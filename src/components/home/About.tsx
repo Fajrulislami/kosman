@@ -53,11 +53,7 @@ export default function About() {
               </div>
               
               {/* Kartu Info 1 */}
-<<<<<<< HEAD
-              <div className="absolute -bottom-6 -right-4 hidden items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-6 py-4 shadow-sm md:flex lg:-right-8">
-=======
               <div className="absolute -bottom-6 -right-4 flex items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 shadow-sm md:px-6 md:py-4 lg:-right-8">
->>>>>>> development
                 <Sparkles className="h-5 w-5 text-[#C69C6D]" />
                 <div>
                   <p className="text-[14px] font-bold text-[#1F3D35]">Privasi Terjaga</p>
@@ -73,11 +69,7 @@ export default function About() {
               </div>
               
               {/* Kartu Info 2 */}
-<<<<<<< HEAD
-              <div className="absolute -left-6 bottom-12 hidden items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-6 py-4 shadow-sm md:flex lg:-left-12">
-=======
               <div className="absolute -left-2 bottom-8 flex items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 shadow-sm md:-left-6 md:bottom-12 md:px-6 md:py-4 lg:-left-12">
->>>>>>> development
                 <ShieldCheck className="h-5 w-5 text-[#C69C6D]" />
                 <div>
                   <p className="text-[14px] font-bold text-[#1F3D35]">Lingkungan Bersih</p>

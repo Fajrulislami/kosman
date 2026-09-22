@@ -8,16 +8,6 @@ import { Wifi, Coffee, Dumbbell, ShieldCheck, CarFront, UtensilsCrossed } from "
   KOMPONEN SUB: FLOATING ICON
   =========================================
 */
-<<<<<<< HEAD
-const FloatingIcon = ({ 
-  icon: Icon, 
-  className, 
-  animationClass 
-}: { 
-  icon: any, 
-  className: string,
-  animationClass: string 
-=======
 const FloatingIcon = ({
   icon: Icon,
   className,
@@ -26,7 +16,6 @@ const FloatingIcon = ({
   icon: any,
   className: string,
   animationClass: string
->>>>>>> development
 }) => {
   return (
     <div className={`absolute pointer-events-none ${animationClass} ${className}`}>
@@ -69,13 +58,8 @@ export default function HeroFacilities() {
         }
 
         .animate-float-icon-1 { animation: float-icon-1 6s ease-in-out infinite; }
-<<<<<<< HEAD
-        .animate-float-icon-2 { animation: float-icon-2 8s ease-in-out infinite 1s; }
-        .animate-float-icon-3 { animation: float-icon-3 7s ease-in-out infinite 2s; }
-=======
         .animate-float-icon-2 { animation: float-icon-2 8s ease-in-out infinite both; }
         .animate-float-icon-3 { animation: float-icon-3 7s ease-in-out infinite both; }
->>>>>>> development
       `}</style>
 
       {/* 
@@ -93,57 +77,32 @@ export default function HeroFacilities() {
       </div>
 
       <div className="relative z-20 mx-auto w-full max-w-[1200px] px-6">
-<<<<<<< HEAD
-        <div 
-          ref={ref}
-          className={`flex flex-col items-center text-center max-w-3xl mx-auto space-y-6 transition-all duration-1000 ease-out ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-          }`}
-=======
         <div
           ref={ref}
           className={`flex flex-col items-center text-center max-w-3xl mx-auto space-y-6 transition-all duration-1000 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
             }`}
->>>>>>> development
         >
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full border border-[#E5E3DE] bg-white px-4 py-1.5 shadow-sm">
             <span className="h-2 w-2 rounded-full bg-[#C69C6D] animate-pulse"></span>
             <span className="text-[12px] font-extrabold tracking-widest text-[#C69C6D] uppercase">Fasilitas Premium</span>
           </div>
-<<<<<<< HEAD
-          
-=======
 
->>>>>>> development
           <h1 className="text-4xl font-bold tracking-tight text-[#202321] md:text-5xl lg:text-[64px] leading-[1.1]">
             Kenyamanan Ekstra,{" "}
             <span className="text-[#1F3D35] block mt-2">Untuk Hidup Maksimal</span>
           </h1>
-<<<<<<< HEAD
-          
-=======
 
->>>>>>> development
           <p className="text-base md:text-lg text-[#6B716D] leading-relaxed max-w-2xl delay-300 transition-all duration-1000">
             Dari dapur modern hingga ruang santai yang hangat, setiap fasilitas kami rancang secara teliti untuk mendukung produktivitas dan kualitas istirahat Anda setiap hari.
           </p>
         </div>
       </div>
-<<<<<<< HEAD
-      
-      {/* Decorative Blur */}
-      <div 
-        className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-white/60 blur-[100px] rounded-[100%] pointer-events-none z-0 transition-all duration-1500 delay-500 ${
-          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-50"
-        }`} 
-=======
 
       {/* Decorative Blur */}
       <div
         className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-white/60 blur-[100px] rounded-[100%] pointer-events-none z-0 transition-all duration-1500 delay-500 ${isVisible ? "opacity-100 scale-100" : "opacity-0 scale-50"
           }`}
->>>>>>> development
       />
     </section>
   );

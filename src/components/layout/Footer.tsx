@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-import Link from "next/link";
-=======
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
->>>>>>> development
 import { 
   MapPin, 
   Phone, 
@@ -17,10 +13,6 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
-<<<<<<< HEAD
-  const currentYear = new Date().getFullYear(); 
-
-=======
   const pathname = usePathname();
   const currentYear = new Date().getFullYear(); 
 
@@ -28,7 +20,6 @@ export default function Footer() {
     return null;
   }
 
->>>>>>> development
   return (
     <footer className="relative overflow-hidden bg-[#162E28] pb-8 pt-20 text-white">
       

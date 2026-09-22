@@ -123,11 +123,7 @@ export default function Facilities() {
       <div className="absolute inset-0 z-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
 
       {/* Latar Bergerak Awan */}
-<<<<<<< HEAD
-      <div className="absolute top-[15%] z-0 flex h-[80%] w-[200%] pointer-events-none opacity-40">
-=======
       <div className="absolute top-[15%] z-0 flex h-[80%] w-[200%] pointer-events-none opacity-15">
->>>>>>> development
         <div className="animate-clouds flex items-center justify-around w-full">
           <div className="flex w-1/2 items-center justify-around">
             <CloudIcon className="w-48 text-[#DFDDD6] -mt-20" />

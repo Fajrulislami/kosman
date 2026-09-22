@@ -74,7 +74,7 @@ export default function RevenueChart() {
             />
             <Tooltip
               contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-              formatter={(value: number) => [formatIDR(value), "Pendapatan"]}
+              formatter={(value: any) => [formatIDR(value as number), "Pendapatan"]}
               labelStyle={{ color: "#1F3D35", fontWeight: "bold", marginBottom: "4px" }}
             />
             <Area

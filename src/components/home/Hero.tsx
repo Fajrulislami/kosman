@@ -69,11 +69,7 @@ const DraggablePill = ({
 */
 export default function Hero() {
   return (
-<<<<<<< HEAD
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-20">
-=======
     <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-28 md:pt-20">
->>>>>>> development
       
       {/* Pola Titik Latar Belakang */}
       <div className="absolute inset-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
@@ -144,8 +140,6 @@ export default function Hero() {
             Hubungi Admin
           </Link>
         </div>
-<<<<<<< HEAD
-=======
 
         {/* Mobile-Only Visual Card */}
         <div className="mt-10 flex w-full max-w-sm flex-col items-center md:hidden">
@@ -174,7 +168,6 @@ export default function Hero() {
             </div>
           </div>
         </div>
->>>>>>> development
       </div>
 
       {/* 
