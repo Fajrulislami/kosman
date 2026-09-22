@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
   MapPin, 
   Phone, 
@@ -10,7 +13,12 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+  const pathname = usePathname();
   const currentYear = new Date().getFullYear(); 
+
+  if (pathname.startsWith("/portal") || pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <footer className="relative overflow-hidden bg-[#162E28] pb-8 pt-20 text-white">

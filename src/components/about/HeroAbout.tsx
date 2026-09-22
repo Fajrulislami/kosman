@@ -18,17 +18,16 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
       },
       { threshold: 0.15 }
     );
-    
+
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div 
-      ref={ref} 
-      className={`transition-all duration-1000 ease-out ${
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
-      }`}
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
+        }`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
@@ -41,14 +40,14 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
   KOMPONEN SUB: BALOK HURUF 3D (GAYA KEYBOARD)
   =========================================
 */
-const FloatingLetter = ({ 
-  char, 
-  className, 
-  animationClass 
-}: { 
-  char: string, 
+const FloatingLetter = ({
+  char,
+  className,
+  animationClass
+}: {
+  char: string,
   className: string,
-  animationClass: string 
+  animationClass: string
 }) => {
   return (
     <div className={`absolute select-none ${animationClass} ${className}`}>
@@ -64,7 +63,7 @@ export default function HeroAbout() {
   return (
     // Padding Top (pt-40 md:pt-48) diperbesar agar teks tidak tertutup Navbar!
     <section className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden bg-[#F8F7F4] pt-40 pb-24 md:min-h-[85vh] md:pt-48">
-      
+
       {/* Pola Titik Latar Belakang (Dot Grid) */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
 
@@ -99,19 +98,19 @@ export default function HeroAbout() {
         <div className="relative h-full w-full">
           {/* Huruf K (Kiri Atas, sedikit blur) */}
           <FloatingLetter char="K" animationClass="animate-float-1" className="left-[5%] top-[20%] h-10 w-10 blur-[1px] sm:left-[15%] sm:h-12 sm:w-12 md:top-[25%] md:h-14 md:w-14" />
-          
+
           {/* Huruf O (Kiri Bawah, tajam) */}
           <FloatingLetter char="O" animationClass="animate-float-2" className="bottom-[15%] left-[10%] h-12 w-12 sm:left-[20%] md:bottom-[25%] md:h-16 md:w-16" />
-          
+
           {/* Huruf S (Kiri Tengah, sangat blur / jauh) */}
           <FloatingLetter char="S" animationClass="animate-float-3" className="left-[-5%] top-[45%] h-8 w-8 blur-[3px] sm:left-[5%] md:h-10 md:w-10" />
-          
+
           {/* Huruf T (Kanan Atas, tajam) */}
           <FloatingLetter char="T" animationClass="animate-float-1" className="right-[10%] top-[15%] h-10 w-10 sm:right-[15%] md:top-[20%] md:h-14 md:w-14" />
-          
+
           {/* Huruf A (Kanan Bawah, tajam) */}
           <FloatingLetter char="A" animationClass="animate-float-2" className="bottom-[20%] right-[5%] h-12 w-12 sm:right-[20%] md:bottom-[30%] md:h-16 md:w-16" />
-          
+
           {/* Huruf R (Kanan Tengah, blur medium) */}
           <FloatingLetter char="R" animationClass="animate-float-3" className="right-[-5%] top-[50%] h-10 w-10 blur-[2px] sm:right-[5%] md:h-12 md:w-12" />
         </div>
@@ -122,7 +121,7 @@ export default function HeroAbout() {
         Berada di atas huruf melayang (z-20)
       */}
       <div className="relative z-20 mx-auto w-full max-w-[900px] px-6 text-center">
-        
+
         <Reveal>
           <span className="mb-4 inline-block text-[13px] font-bold tracking-[0.2em] text-[#C69C6D]">
             TENTANG KAMI

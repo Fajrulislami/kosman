@@ -69,7 +69,7 @@ const DraggablePill = ({
 */
 export default function Hero() {
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-20">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-28 md:pt-20">
       
       {/* Pola Titik Latar Belakang */}
       <div className="absolute inset-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
@@ -139,6 +139,34 @@ export default function Hero() {
           >
             Hubungi Admin
           </Link>
+        </div>
+
+        {/* Mobile-Only Visual Card */}
+        <div className="mt-10 flex w-full max-w-sm flex-col items-center md:hidden">
+          <div className="w-full overflow-hidden rounded-[20px] border border-[#E5E3DE] bg-white shadow-lg">
+            <div className="flex items-center gap-2 border-b border-[#E5E3DE] bg-[#F8F7F4] px-4 py-2.5">
+              <div className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]"></div>
+              <div className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]"></div>
+              <div className="h-2.5 w-2.5 rounded-full bg-[#27C93F]"></div>
+            </div>
+            <div className="aspect-[16/9] w-full bg-gradient-to-br from-[#E5E3DE] to-[#D5D3CC]">
+              {/* Placeholder untuk gambar hero */}
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-full border border-[#E5E3DE] bg-white px-3 py-1.5 shadow-sm">
+              <Bed className="h-3.5 w-3.5 text-[#C69C6D]" />
+              <span className="text-[12px] font-semibold text-[#6B716D]">Furnished</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full border border-[#E5E3DE] bg-white px-3 py-1.5 shadow-sm">
+              <Wifi className="h-3.5 w-3.5 text-[#C69C6D]" />
+              <span className="text-[12px] font-semibold text-[#6B716D]">WiFi</span>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-full border border-[#E5E3DE] bg-white px-3 py-1.5 shadow-sm">
+              <Car className="h-3.5 w-3.5 text-[#C69C6D]" />
+              <span className="text-[12px] font-semibold text-[#6B716D]">Parking</span>
+            </div>
+          </div>
         </div>
       </div>
 

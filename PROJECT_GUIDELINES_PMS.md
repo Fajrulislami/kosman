@@ -100,3 +100,21 @@ Ketika membuat *Card* di dashboard (misalnya *Card* untuk menampilkan informasi 
 2. `border-gray-100` (garis tepi sangat tipis dan samar).
 3. `shadow-[0_8px_30px_rgb(0,0,0,0.04)]` (bayangan sangat lembut, nyaris tidak terlihat namun memberikan efek mengambang).
 4. Tipografi yang kontras (label abu-abu kecil, angka hitam besar & tebal).
+
+---
+
+## 6. Struktur Routing (URL) untuk Tenant Portal
+
+Selain Admin Dashboard, sistem ini juga menyediakan **Tenant Portal** (di bawah rute `/portal`) agar penyewa dapat mengelola sewa mereka secara mandiri. Tenant Portal mengadaptasi prinsip desain *Apple-like UI* yang sama dengan Admin Dashboard agar tetap terlihat bersih dan modern.
+
+```text
+/portal/login          -> Halaman Login Penyewa
+/portal/dashboard      -> Halaman Ringkasan (Bento Box style)
+/portal/tagihan        -> Riwayat Pembayaran & Tagihan Aktif
+/portal/komplain       -> Form Laporan Pemeliharaan & Statusnya
+/portal/profil         -> Detail Data Diri Penyewa
+```
+
+### Panduan Desain Tenant Portal
+- **Dashboard Layout:** Menggunakan grid asimetris bergaya *Bento-Box* untuk menghindari kesan *template AI* atau tabel yang kaku.
+- **Formulir Komplain:** Formulir dibuat jelas dengan input kategori (Listrik, Air, dll), deskripsi, dan upload foto opsional. Riwayat komplain disajikan dalam bentuk *timeline* dengan status yang jelas (Menunggu, Diproses, Selesai).
