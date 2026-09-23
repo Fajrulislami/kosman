@@ -35,7 +35,7 @@ export default function DashboardContent() {
               Halo, {tenantProfile.name.split(" ")[0]}!
             </h2>
             <p className="text-[#6B716D] mt-2 max-w-md leading-relaxed">
-              Selamat datang kembali di portal Kostara. Semoga hari Anda menyenangkan dan nyaman berada di kos kami.
+              Selamat datang kembali di portal Pondok Rahmat. Semoga hari Anda menyenangkan dan nyaman berada di kos kami.
             </p>
           </div>
 

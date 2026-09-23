@@ -3,7 +3,7 @@ import RevenueChart from "@/components/admin/overview/RevenueChart";
 import RecentActivity from "@/components/admin/overview/RecentActivity";
 
 export const metadata = {
-  title: "Overview - Admin Dashboard Kostara",
+  title: "Overview - Admin Dashboard Pondok Rahmat",
   description: "Overview metrics and recent activity",
 };
 
@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
             Dashboard Overview
           </h1>
           <p className="text-sm text-[#6B716D]">
-            Ringkasan performa dan aktivitas properti Kostara hari ini.
+            Ringkasan performa dan aktivitas properti Pondok Rahmat hari ini.
           </p>
         </div>
         <div className="flex gap-3">

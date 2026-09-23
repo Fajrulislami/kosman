@@ -21,7 +21,7 @@ export default function AccountSettings() {
             <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
             <input 
               type="text" 
-              defaultValue="Admin Kostara"
+              defaultValue="Admin Pondok Rahmat"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>
@@ -34,7 +34,7 @@ export default function AccountSettings() {
             <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
             <input 
               type="email" 
-              defaultValue="admin@kostara.id"
+              defaultValue="admin@pondokrahmat.id"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>

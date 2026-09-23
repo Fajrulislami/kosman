@@ -5,8 +5,8 @@ import ContactInfo from "@/components/kontak/ContactInfo";
 import ContactForm from "@/components/kontak/ContactForm";
 
 export const metadata: Metadata = {
-  title: "Hubungi Kami - Kostara",
-  description: "Hubungi Kostara untuk informasi lebih lanjut mengenai kamar, fasilitas, dan harga. Kami siap melayani Anda.",
+  title: "Hubungi Kami - Pondok Rahmat",
+  description: "Hubungi Pondok Rahmat untuk informasi lebih lanjut mengenai kamar, fasilitas, dan harga. Kami siap melayani Anda.",
 };
 
 export default function KontakPage() {

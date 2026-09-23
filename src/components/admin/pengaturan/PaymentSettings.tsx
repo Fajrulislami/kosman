@@ -29,7 +29,7 @@ export default function PaymentSettings() {
               <p className="text-sm font-bold uppercase tracking-wider text-[#99A09C]">BCA (Bank Central Asia)</p>
               <div className="mt-1 flex items-center space-x-2">
                 <span className="text-lg font-black text-[#1F3D35]">123 456 7890</span>
-                <span className="text-sm font-semibold text-[#6B716D]">- a.n. Budi Kostara</span>
+                <span className="text-sm font-semibold text-[#6B716D]">- a.n. Budi Pondok Rahmat</span>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@ export default function PaymentSettings() {
               <p className="text-sm font-bold uppercase tracking-wider text-[#99A09C]">GoPay / QRIS</p>
               <div className="mt-1 flex items-center space-x-2">
                 <span className="text-lg font-black text-[#1F3D35]">0812 3456 7890</span>
-                <span className="text-sm font-semibold text-[#6B716D]">- a.n. Budi Kostara</span>
+                <span className="text-sm font-semibold text-[#6B716D]">- a.n. Budi Pondok Rahmat</span>
               </div>
             </div>
           </div>

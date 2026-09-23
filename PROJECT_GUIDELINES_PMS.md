@@ -83,9 +83,35 @@ Gunakan pola URL di bawah `/admin` agar terpisah dengan aman dari halaman Landin
 
 ---
 
-## 5. Panduan Desain Card Box Khusus Admin (Apple-like)
+## 5. Panduan Desain UI Khusus Admin & Spesifikasi Komponen (Apple-like)
 
-Ketika membuat *Card* di dashboard (misalnya *Card* untuk menampilkan informasi kamar atau ringkasan pendapatan), gunakan panduan kelas Tailwind berikut agar terasa premium:
+Ketika membuat komponen UI di dashboard (misalnya *Card*, navigasi, atau form), gunakan panduan berikut agar desain terasa premium, konsisten, dan fungsional:
+
+### A. Palet Warna (Color System) & Status
+- **Background Utama:** `#F5F5F7` (warm off-white khas Apple).
+- **Surface / Card:** `#FFFFFF` (putih bersih).
+- **Primary / Action:** Warna gelap elegan (misal: `zinc-900` atau `slate-800`) untuk tombol aksi utama agar modern dan tidak terlihat kaku.
+- **Semantic Status (Warna Label/Badge):**
+  - *Success (Hijau):* `emerald-500` teks / `emerald-50` background (Untuk: Lunas, Kamar Terisi).
+  - *Warning (Oranye):* `amber-500` teks / `amber-50` background (Untuk: Pending, Jatuh Tempo).
+  - *Danger (Merah):* `rose-500` teks / `rose-50` background (Untuk: Telat Bayar, Komplain Darurat).
+
+### B. Hierarki Tipografi (Plus Jakarta Sans)
+- **H1 (Page Title):** `text-2xl` atau `text-3xl font-bold text-gray-900`.
+- **Section Title:** `text-lg font-semibold text-gray-800`.
+- **Body / Data Text:** `text-sm font-normal text-gray-600`.
+- **Muted Label:** `text-xs font-medium text-gray-500` (untuk label card/form).
+
+### C. Layout Navigasi & Responsivitas
+- **Desktop:** Menggunakan **Sidebar (kiri)** yang *collapsible* (bisa diperkecil menjadi hanya ikon) agar area untuk tabel data bisa lebih luas. Terdapat *Topbar* ringan untuk fitur *Search* dan *Profil*.
+- **Mobile/Tablet:** Sidebar disembunyikan menjadi *Hamburger Menu* (drawer). Tabel data yang panjang diubah susunannya menjadi *List Card* vertikal agar tidak terpotong di layar HP.
+
+### D. Interaksi & State (Micro-animations)
+- **Hover:** Tambahkan efek `transition-all duration-300` agar efek hover (pada bayangan atau warna) terasa halus.
+- **Focus Ring:** Aksesibilitas form sangat penting. Saat diklik, input harus memiliki ring yang lembut: `focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400`.
+- **Loading & Empty State:** Gunakan desain *Skeleton Loader* saat tabel memuat data, dan tampilkan desain ilustrasi sederhana jika halaman masih kosong (*Empty State*).
+
+### E. Contoh Desain Card Box Khusus Admin
 
 ```tsx
 // Contoh Apple-style UI Card Box

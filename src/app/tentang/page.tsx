@@ -9,8 +9,8 @@ import CtaAbout from "@/components/about/CtaAbout";
 
 
 export const metadata = {
-  title: "Tentang Kami | Kostara",
-  description: "Mengenal lebih dekat Kostara, hunian premium yang dirancang untuk kenyamanan Anda.",
+  title: "Tentang Kami | Pondok Rahmat",
+  description: "Mengenal lebih dekat Pondok Rahmat, hunian premium yang dirancang untuk kenyamanan Anda.",
 };
 
 export default function TentangPage() {

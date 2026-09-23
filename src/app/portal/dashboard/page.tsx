@@ -1,4 +1,4 @@
-import DashboardContent from "@/components/portal/DashboardContent";
+import DashboardContent from "@/components/portal/overview/DashboardContent";
 
 export const metadata = {
   title: "Dashboard - Tenant Portal",

@@ -110,7 +110,7 @@ export default function Environment() {
               SUASANA & LINGKUNGAN
             </span>
             <span className="text-[10px] font-bold tracking-widest text-[#6B716D] opacity-60 md:text-[11px]">
-              KOSTARA RESIDENCE
+              pondokrahmat RESIDENCE
             </span>
           </div>
         </Reveal>

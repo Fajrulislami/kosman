@@ -23,7 +23,7 @@ export async function generateMetadata(
   }
   
   return {
-    title: `${room.name} - Kostara`,
+    title: `${room.name} - Pondok Rahmat`,
     description: room.description,
   };
 }

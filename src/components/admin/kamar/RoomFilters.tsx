@@ -34,8 +34,6 @@ export default function RoomFilters() {
             <select className="block rounded-xl border-0 py-2.5 pl-3 pr-10 text-[#1F3D35] ring-1 ring-inset ring-[#E5E3DE] focus:ring-2 focus:ring-[#C69C6D] sm:text-sm">
               <option value="">Semua Tipe</option>
               <option value="standar">Standar</option>
-              <option value="premium">Premium</option>
-              <option value="vip">VIP</option>
             </select>
             
             <button className="flex items-center justify-center rounded-xl border border-[#E5E3DE] bg-white px-3 py-2 text-[#6B716D] hover:bg-[#F8F7F4] sm:hidden">

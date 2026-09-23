@@ -44,7 +44,7 @@ export default function ContactForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const waNumber = "6281234567890";
-    const text = `Halo Kostara, saya ${formData.name}.\n\nSaya ingin bertanya mengenai *${formData.topic}*.\n\n${formData.message}`;
+    const text = `Halo Pondok Rahmat, saya ${formData.name}.\n\nSaya ingin bertanya mengenai *${formData.topic}*.\n\n${formData.message}`;
     const encodedText = encodeURIComponent(text);
     window.open(`https://wa.me/${waNumber}?text=${encodedText}`, "_blank");
   };

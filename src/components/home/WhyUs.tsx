@@ -73,7 +73,7 @@ export default function WhyUs() {
             <div className="max-w-2xl">
               {/* Badge konsisten dengan lokasi dan kontak */}
               <span className="mb-6 inline-block rounded-full bg-white px-5 py-2 text-[12px] font-bold tracking-[0.2em] text-[#C69C6D] shadow-sm border border-[#E5E3DE]">
-                MENGAPA KOSTARA
+                MENGAPA pondokrahmat
               </span>
               <h2 className="text-4xl font-extrabold tracking-tight text-[#1F3D35] md:text-5xl lg:text-[56px] leading-[1.1]">
                 Bukan Sekadar <br />

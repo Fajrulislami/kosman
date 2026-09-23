@@ -57,7 +57,7 @@ export default function AdminHeader() {
               AD
             </div>
             <span className="hidden lg:ml-3 lg:block lg:text-sm lg:font-semibold lg:leading-6 lg:text-[#1F3D35]">
-              Admin Kostara
+              Admin Pondok Rahmat
             </span>
           </div>
         </div>

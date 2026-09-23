@@ -11,7 +11,7 @@ import { Plus, Minus, Square } from "lucide-react";
 const faqs = [
   {
     label: "SISTEM-SEWA.FRAME",
-    question: "Bagaimana sistem pembayaran sewa di Kostara?",
+    question: "Bagaimana sistem pembayaran sewa di Pondok Rahmat?",
     answer: "Pembayaran dapat dilakukan secara bulanan, per 6 bulan, atau tahunan di awal masa sewa. Kami menerima transfer antar bank dan e-wallet. Tidak ada biaya tersembunyi; harga sudah mencakup fasilitas standar."
   },
   {
@@ -27,7 +27,7 @@ const faqs = [
   {
     label: "ATURAN-TAMU.FRAME",
     question: "Apakah tamu atau teman boleh berkunjung ke kos?",
-    answer: "Tentu. Tamu dapat berkunjung dan bersantai di area komunal (lobby & lounge) hingga pukul 22.00 WITA. Namun demi privasi dan keamanan bersama, tamu tidak diizinkan masuk atau menginap di dalam kamar penghuni."
+    answer: "Tentu, tamu dapat berkunjung di area komunal (lobby & lounge). Namun, demi kenyamanan dan keamanan bersama, tamu laki-laki dilarang keras masuk dan bermalam di dalam kamar. Selain itu, teman tidak diperkenankan menginap lebih dari 3 hari, kecuali orang tua kandung penghuni kos."
   },
   {
     label: "PEMELIHARAAN.FRAME",
@@ -136,7 +136,7 @@ export default function FAQ() {
             Ada Pertanyaan?
           </h2>
           <p className="max-w-lg text-[15px] leading-relaxed text-[#6B716D]">
-            Temukan jawaban cepat untuk pertanyaan yang paling sering diajukan oleh calon penghuni Kostara.
+            Temukan jawaban cepat untuk pertanyaan yang paling sering diajukan oleh calon penghuni Pondok Rahmat.
           </p>
         </div>
 

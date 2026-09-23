@@ -117,7 +117,7 @@ export default function Values() {
               PRINSIP KAMI
             </span>
             <h2 className="mb-6 text-[32px] font-extrabold tracking-tight text-[#1F3D35] md:text-[46px]">
-              Landasan Kostara
+              Landasan Pondok Rahmat
             </h2>
             <p className="max-w-xl text-[15px] leading-relaxed text-[#6B716D]">
               Setiap sudut dan layanan yang kami bangun berakar pada empat pilar utama demi memastikan pengalaman menetap yang sempurna.

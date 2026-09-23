@@ -148,7 +148,7 @@ export default function KomplainContent() {
                       <div className="mt-4 pt-4 border-t border-[#E5E3DE]">
                         <p className="text-sm text-[#202321] italic bg-[#F8F7F4] p-3 rounded-xl border border-[#E5E3DE]/50">
                           "Tim teknisi kami akan mengecek kamar Anda pada jam 14:00 siang ini." 
-                          <span className="block mt-1 text-xs text-[#6B716D] font-semibold not-italic">— Admin Kostara</span>
+                          <span className="block mt-1 text-xs text-[#6B716D] font-semibold not-italic">— Admin Pondok Rahmat</span>
                         </p>
                       </div>
                     )}

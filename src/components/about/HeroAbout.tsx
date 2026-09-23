@@ -133,7 +133,7 @@ export default function HeroAbout() {
 
         <Reveal delay={150}>
           <p className="mx-auto max-w-[600px] text-[16px] leading-relaxed text-[#6B716D] md:text-[18px]">
-            Mengenal lebih dekat Kostara, hunian yang dirancang untuk memberikan kenyamanan, keamanan, dan kemudahan dalam kehidupan sehari-hari Anda.
+            Mengenal lebih dekat Pondok Rahmat, hunian yang dirancang untuk memberikan kenyamanan, keamanan, dan kemudahan dalam kehidupan sehari-hari Anda.
           </p>
         </Reveal>
 

@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import RoomCatalog from "@/components/rooms/RoomCatalog";
 
 export const metadata: Metadata = {
-  title: "Kamar - Kostara",
-  description: "Daftar pilihan kamar kos yang nyaman dan fasilitas lengkap di Kostara.",
+  title: "Kamar - Pondok Rahmat",
+  description: "Daftar pilihan kamar kos yang nyaman dan fasilitas lengkap di Pondok Rahmat.",
 };
 
 export default function KamarPage() {

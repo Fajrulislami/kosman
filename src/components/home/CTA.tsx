@@ -125,7 +125,7 @@ export default function CTA() {
         <Reveal delay={100}>
           {/* Teks Sub-heading pendukung */}
           <p className="mx-auto mb-12 max-w-[500px] text-[16px] leading-relaxed text-[#6B716D] md:text-[18px]">
-            Jangan biarkan hari-hari sibuk Anda dihabiskan di tempat yang salah. Berikan diri Anda hunian premium, aman, dan tenang di Kostara hari ini juga.
+            Jangan biarkan hari-hari sibuk Anda dihabiskan di tempat yang salah. Berikan diri Anda hunian premium, aman, dan tenang di Pondok Rahmat hari ini juga.
           </p>
 
           {/* 

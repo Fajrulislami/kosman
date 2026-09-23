@@ -1,4 +1,4 @@
-import KomplainContent from "@/components/portal/KomplainContent";
+import KomplainContent from "@/components/portal/komplain/KomplainContent";
 
 export const metadata = {
   title: "Komplain - Tenant Portal",

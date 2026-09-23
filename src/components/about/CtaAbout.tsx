@@ -86,7 +86,7 @@ export default function CtaAbout() {
         <Reveal delay={100}>
           {/* Judul */}
           <h2 className="mb-6 text-[40px] font-extrabold leading-[1.05] tracking-tight text-[#1F3D35] sm:text-[52px] md:text-[64px] lg:text-[72px]">
-            Rasakan Kostara. <br />
+            Rasakan Pondok Rahmat. <br />
             <span className="text-[#C69C6D]">Pesan sekarang.</span>
           </h2>
         </Reveal>
@@ -94,7 +94,7 @@ export default function CtaAbout() {
         <Reveal delay={200}>
           {/* Teks Pendukung */}
           <p className="mx-auto mb-12 max-w-[500px] text-[16px] leading-relaxed text-[#6B716D] md:text-[18px]">
-            Jangan biarkan keseharian Anda terbebani oleh lingkungan yang salah. Jadikan Kostara sebagai titik pulang Anda hari ini.
+            Jangan biarkan keseharian Anda terbebani oleh lingkungan yang salah. Jadikan Pondok Rahmat sebagai titik pulang Anda hari ini.
           </p>
 
           {/* Tombol Aksi */}

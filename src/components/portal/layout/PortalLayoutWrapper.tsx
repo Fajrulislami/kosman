@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import PortalSidebar from "@/components/portal/PortalSidebar";
-import PortalHeader from "@/components/portal/PortalHeader";
+import PortalSidebar from "./PortalSidebar";
+import PortalHeader from "./PortalHeader";
 
 export default function PortalLayoutWrapper({
   children,

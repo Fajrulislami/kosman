@@ -7,8 +7,8 @@ import TransportGuide from "@/components/lokasi/TransportGuide";
 import CtaAbout from "@/components/about/CtaAbout";
 
 export const metadata: Metadata = {
-  title: "Lokasi - Kostara",
-  description: "Lokasi strategis Kostara, dekat dengan kampus, pusat perbelanjaan, dan transportasi umum.",
+  title: "Lokasi - Pondok Rahmat",
+  description: "Lokasi strategis Pondok Rahmat, dekat dengan kampus, pusat perbelanjaan, dan transportasi umum.",
 };
 
 export default function LokasiPage() {

@@ -122,7 +122,7 @@ export default function Location() {
                             </div>
                             <div className="flex items-center gap-2 text-[12px] font-semibold text-[#6B716D]">
                                 <MapPin className="h-3.5 w-3.5 text-[#C69C6D]" />
-                                <span>Titik Pusat Kostara</span>
+                                <span>Titik Pusat Pondok Rahmat</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="relative flex h-2.5 w-2.5">
@@ -147,7 +147,7 @@ export default function Location() {
                                         </div>
                                     </div>
                                     <div className="mt-4 rounded-full border border-[#E5E3DE] bg-white px-4 py-2 text-[12px] font-bold text-[#1F3D35] shadow-sm">
-                                        Kostara Residence
+                                        Pondok Rahmat Residence
                                     </div>
                                 </div>
                             </div>

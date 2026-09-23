@@ -39,7 +39,7 @@ export default function Footer() {
           <div className="md:col-span-5 lg:col-span-4">
             <Link href="/" className="group mb-4 inline-block transition-transform duration-300 hover:scale-[1.02]">
               <span className="text-3xl font-extrabold tracking-tighter text-white">
-                Kostara<span className="text-[#C69C6D] transition-colors duration-300 group-hover:text-white">.</span>
+                Pondok Rahmat<span className="text-[#C69C6D] transition-colors duration-300 group-hover:text-white">.</span>
               </span>
             </Link>
             
@@ -95,7 +95,7 @@ export default function Footer() {
               </li>
               <li className="group flex items-center gap-3 text-[15px] text-white/70 transition-colors duration-300 hover:text-white">
                 <Mail className="h-5 w-5 shrink-0 text-[#C69C6D] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-110" />
-                <span>halo@kostara.com</span>
+                <span>halo@pondokrahmat.com</span>
               </li>
             </ul>
 
@@ -117,7 +117,7 @@ export default function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
           <p className="text-[14px] text-white/50">
-            © {currentYear} Kostara. All Rights Reserved.
+            © {currentYear} Pondok Rahmat. All Rights Reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/privacy" className="relative text-[14px] text-white/50 transition-colors duration-300 hover:text-white after:absolute after:bottom-[-2px] after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full">

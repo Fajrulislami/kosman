@@ -44,14 +44,14 @@ export default function ContactInfo() {
     },
     {
       title: "Email",
-      value: "hello@kostara.id",
+      value: "hello@pondokrahmat.id",
       description: "Untuk penawaran kerjasama",
       icon: Mail,
-      link: "mailto:hello@kostara.id",
+      link: "mailto:hello@pondokrahmat.id",
       delay: 200
     },
     {
-      title: "Alamat Kostara",
+      title: "Alamat Pondok Rahmat",
       value: "Jl. Setiabudi No. 123, Jakarta Selatan",
       description: "Kunjungi kami untuk survey langsung.",
       icon: MapPin,
