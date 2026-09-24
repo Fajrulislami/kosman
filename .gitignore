@@ -13,8 +13,10 @@ node_modules/
 /coverage
 
 # next.js & builds
-/.next/
-/out/
+.next/
+**/.next/
+out/
+**/out/
 /build
 dist/
 **/dist/
