@@ -16,32 +16,20 @@ Berdasarkan struktur kode frontend yang telah di-clone, aplikasi terbagi menjadi
 
 ---
 
-## 2. Tech Stack Backend yang Direkomendasikan
+## 2. Arsitektur Terpisah (Frontend & Backend) & Tech Stack
 
-Mengacu pada `PROJECT_GUIDELINES_PMS.md` serta arsitektur Next.js 16 App Router:
+Aplikasi sekarang dipisahkan menjadi 2 service mandiri:
+- `frontend/`: Next.js 16 (App Router, Tailwind CSS v4, Lucide Icons, Recharts) pada port `3000`.
+- `backend/`: Express.js + TypeScript + Prisma ORM pada port `5000`.
 
-1. **Framework & Runtime**:
-   - **Next.js Route Handlers & Server Actions** (Monorepo / Fullstack Next.js).
-   - *Alasan*: Menghindari overhead pengelolaan 2 server terpisah, type-safety end-to-end dengan TypeScript, dan latensi minimal.
-2. **Database**:
-   - **PostgreSQL** (Dapat menggunakan Supabase, Neon, atau Docker PostgreSQL untuk lokal).
-   - *Alasan*: Relasi data yang kuat (kamar ↔ penghuni ↔ kontrak ↔ tagihan ↔ pembayaran) membutuhkan integritas relasional (ACID).
-3. **ORM & Migrations**:
-   - **Prisma ORM (v6)**.
-   - *Alasan*: Skema deklaratif yang rapi, auto-generated TypeScript client, dan migrasi terstruktur.
-4. **Autentikasi & Otorisasi**:
-   - **Auth.js (NextAuth.js v5)** dengan JWT Session & Credentials Provider (Password hashing via `bcryptjs`).
-   - Role-Based Access Control (RBAC): `ADMIN` dan `TENANT`.
-5. **Validasi Data**:
-   - **Zod**: Validasi skema request payload di setiap endpoint API dan form Server Actions.
-6. **Penyimpanan Berkas (Object Storage)**:
-   - **Supabase Storage** / **Cloudinary** / **AWS S3**:
-   - Untuk berkas foto kamar, dokumen KTP penyewa, foto bukti bayar, dan lampiran foto komplain fasilitas.
-7. **Otomatisasi & Cron Jobs**:
-   - **Vercel Cron** atau Node-cron worker untuk generate invoice tagihan otomatis setiap tanggal 1 tiap bulannya.
-8. **Notifikasi WhatsApp & Payment Gateway (Fase Lanjutan)**:
-   - WhatsApp API (Fonnte / Wablas) untuk reminder jatuh tempo dan status perbaikan.
-   - Midtrans / Xendit (Snap / Core API) untuk virtual account & QRIS otomatis.
+### Database Workflow (SQLite Lokal -> PostgreSQL Production)
+1. **Fase Pengujian Lokal (Saat Ini)**:
+   - Menggunakan **SQLite** (`file:./dev.db`) di dalam folder `backend/prisma/`.
+   - Tidak memerlukan instalasi database server lokal, langsung siap diuji coba secara instan.
+2. **Fase Migrasi ke PostgreSQL**:
+   - Ganti `provider = "sqlite"` menjadi `provider = "postgresql"` di `backend/prisma/schema.prisma`.
+   - Ubah `DATABASE_URL` di `backend/.env` menjadi connection string PostgreSQL (Supabase / Neon / Docker).
+   - Jalankan `npx prisma migrate dev --name init_postgres` dan `npx prisma db seed`.
 
 ---
 
