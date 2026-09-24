@@ -61,7 +61,6 @@ export default function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
                 >
                   <option value="1">Lantai 1</option>
                   <option value="2">Lantai 2</option>
-                  <option value="3">Lantai 3</option>
                 </select>
               </div>
             </div>
@@ -74,11 +73,10 @@ export default function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
                 </label>
                 <select
                   id="roomType"
-                  className="mt-2 block w-full rounded-xl border-0 py-2.5 pl-3 pr-10 text-[#1F3D35] ring-1 ring-inset ring-[#E5E3DE] focus:ring-2 focus:ring-[#C69C6D] sm:text-sm"
+                  disabled
+                  className="mt-2 block w-full rounded-xl border-0 py-2.5 pl-3 pr-10 text-[#1F3D35] bg-[#F8F7F4] ring-1 ring-inset ring-[#E5E3DE] focus:ring-2 focus:ring-[#C69C6D] sm:text-sm cursor-not-allowed"
                 >
                   <option value="standar">Standar</option>
-                  <option value="premium">Premium</option>
-                  <option value="vip">VIP</option>
                 </select>
               </div>
               <div>
@@ -112,7 +110,7 @@ export default function AddRoomModal({ isOpen, onClose }: AddRoomModalProps) {
                 <input
                   type="text"
                   id="price"
-                  placeholder="1.500.000"
+                  placeholder="650.000"
                   className="block w-full rounded-xl border-0 py-2.5 pl-10 pr-12 text-[#1F3D35] ring-1 ring-inset ring-[#E5E3DE] placeholder:text-[#99A09C] focus:ring-2 focus:ring-inset focus:ring-[#C69C6D] sm:text-sm"
                 />
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">

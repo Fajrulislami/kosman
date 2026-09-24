@@ -88,7 +88,7 @@ const VideoCard = ({ item, index }: { item: any; index: number }) => {
           <div className="flex items-center gap-2 text-[#C69C6D]">
             <Icon className="h-4 w-4" strokeWidth={2} />
             <span className="text-[10px] font-extrabold uppercase tracking-widest opacity-80">
-              Kostara
+              Pondok Rahmat
             </span>
           </div>
         </div>

@@ -54,7 +54,7 @@ export default function Gallery() {
               GALERI KOS
             </span>
             <h2 className="text-[32px] font-extrabold tracking-tight text-[#1F3D35] md:text-[42px]">
-              Eksplorasi Suasana Kostara
+              Eksplorasi Suasana Pondok Rahmat
             </h2>
           </div>
         </Reveal>
@@ -134,7 +134,7 @@ export default function Gallery() {
               </div>
 
               <div className="relative flex flex-1 flex-col justify-end overflow-hidden bg-[#E5E3DE] p-6">
-                {/* <Image src="/images/gallery/lingkungan.jpg" alt="Lingkungan Kostara" fill className="object-cover" /> */}
+                {/* <Image src="/images/gallery/lingkungan.jpg" alt="Lingkungan Pondok Rahmat" fill className="object-cover" /> */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
                 
                 <div className="relative z-10">

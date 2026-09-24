@@ -2,8 +2,8 @@ import AdminSidebar from "@/components/admin/layout/AdminSidebar";
 import AdminHeader from "@/components/admin/layout/AdminHeader";
 
 export const metadata = {
-  title: "Admin Dashboard - Kostara",
-  description: "Property Management System for Kostara",
+  title: "Admin Dashboard - Pondok Rahmat",
+  description: "Property Management System for Pondok Rahmat",
 };
 
 export default function AdminLayout({

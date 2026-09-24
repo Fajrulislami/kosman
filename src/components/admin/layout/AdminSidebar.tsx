@@ -29,7 +29,7 @@ export default function AdminSidebar() {
       {/* Logo Area */}
       <div className="flex h-16 items-center justify-center border-b border-[#E5E3DE]">
         <Link href="/admin" className="text-2xl font-black tracking-tighter text-[#1F3D35]">
-          KOSTARA<span className="text-[#C69C6D]">.</span>
+          pondokrahmat<span className="text-[#C69C6D]">.</span>
         </Link>
       </div>
 

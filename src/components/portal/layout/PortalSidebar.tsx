@@ -34,7 +34,7 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
         <div className="p-6 border-b border-[#E5E3DE] flex items-center justify-between">
           <div>
             <Link href="/" className="text-2xl font-bold text-[#1F3D35]">
-              Kostara<span className="text-[#C69C6D]">.</span>
+              Pondok Rahmat<span className="text-[#C69C6D]">.</span>
             </Link>
             <p className="text-sm text-[#6B716D] mt-1">Tenant Portal</p>
           </div>

@@ -24,7 +24,7 @@ export default function TransportGuide() {
       <div className={`mx-auto w-full max-w-[1000px] px-6 transition-all duration-1000 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0"}`}>
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold text-[#1F3D35] md:text-[40px] leading-[1.2]">
-            Cara Menuju Kostara
+            Cara Menuju Pondok Rahmat
           </h2>
           <p className="mt-4 text-lg text-[#6B716D]">
             Panduan rute termudah menuju lokasi kami, apa pun moda transportasi Anda.
@@ -91,7 +91,7 @@ export default function TransportGuide() {
                     <div>
                       <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Bundaran HI</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Arahkan kendaraan ke arah Menteng / Cikini. Lurus terus melintasi Tugu Tani, belok kiri pada lampu merah kedua setelah Stasiun Cikini. Gedung Kostara berada di sebelah kiri jalan dengan fasad berwarna hijau gelap.
+                        Arahkan kendaraan ke arah Menteng / Cikini. Lurus terus melintasi Tugu Tani, belok kiri pada lampu merah kedua setelah Stasiun Cikini. Gedung Pondok Rahmat berada di sebelah kiri jalan dengan fasad berwarna hijau gelap.
                       </p>
                     </div>
                   </li>
@@ -102,7 +102,7 @@ export default function TransportGuide() {
                     <div>
                       <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Salemba Raya</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Masuk ke Jalan Diponegoro, putar balik di depan RS Carolus. Ambil jalur kiri dan belok kiri sebelum pertigaan besar. Kostara berjarak 200m dari belokan.
+                        Masuk ke Jalan Diponegoro, putar balik di depan RS Carolus. Ambil jalur kiri dan belok kiri sebelum pertigaan besar. Pondok Rahmat berjarak 200m dari belokan.
                       </p>
                     </div>
                   </li>
@@ -148,7 +148,7 @@ export default function TransportGuide() {
                     <div>
                       <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan KRL Commuter Line</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Turun di <strong>Stasiun KRL Cikini</strong>. Keluar stasiun, belok kanan dan berjalan kaki sekitar 5 menit (500 meter) menyusuri trotoar. Kostara terletak di sebelah kanan jalan.
+                        Turun di <strong>Stasiun KRL Cikini</strong>. Keluar stasiun, belok kanan dan berjalan kaki sekitar 5 menit (500 meter) menyusuri trotoar. Pondok Rahmat terletak di sebelah kanan jalan.
                       </p>
                     </div>
                   </li>

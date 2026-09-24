@@ -8,7 +8,7 @@ export default function RuleSettings() {
       <div>
         <h2 className="text-xl font-black text-[#1F3D35]">Tata Tertib & Kebijakan</h2>
         <p className="mt-1 text-sm font-medium text-[#6B716D]">
-          Aturan umum yang harus ditaati oleh seluruh penghuni Kos Kostara.
+          Aturan umum yang harus ditaati oleh seluruh penghuni Kos Pondok Rahmat.
         </p>
       </div>
 

@@ -19,7 +19,7 @@ const storyList = [
   },
   {
     title: "Membangun Komunitas.",
-    text: "Lebih dari sekadar fasilitas bangunan fisik, Kostara dirancang untuk membentuk lingkungan sosial yang positif. Area komunal dibuat agar penghuni dapat berinteraksi secara natural tanpa mengganggu ranah privasi masing-masing."
+    text: "Lebih dari sekadar fasilitas bangunan fisik, Pondok Rahmat dirancang untuk membentuk lingkungan sosial yang positif. Area komunal dibuat agar penghuni dapat berinteraksi secara natural tanpa mengganggu ranah privasi masing-masing."
   },
   {
     title: "Komitmen Pelayanan.",
@@ -185,7 +185,7 @@ export default function Story() {
                   <CheckCircle2 className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-[13px] font-medium text-[#6B716D]">
-                  Catatan Manajemen Kostara
+                  Catatan Manajemen Pondok Rahmat
                 </span>
               </div>
               <span className="text-[11px] font-bold tracking-widest text-[#C69C6D]">

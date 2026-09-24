@@ -139,7 +139,7 @@ export default function PointsOfInterest() {
             Segalanya Dalam Jangkauan
           </h2>
           <p className="mt-6 text-lg text-[#6B716D] leading-relaxed">
-            Tidak perlu menghabiskan banyak waktu di jalan. Berbagai kebutuhan utama Anda dapat diakses dengan cepat dari Kostara.
+            Tidak perlu menghabiskan banyak waktu di jalan. Berbagai kebutuhan utama Anda dapat diakses dengan cepat dari Pondok Rahmat.
           </p>
         </div>
 

@@ -54,7 +54,7 @@ const reviewsCol1 = [
     role: "Mahasiswi",
   },
   {
-    text: "Saya sudah ngekos di 3 tempat berbeda, dan Kostara ini yang paling nyaman. Manajemennya responsif kalau ada keluhan.",
+    text: "Saya sudah ngekos di 3 tempat berbeda, dan Pondok Rahmat ini yang paling nyaman. Manajemennya responsif kalau ada keluhan.",
     name: "Reza Pahlevi",
     role: "Pekerja Lepas",
   }
@@ -176,7 +176,7 @@ export default function Testimonials() {
               Apa Kata Mereka?
             </h2>
             <p className="mb-8 max-w-lg text-[15px] leading-relaxed text-[#6B716D]">
-              Ratusan penghuni telah memercayakan kenyamanan harian mereka di Kostara. Inilah pengalaman nyata mereka selama tinggal di sini.
+              Ratusan penghuni telah memercayakan kenyamanan harian mereka di Pondok Rahmat. Inilah pengalaman nyata mereka selama tinggal di sini.
             </p>
             
             {/* Rating Badge */}

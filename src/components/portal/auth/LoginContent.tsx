@@ -19,7 +19,7 @@ export default function LoginContent() {
         <div className="relative z-10 p-12 lg:p-20">
           <Link href="/" className="inline-block transition-opacity hover:opacity-80">
             <span className="text-3xl font-extrabold tracking-tighter text-white">
-              Kostara<span className="text-[#C69C6D]">.</span>
+              Pondok Rahmat<span className="text-[#C69C6D]">.</span>
             </span>
           </Link>
         </div>
@@ -44,7 +44,7 @@ export default function LoginContent() {
         
         {/* Tombol Back to Home (Khusus Mobile) */}
         <Link href="/" className="lg:hidden absolute top-8 left-8 text-2xl font-extrabold tracking-tighter text-[#1F3D35]">
-          Kostara<span className="text-[#C69C6D]">.</span>
+          Pondok Rahmat<span className="text-[#C69C6D]">.</span>
         </Link>
 
         <div className="max-w-[400px] w-full mx-auto">

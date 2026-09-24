@@ -82,12 +82,12 @@ export default function TagihanContent() {
               <div className="p-5 rounded-xl bg-[#F8F7F4] border border-[#E5E3DE]">
                 <p className="text-sm font-semibold text-[#6B716D] mb-1">Bank BCA</p>
                 <p className="text-xl font-bold tracking-wider text-[#202321] mb-2">1234 5678 90</p>
-                <p className="text-sm text-[#6B716D]">a.n. PT Kostara Nusantara</p>
+                <p className="text-sm text-[#6B716D]">a.n. PT Pondok Rahmat Nusantara</p>
               </div>
               <div className="p-5 rounded-xl bg-[#F8F7F4] border border-[#E5E3DE]">
                 <p className="text-sm font-semibold text-[#6B716D] mb-1">Bank Mandiri</p>
                 <p className="text-xl font-bold tracking-wider text-[#202321] mb-2">098 7654 321</p>
-                <p className="text-sm text-[#6B716D]">a.n. PT Kostara Nusantara</p>
+                <p className="text-sm text-[#6B716D]">a.n. PT Pondok Rahmat Nusantara</p>
               </div>
             </div>
             <p className="text-sm text-[#6B716D] mt-6 leading-relaxed">

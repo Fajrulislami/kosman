@@ -14,7 +14,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Kostara — Hunian Nyaman dan Strategis",
+  title: "Pondok Rahmat — Hunian Nyaman dan Strategis",
   description: "Temukan kos nyaman dengan fasilitas lengkap dan lokasi strategis.",
 };
 

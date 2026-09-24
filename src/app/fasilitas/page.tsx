@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Fasilitas - Kostara",
+  title: "Fasilitas - Pondok Rahmat",
   description: "Fasilitas premium yang dirancang untuk kenyamanan maksimal Anda.",
 };
 
@@ -27,7 +27,7 @@ export default function FasilitasPage() {
               Tertarik menikmati semua fasilitas ini?
             </h2>
             <p className="text-lg text-white/80 leading-relaxed">
-              Jadikan Kostara tempat tinggal Anda berikutnya. Lihat pilihan kamar yang tersedia dan amankan posisi Anda hari ini.
+              Jadikan Pondok Rahmat tempat tinggal Anda berikutnya. Lihat pilihan kamar yang tersedia dan amankan posisi Anda hari ini.
             </p>
             
             <div className="pt-4 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">

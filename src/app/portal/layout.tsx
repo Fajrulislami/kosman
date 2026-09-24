@@ -1,4 +1,4 @@
-import PortalLayoutWrapper from "@/components/portal/PortalLayoutWrapper";
+import PortalLayoutWrapper from "@/components/portal/layout/PortalLayoutWrapper";
 
 export default function PortalLayout({
   children,
