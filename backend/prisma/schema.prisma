@@ -1,0 +1,180 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("TENANT") // "ADMIN" | "TENANT"
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant?
+
+  @@map("users")
+}
+
+model RoomType {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  basePrice    Int
+  depositPrice Int      @default(0)
+  size         String
+  description  String
+  facilities   String   @default("[]") // JSON Array string
+  images       String   @default("[]") // JSON Array string
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  rooms        Room[]
+  inquiries    BookingInquiry[]
+
+  @@map("room_types")
+}
+
+model Room {
+  id          String   @id @default(cuid())
+  roomNumber  String   @unique
+  floor       Int      @default(1)
+  status      String   @default("AVAILABLE") // "AVAILABLE" | "OCCUPIED" | "MAINTENANCE" | "RESERVED"
+  notes       String?
+  roomTypeId  String
+  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leases      Lease[]
+  complaints  Complaint[]
+
+  @@map("rooms")
+}
+
+model Tenant {
+  id                String   @id @default(cuid())
+  userId            String?  @unique
+  user              User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fullName          String
+  nik               String   @unique
+  phone             String
+  emergencyName     String?
+  emergencyPhone    String?
+  emergencyRelation String?
+  occupation        String?
+  ktpImageUrl       String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  leases            Lease[]
+  complaints        Complaint[]
+
+  @@map("tenants")
+}
+
+model Lease {
+  id            String   @id @default(cuid())
+  tenantId      String
+  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  roomId        String
+  room          Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  startDate     DateTime
+  endDate       DateTime
+  rentAmount    Int
+  depositAmount Int      @default(0)
+  status        String   @default("ACTIVE") // "ACTIVE" | "TERMINATED" | "EXPIRED"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  invoices      Invoice[]
+
+  @@map("leases")
+}
+
+model Invoice {
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  leaseId       String
+  lease         Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  amount        Int
+  penaltyAmount Int      @default(0)
+  dueDate       DateTime
+  periodMonth   Int
+  periodYear    Int
+  status        String   @default("PENDING") // "PENDING" | "WAITING_CONFIRMATION" | "PAID" | "OVERDUE" | "CANCELLED"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  payments      Payment[]
+
+  @@map("invoices")
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice   @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount        Int
+  method        String    @default("MANUAL_TRANSFER") // "MANUAL_TRANSFER" | "CASH" | "MIDTRANS_VA" | "QRIS"
+  proofImageUrl String?
+  paidAt        DateTime  @default(now())
+  verifiedAt    DateTime?
+  verifiedBy    String?
+  status        String    @default("PENDING") // "PENDING" | "VERIFIED" | "REJECTED"
+  rejectReason  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("payments")
+}
+
+model Complaint {
+  id             String    @id @default(cuid())
+  ticketNumber   String    @unique
+  tenantId       String
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  roomId         String
+  room           Room      @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  category       String // "AC" | "ELECTRICITY" | "PLUMBING" | "FURNITURE" | "INTERNET" | "OTHER"
+  title          String
+  description    String
+  images         String    @default("[]") // JSON Array string
+  priority       String    @default("MEDIUM") // "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+  status         String    @default("PENDING") // "PENDING" | "IN_PROGRESS" | "RESOLVED" | "REJECTED"
+  resolvedAt     DateTime?
+  resolutionNote String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("complaints")
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @default("{}") // JSON string
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model BookingInquiry {
+  id          String    @id @default(cuid())
+  name        String
+  phone       String
+  roomTypeId  String?
+  roomType    RoomType? @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
+  checkInDate DateTime?
+  notes       String?
+  status      String    @default("NEW")
+  createdAt   DateTime  @default(now())
+
+  @@map("booking_inquiries")
+}
