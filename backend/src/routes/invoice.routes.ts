@@ -286,3 +286,57 @@ invoiceRouter.post("/admin/payments/:id/verify", requireAdmin, async (req: Authe
     res.status(500).json({ error: "Gagal memverifikasi pembayaran" });
   }
 });
+
+// POST /api/admin/invoices (Generate Tagihan Baru Manual)
+const createInvoiceSchema = z.object({
+  leaseId: z.string().min(1, "Kontrak sewa wajib dipilih"),
+  amount: z.number().positive("Nominal harus lebih dari 0"),
+  dueDate: z.string(),
+  periodMonth: z.number().int().min(1).max(12),
+  periodYear: z.number().int().min(2024),
+});
+
+invoiceRouter.post("/admin/invoices", requireAdmin, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsed = createInvoiceSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten() });
+      return;
+    }
+
+    const { leaseId, amount, dueDate, periodMonth, periodYear } = parsed.data;
+
+    const lease = await prisma.lease.findUnique({
+      where: { id: leaseId },
+      include: { room: true },
+    });
+
+    if (!lease) {
+      res.status(404).json({ error: "Kontrak sewa penghuni tidak ditemukan" });
+      return;
+    }
+
+    const invoiceNumber = `INV-${periodYear}${String(periodMonth).padStart(2, "0")}-${lease.room.roomNumber}-${Date.now().toString().slice(-4)}`;
+
+    const newInvoice = await prisma.invoice.create({
+      data: {
+        invoiceNumber,
+        leaseId,
+        amount,
+        dueDate: new Date(dueDate),
+        periodMonth,
+        periodYear,
+        status: "PENDING",
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Tagihan baru berhasil dibuat",
+      data: newInvoice,
+    });
+  } catch (error) {
+    console.error("Create invoice error:", error);
+    res.status(500).json({ error: "Gagal membuat tagihan baru" });
+  }
+});

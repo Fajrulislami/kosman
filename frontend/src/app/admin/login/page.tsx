@@ -34,6 +34,11 @@ export default function AdminLoginPage() {
         throw new Error("Akun ini tidak memiliki hak akses Administrator");
       }
 
+      if (data.token) {
+        localStorage.setItem("kostara_token", data.token);
+        document.cookie = `kostara_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+      }
+
       router.push("/admin");
       router.refresh();
     } catch (err) {

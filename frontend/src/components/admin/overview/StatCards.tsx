@@ -1,47 +1,52 @@
 "use client";
 
 import { Users, DoorOpen, Wallet, AlertCircle, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { DashboardOverview } from "@/types/admin";
 
-const stats = [
-  {
-    name: "Total Penghuni Aktif",
-    value: "24",
-    trend: "+2 (Bulan Ini)",
-    trendUp: true,
-    icon: Users,
-    color: "bg-blue-100/50 text-blue-600 ring-1 ring-blue-500/20",
-    trendColor: "text-blue-600 bg-blue-50",
-  },
-  {
-    name: "Kamar Kosong",
-    value: "4",
-    trend: "Tersedia",
-    trendUp: true,
-    icon: DoorOpen,
-    color: "bg-green-100/50 text-green-600 ring-1 ring-green-500/20",
-    trendColor: "text-green-600 bg-green-50",
-  },
-  {
-    name: "Pendapatan Bulan Ini",
-    value: "Rp 32.5 Jt",
-    trend: "+15% vs Bulan Lalu",
-    trendUp: true,
-    icon: Wallet,
-    color: "bg-[#FCECE9] text-[#E54D2E] ring-1 ring-[#E54D2E]/20",
-    trendColor: "text-green-600 bg-green-50",
-  },
-  {
-    name: "Tagihan Tertunda",
-    value: "3",
-    trend: "Perlu Perhatian",
-    trendUp: false,
-    icon: AlertCircle,
-    color: "bg-amber-100/50 text-amber-600 ring-1 ring-amber-500/20",
-    trendColor: "text-amber-600 bg-amber-50",
-  },
-];
+interface StatCardsProps {
+  metrics?: DashboardOverview["metrics"];
+}
 
-export default function StatCards() {
+export default function StatCards({ metrics }: StatCardsProps) {
+  const stats = [
+    {
+      name: "Total Penghuni Aktif",
+      value: metrics ? String(metrics.occupiedRooms) : "0",
+      trend: `${metrics?.occupancyRate ?? 0}% Okupansi`,
+      trendUp: true,
+      icon: Users,
+      color: "bg-blue-100/50 text-blue-600 ring-1 ring-blue-500/20",
+      trendColor: "text-blue-600 bg-blue-50",
+    },
+    {
+      name: "Kamar Kosong",
+      value: metrics ? String(metrics.availableRooms) : "0",
+      trend: `${metrics?.totalRooms ?? 0} Total Unit`,
+      trendUp: true,
+      icon: DoorOpen,
+      color: "bg-green-100/50 text-green-600 ring-1 ring-green-500/20",
+      trendColor: "text-green-600 bg-green-50",
+    },
+    {
+      name: "Pendapatan Bulan Ini",
+      value: metrics ? metrics.revenueFormatted : "Rp 0",
+      trend: "Terverifikasi",
+      trendUp: true,
+      icon: Wallet,
+      color: "bg-[#FCECE9] text-[#E54D2E] ring-1 ring-[#E54D2E]/20",
+      trendColor: "text-green-600 bg-green-50",
+    },
+    {
+      name: "Tagihan Tertunda",
+      value: metrics ? String(metrics.unpaidInvoices) : "0",
+      trend: metrics && metrics.unpaidInvoices > 0 ? "Perlu Ditagih" : "Aman",
+      trendUp: false,
+      icon: AlertCircle,
+      color: "bg-amber-100/50 text-amber-600 ring-1 ring-amber-500/20",
+      trendColor: metrics && metrics.unpaidInvoices > 0 ? "text-amber-600 bg-amber-50" : "text-green-600 bg-green-50",
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {stats.map((stat) => (
@@ -57,7 +62,7 @@ export default function StatCards() {
               <p className="text-sm font-semibold tracking-wide text-[#6B716D]">
                 {stat.name}
               </p>
-              <p className="mt-2 text-3xl font-black tracking-tight text-[#1F3D35]">
+              <p className="mt-2 text-2xl lg:text-3xl font-black tracking-tight text-[#1F3D35]">
                 {stat.value}
               </p>
             </div>
@@ -71,11 +76,11 @@ export default function StatCards() {
             <span
               className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${stat.trendColor}`}
             >
-              {stat.trendUp && stat.name !== "Kamar Kosong" && stat.name !== "Tagihan Tertunda" ? (
+              {stat.trendUp ? (
                 <ArrowUpRight className="h-3 w-3" />
-              ) : stat.name === "Tagihan Tertunda" ? (
+              ) : (
                 <ArrowDownRight className="h-3 w-3" />
-              ) : null}
+              )}
               {stat.trend}
             </span>
           </div>

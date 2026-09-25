@@ -30,6 +30,11 @@ export default function LoginContent() {
         throw new Error(data.error || "Gagal masuk");
       }
 
+      if (data.token) {
+        localStorage.setItem("kostara_token", data.token);
+        document.cookie = `kostara_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+      }
+
       if (data.user.role === "ADMIN") {
         router.push("/admin");
       } else {

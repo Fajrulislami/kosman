@@ -1,65 +1,32 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Filter, MoreVertical, Eye, Edit, Trash2 } from "lucide-react";
-
-// Mock Data
-const MOCK_TENANTS = [
-  {
-    id: "T-101",
-    name: "Budi Santoso",
-    phone: "081234567890",
-    room: "101",
-    roomType: "Premium",
-    joinDate: "12 Jan 2024",
-    status: "aktif",
-    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-  },
-  {
-    id: "T-102",
-    name: "Siti Aminah",
-    phone: "089876543210",
-    room: "102",
-    roomType: "Standard",
-    joinDate: "05 Feb 2024",
-    status: "nunggak",
-    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-  },
-  {
-    id: "T-103",
-    name: "Andi Wijaya",
-    phone: "081122334455",
-    room: "201",
-    roomType: "Premium",
-    joinDate: "20 Mar 2024",
-    status: "aktif",
-    avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-  },
-  {
-    id: "T-104",
-    name: "Rina Kumala",
-    phone: "087766554433",
-    room: "205",
-    roomType: "Deluxe",
-    joinDate: "01 Sep 2024",
-    status: "baru",
-    avatar: "https://i.pravatar.cc/150?u=a04258a2462d826712d",
-  },
-];
+import { Search, Filter, Eye, Loader2, Users } from "lucide-react";
+import { TenantItem } from "@/types/admin";
 
 interface TenantTableProps {
-  onViewDetail?: (id: string) => void;
+  tenants: TenantItem[];
+  loading?: boolean;
+  onViewDetail?: (tenant: TenantItem) => void;
 }
 
-export default function TenantTable({ onViewDetail }: TenantTableProps) {
+export default function TenantTable({ tenants, loading = false, onViewDetail }: TenantTableProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("semua");
 
   // Filter logic
-  const filteredTenants = MOCK_TENANTS.filter((tenant) => {
-    const matchesSearch = tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          tenant.room.includes(searchTerm);
-    const matchesStatus = statusFilter === "semua" || tenant.status === statusFilter;
+  const filteredTenants = tenants.filter((tenant) => {
+    const matchesSearch =
+      tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tenant.phone.includes(searchTerm) ||
+      tenant.nik.includes(searchTerm);
+
+    const matchesStatus =
+      statusFilter === "semua" ||
+      (statusFilter === "aktif" && tenant.status === "Aktif") ||
+      (statusFilter === "nonaktif" && tenant.status !== "Aktif");
+
     return matchesSearch && matchesStatus;
   });
 
@@ -75,7 +42,7 @@ export default function TenantTable({ onViewDetail }: TenantTableProps) {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#99A09C]" />
             <input
               type="text"
-              placeholder="Cari nama atau no. kamar..."
+              placeholder="Cari nama, kamar, NIK, atau no. HP..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full rounded-xl border border-[#E5E3DE] bg-[#F8F7F4] py-2.5 pl-10 pr-4 text-sm outline-none focus:border-[#C69C6D] focus:ring-1 focus:ring-[#C69C6D] sm:w-64 transition-all"
@@ -92,8 +59,7 @@ export default function TenantTable({ onViewDetail }: TenantTableProps) {
             >
               <option value="semua">Semua Status</option>
               <option value="aktif">Aktif</option>
-              <option value="baru">Baru</option>
-              <option value="nunggak">Nunggak</option>
+              <option value="nonaktif">Non-Aktif</option>
             </select>
           </div>
         </div>
@@ -105,85 +71,95 @@ export default function TenantTable({ onViewDetail }: TenantTableProps) {
           <thead className="bg-[#F8F7F4]/50 text-xs uppercase text-[#99A09C]">
             <tr>
               <th className="px-6 py-4 font-bold tracking-wider">Profil Penghuni</th>
-              <th className="px-6 py-4 font-bold tracking-wider">Kamar</th>
-              <th className="px-6 py-4 font-bold tracking-wider">Tanggal Masuk</th>
+              <th className="px-6 py-4 font-bold tracking-wider">Kamar & Tipe</th>
+              <th className="px-6 py-4 font-bold tracking-wider">Masa Sewa</th>
               <th className="px-6 py-4 font-bold tracking-wider">Status</th>
               <th className="px-6 py-4 font-bold tracking-wider text-right">Aksi</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#E5E3DE]">
-            {filteredTenants.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center text-[#6B716D]">
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-[#1F3D35]" />
+                    <span>Memuat data penghuni...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredTenants.length > 0 ? (
               filteredTenants.map((tenant) => (
                 <tr key={tenant.id} className="group transition-colors hover:bg-[#F8F7F4]/50">
                   {/* Profil */}
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
-                      <img src={tenant.avatar} alt={tenant.name} className="h-10 w-10 rounded-full object-cover" />
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3D35] text-white font-bold text-sm">
+                        {tenant.name.slice(0, 2).toUpperCase()}
+                      </div>
                       <div>
                         <p className="font-bold text-[#1F3D35]">{tenant.name}</p>
-                        <p className="text-xs text-[#6B716D]">{tenant.phone}</p>
+                        <p className="text-xs text-[#6B716D]">{tenant.phone} • {tenant.email}</p>
                       </div>
                     </div>
                   </td>
                   
                   {/* Kamar */}
                   <td className="px-6 py-4">
-                    <p className="font-semibold text-[#1F3D35]">Kamar {tenant.room}</p>
-                    <p className="text-xs text-[#6B716D]">{tenant.roomType}</p>
+                    <p className="font-semibold text-[#1F3D35]">{tenant.room}</p>
+                    <p className="text-xs text-[#6B716D]">{tenant.rentAmount}/bln</p>
                   </td>
                   
                   {/* Tanggal */}
-                  <td className="px-6 py-4 text-[#6B716D] font-medium">
-                    {tenant.joinDate}
+                  <td className="px-6 py-4 text-[#6B716D] font-medium text-xs">
+                    <p>Mulai: {tenant.startDate}</p>
+                    <p>Hingga: {tenant.endDate}</p>
                   </td>
                   
                   {/* Status Badge */}
                   <td className="px-6 py-4">
-                    {tenant.status === 'aktif' && (
-                      <span className="inline-flex items-center rounded-full bg-[#E6F4EA] px-2.5 py-1 text-xs font-semibold text-[#1E8E3E]">
-                        Aktif
-                      </span>
-                    )}
-                    {tenant.status === 'nunggak' && (
-                      <span className="inline-flex items-center rounded-full bg-[#FCE8E6] px-2.5 py-1 text-xs font-semibold text-[#D93025]">
-                        Nunggak
-                      </span>
-                    )}
-                    {tenant.status === 'baru' && (
-                      <span className="inline-flex items-center rounded-full bg-[#E8F0FE] px-2.5 py-1 text-xs font-semibold text-[#1A73E8]">
-                        Baru
-                      </span>
-                    )}
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        tenant.status === "Aktif"
+                          ? "bg-[#E6F4EA] text-[#1E8E3E]"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {tenant.status}
+                    </span>
                   </td>
                   
                   {/* Aksi */}
                   <td className="px-6 py-4 text-right">
-                    <div className="flex justify-end space-x-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button 
-                        onClick={() => onViewDetail && onViewDetail(tenant.id)}
-                        className="rounded-lg p-2 text-[#6B716D] hover:bg-white hover:text-[#1F3D35] hover:shadow-sm transition-all"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button className="rounded-lg p-2 text-[#6B716D] hover:bg-white hover:text-[#C69C6D] hover:shadow-sm transition-all">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="rounded-lg p-2 text-[#6B716D] hover:bg-white hover:text-[#E54D2E] hover:shadow-sm transition-all">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    <button 
+                      onClick={() => onViewDetail && onViewDetail(tenant)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E3DE] bg-white px-3 py-1.5 text-xs font-semibold text-[#1F3D35] hover:bg-[#F8F7F4] hover:border-[#C69C6D] transition-all"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      <span>Detail</span>
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-[#6B716D]">
-                  Tidak ada penghuni yang sesuai dengan pencarian Anda.
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <Users className="h-8 w-8 text-[#99A09C]" />
+                    <p className="font-medium text-[#202321]">Tidak ada data penghuni</p>
+                    <p className="text-xs text-[#99A09C]">Belum ada penghuni yang terdaftar atau hasil filter kosong</p>
+                  </div>
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+      </div>
+      
+      {/* Footer count */}
+      <div className="flex items-center justify-between border-t border-[#E5E3DE] bg-white px-6 py-4">
+        <p className="text-sm text-[#6B716D]">
+          Menampilkan <span className="font-semibold text-[#1F3D35]">{filteredTenants.length}</span> penghuni
+        </p>
       </div>
     </div>
   );

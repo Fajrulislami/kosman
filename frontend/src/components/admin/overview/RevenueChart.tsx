@@ -9,15 +9,19 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { DashboardOverview } from "@/types/admin";
 
-const data = [
-  { name: "Jan", total: 28000000 },
-  { name: "Feb", total: 30000000 },
-  { name: "Mar", total: 29000000 },
-  { name: "Apr", total: 31500000 },
-  { name: "Mei", total: 32000000 },
-  { name: "Jun", total: 34000000 },
-  { name: "Jul", total: 32500000 },
+interface RevenueChartProps {
+  chartData?: DashboardOverview["chartData"];
+}
+
+const defaultData = [
+  { month: "Jan", pendapatan: 0, fullAmount: 0 },
+  { month: "Feb", pendapatan: 0, fullAmount: 0 },
+  { month: "Mar", pendapatan: 0, fullAmount: 0 },
+  { month: "Apr", pendapatan: 0, fullAmount: 0 },
+  { month: "Mei", pendapatan: 0, fullAmount: 0 },
+  { month: "Jun", pendapatan: 0, fullAmount: 0 },
 ];
 
 const formatIDR = (value: number) => {
@@ -29,15 +33,16 @@ const formatIDR = (value: number) => {
   }).format(value);
 };
 
-export default function RevenueChart() {
+export default function RevenueChart({ chartData }: RevenueChartProps) {
+  const data = chartData && chartData.length > 0 ? chartData : defaultData;
+
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#E5E3DE]">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-lg font-bold text-[#1F3D35]">Tren Pendapatan</h2>
-        <select className="rounded-lg border-0 bg-[#F8F7F4] py-1.5 pl-3 pr-8 text-sm font-medium text-[#6B716D] focus:ring-2 focus:ring-[#C69C6D]">
-          <option>Tahun Ini</option>
-          <option>Tahun Lalu</option>
-        </select>
+        <div>
+          <h2 className="text-lg font-bold text-[#1F3D35]">Tren Pendapatan (6 Bulan Terakhir)</h2>
+          <p className="text-xs text-[#6B716D]">Akumulasi pembayaran sewa yang telah terverifikasi lunas</p>
+        </div>
       </div>
 
       <div className="h-[300px] w-full">
@@ -59,7 +64,7 @@ export default function RevenueChart() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E3DE" />
             <XAxis
-              dataKey="name"
+              dataKey="month"
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#6B716D", fontSize: 12 }}
@@ -69,17 +74,20 @@ export default function RevenueChart() {
               axisLine={false}
               tickLine={false}
               tick={{ fill: "#6B716D", fontSize: 12 }}
-              tickFormatter={(value) => `Rp ${value / 1000000}Jt`}
+              tickFormatter={(value) => `Rp ${value}Jt`}
               dx={-10}
             />
             <Tooltip
-              contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-              formatter={(value: any) => [formatIDR(value as number), "Pendapatan"]}
+              contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
+              formatter={(value: any, name: any, item: any) => [
+                formatIDR(item.payload.fullAmount ?? (Number(value) * 1000000)),
+                "Pendapatan Lunas",
+              ]}
               labelStyle={{ color: "#1F3D35", fontWeight: "bold", marginBottom: "4px" }}
             />
             <Area
               type="monotone"
-              dataKey="total"
+              dataKey="pendapatan"
               stroke="#1F3D35"
               strokeWidth={3}
               fillOpacity={1}
