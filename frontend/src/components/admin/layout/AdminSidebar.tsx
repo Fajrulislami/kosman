@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { 
   LayoutDashboard, 
   DoorClosed, 
@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 const menuItems = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -23,13 +24,27 @@ const menuItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore
+    } finally {
+      localStorage.removeItem("kostara_token");
+      document.cookie = "kostara_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   return (
     <aside className="hidden w-64 flex-col border-r border-[#E5E3DE] bg-white lg:flex">
       {/* Logo Area */}
       <div className="flex h-16 items-center justify-center border-b border-[#E5E3DE]">
         <Link href="/admin" className="text-2xl font-black tracking-tighter text-[#1F3D35]">
-          pondokrahmat<span className="text-[#C69C6D]">.</span>
+          Kostara<span className="text-[#C69C6D]">.</span>
         </Link>
       </div>
 
@@ -65,13 +80,13 @@ export default function AdminSidebar() {
 
       {/* User Area / Logout */}
       <div className="border-t border-[#E5E3DE] p-4">
-        <Link
-          href="/"
+        <button
+          onClick={handleLogout}
           className="group flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-[#E54D2E] transition-all hover:bg-[#FCECE9]"
         >
           <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-[#E54D2E]" />
-          Keluar (Ke Beranda)
-        </Link>
+          Keluar Akun
+        </button>
       </div>
     </aside>
   );

@@ -107,11 +107,11 @@ export default function Navbar() {
       {/* Call to Action (CTA) & Login Button */}
       <div className="hidden md:flex items-center rounded-full border border-white/60 bg-white/40 p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.03)] backdrop-blur-lg">
         <Link
-          href="/portal/login"
+          href="/login"
           className="group flex items-center gap-2 rounded-full bg-[#1F3D35] px-6 py-2 text-[15px] font-semibold text-white transition-all duration-500 ease-out hover:bg-[#162E28] hover:shadow-[0_8px_20px_rgba(31,61,53,0.3)] hover:-translate-y-0.5"
         >
           <LogIn size={18} className="transition-transform duration-300 group-hover:-translate-x-1" />
-          <span>Masuk Portal</span>
+          <span>Masuk Akun</span>
         </Link>
       </div>
 

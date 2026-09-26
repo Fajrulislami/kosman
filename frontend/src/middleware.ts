@@ -4,26 +4,36 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // Allow next internals, static files, and login page
   if (
-    pathname.startsWith("/admin/login") ||
-    pathname.startsWith("/portal/login") ||
+    pathname === "/login" ||
     pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
     pathname.includes(".")
   ) {
     return NextResponse.next();
   }
 
-  const token = req.cookies.get("kostara_session")?.value;
-
-  if (pathname.startsWith("/admin") && !token) {
+  // Redirect legacy login endpoints to unified /login
+  if (pathname === "/admin/login" || pathname === "/portal/login") {
     const url = req.nextUrl.clone();
-    url.pathname = "/admin/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
+  const token = req.cookies.get("kostara_session")?.value;
+
+  // Protect /admin routes - redirect unauthenticated users to /login
+  if (pathname.startsWith("/admin") && !token) {
+    const url = req.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
+
+  // Protect /portal routes - redirect unauthenticated users to /login
   if (pathname.startsWith("/portal") && !token) {
     const url = req.nextUrl.clone();
-    url.pathname = "/portal/login";
+    url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
@@ -31,5 +41,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/portal/:path*"],
+  matcher: ["/admin/:path*", "/portal/:path*", "/login"],
 };
