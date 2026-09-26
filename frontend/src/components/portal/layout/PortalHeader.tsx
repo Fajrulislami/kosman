@@ -1,7 +1,26 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Bell, Menu, Search } from "lucide-react";
-import { tenantProfile } from "@/data/portal";
+import { apiFetch } from "@/lib/api";
 
 export default function PortalHeader({ onMenuToggle }: { onMenuToggle?: () => void }) {
+  const [userName, setUserName] = useState("Penghuni");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await apiFetch<{ authenticated: boolean; user: any }>("/api/auth/me");
+        if (res.user?.name) {
+          setUserName(res.user.name);
+        }
+      } catch {
+        // Fallback
+      }
+    };
+    fetchUser();
+  }, []);
+
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-[#E5E3DE] sticky top-0 z-30">
       <div className="flex items-center justify-between px-6 py-4">
@@ -18,7 +37,7 @@ export default function PortalHeader({ onMenuToggle }: { onMenuToggle?: () => vo
             <Search className="w-4 h-4 text-[#6B716D]" />
             <input 
               type="text" 
-              placeholder="Cari fitur..." 
+              placeholder="Cari fitur portal..." 
               className="bg-transparent text-sm w-full focus:outline-none text-[#202321]"
             />
           </div>
@@ -33,11 +52,11 @@ export default function PortalHeader({ onMenuToggle }: { onMenuToggle?: () => vo
           
           <div className="flex items-center gap-3 pl-4 border-l border-[#E5E3DE]">
             <div className="hidden md:block text-right">
-              <p className="font-semibold text-[#202321] text-sm">{tenantProfile.name}</p>
-              <p className="text-[#6B716D] text-xs">Tenant</p>
+              <p className="font-semibold text-[#202321] text-sm">{userName}</p>
+              <p className="text-[#6B716D] text-xs">Penghuni Aktif</p>
             </div>
             <div className="w-9 h-9 rounded-full bg-[#1F3D35] text-white flex items-center justify-center font-bold text-sm shadow-md">
-              {tenantProfile.name.charAt(0)}
+              {userName.charAt(0).toUpperCase()}
             </div>
           </div>
         </div>

@@ -1,177 +1,191 @@
-import { tenantProfile } from "@/data/portal";
+"use client";
+
+import { useState, useEffect } from "react";
 import { 
   User, Mail, Phone, MapPin, Key, ShieldCheck, 
-  Car, Contact, Home, Calendar, Camera, HeartPulse
+  Home, Calendar, CreditCard, HeartPulse, Loader2, Contact, Briefcase
 } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function ProfilContent() {
+  const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const res = await apiFetch<{ authenticated: boolean; user: any }>("/api/auth/me");
+        setProfile(res.user);
+      } catch (err) {
+        console.error("Failed to load tenant profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const tenant = profile?.tenant;
+  const activeLease = tenant?.leases?.[0];
+  const room = activeLease?.room;
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 text-[#6B716D]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#1F3D35]" />
+        <p className="mt-3 text-sm font-medium">Memuat profil penghuni...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto pb-16 pt-4">
       
-      {/* --- HEADER PROFIL (Seamless, Tanpa Kotak) --- */}
-      <div className="flex flex-col items-center text-center mb-12">
-        <div className="relative group cursor-pointer mb-4">
-          <div className="w-28 h-28 bg-[#1F3D35] rounded-full shadow-lg flex items-center justify-center text-white text-4xl font-light tracking-widest overflow-hidden transition-transform duration-300 group-hover:scale-105">
-            {tenantProfile.name.charAt(0)}
-          </div>
-          <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 backdrop-blur-sm">
-            <Camera className="w-8 h-8 text-white" />
-          </div>
+      {/* Header Profil */}
+      <div className="flex flex-col items-center text-center mb-10">
+        <div className="w-24 h-24 bg-[#1F3D35] rounded-full shadow-lg flex items-center justify-center text-white text-3xl font-bold mb-4">
+          {profile?.name ? profile.name.charAt(0).toUpperCase() : "U"}
         </div>
-        <h1 className="text-2xl font-bold text-[#202321] tracking-tight">{tenantProfile.name}</h1>
-        <p className="text-[#6B716D] mt-1">{tenantProfile.email}</p>
+        <h1 className="text-2xl font-bold text-[#202321] tracking-tight">{profile?.name || "Penghuni"}</h1>
+        <p className="text-sm text-[#6B716D] mt-0.5">{profile?.email || "-"}</p>
         
-        <span className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
+        <span className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
           <ShieldCheck className="w-3.5 h-3.5" />
-          Tenant Terverifikasi
+          Penghuni Terverifikasi Kostara
         </span>
       </div>
 
-      <div className="space-y-10">
+      <div className="space-y-8">
 
-        {/* --- SECTION 1: Detail Kos (Read Only) --- */}
+        {/* SECTION 1: Detail Kamar & Kontrak */}
         <section>
-          <h2 className="text-sm font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-4">Informasi Sewa</h2>
-          <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <h2 className="text-xs font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-2">Informasi Sewa Kamar</h2>
+          <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-sm divide-y divide-[#E5E3DE]">
             
-            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 bg-[#F8F7F4]/50">
+            <div className="flex items-center justify-between p-4 sm:p-5 bg-[#F8F7F4]/40">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E3DE] flex items-center justify-center text-[#1F3D35] shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E3DE] flex items-center justify-center text-[#1F3D35]">
                   <Home className="w-4 h-4" />
                 </div>
-                <span className="font-semibold text-[#202321]">Kamar Saat Ini</span>
+                <span className="font-semibold text-sm text-[#202321]">Unit Kamar</span>
               </div>
-              <span className="text-[#6B716D] font-medium text-right">{tenantProfile.room}</span>
+              <span className="text-[#1F3D35] font-bold text-sm">
+                {room ? `Kamar ${room.roomNumber} - ${room.roomType?.name || "Standar"}` : "-"}
+              </span>
             </div>
 
             <div className="flex items-center justify-between p-4 sm:p-5">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E3DE] flex items-center justify-center text-[#1F3D35] shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E3DE] flex items-center justify-center text-[#1F3D35]">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <span className="font-semibold text-sm text-[#202321]">Tarif Sewa Bulanan</span>
+              </div>
+              <span className="text-[#202321] font-bold text-sm">
+                {activeLease ? `Rp ${activeLease.rentAmount?.toLocaleString("id-ID")}` : "-"}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-white border border-[#E5E3DE] flex items-center justify-center text-[#1F3D35]">
                   <Calendar className="w-4 h-4" />
                 </div>
-                <span className="font-semibold text-[#202321]">Tanggal Masuk</span>
+                <span className="font-semibold text-sm text-[#202321]">Periode Kontrak</span>
               </div>
-              <span className="text-[#6B716D] font-medium text-right">{tenantProfile.joinDate}</span>
+              <span className="text-[#6B716D] font-medium text-xs sm:text-sm text-right">
+                {activeLease ? `${activeLease.startDate?.split("T")[0]} s/d ${activeLease.endDate?.split("T")[0]}` : "-"}
+              </span>
             </div>
 
           </div>
         </section>
 
-        {/* --- SECTION 2: Data Diri (Editable List Style) --- */}
+        {/* SECTION 2: Data Pribadi */}
         <section>
-          <h2 className="text-sm font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-4">Data Pribadi</h2>
-          <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+          <h2 className="text-xs font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-2">Data Pribadi</h2>
+          <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-sm divide-y divide-[#E5E3DE]">
             
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
                 <User className="w-4 h-4 text-[#C69C6D]" />
-                <span className="font-semibold text-[#202321] text-sm">Nama</span>
+                <span className="font-semibold text-sm text-[#202321]">Nama Lengkap</span>
               </div>
-              <input type="text" defaultValue={tenantProfile.name} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
+              <span className="text-sm font-medium text-[#6B716D]">{tenant?.fullName || profile?.name}</span>
+            </div>
 
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <ShieldCheck className="w-4 h-4 text-[#C69C6D]" />
+                <span className="font-semibold text-sm text-[#202321]">NIK KTP</span>
+              </div>
+              <span className="text-sm font-medium text-[#6B716D]">{tenant?.nik || "-"}</span>
+            </div>
+
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-[#C69C6D]" />
-                <span className="font-semibold text-[#202321] text-sm">Email</span>
+                <span className="font-semibold text-sm text-[#202321]">Email Akun</span>
               </div>
-              <input type="email" defaultValue={tenantProfile.email} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
+              <span className="text-sm font-medium text-[#6B716D]">{profile?.email}</span>
+            </div>
 
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-[#C69C6D]" />
-                <span className="font-semibold text-[#202321] text-sm">Telepon</span>
+                <span className="font-semibold text-sm text-[#202321]">Nomor HP / WhatsApp</span>
               </div>
-              <input type="tel" defaultValue={tenantProfile.phone} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
+              <span className="text-sm font-medium text-[#6B716D]">{tenant?.phone || "-"}</span>
+            </div>
 
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <Car className="w-4 h-4 text-[#C69C6D]" />
-                <span className="font-semibold text-[#202321] text-sm">Kendaraan</span>
+            <div className="flex items-center justify-between p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <Briefcase className="w-4 h-4 text-[#C69C6D]" />
+                <span className="font-semibold text-sm text-[#202321]">Pekerjaan</span>
               </div>
-              <input type="text" placeholder="Plat Nomor (Opsional)" className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none uppercase" />
-            </label>
-
-            <label className="flex items-start justify-between p-4 sm:p-5 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px] pt-1">
-                <MapPin className="w-4 h-4 text-[#C69C6D]" />
-                <span className="font-semibold text-[#202321] text-sm">Alamat KTP</span>
-              </div>
-              <textarea rows={2} placeholder="Masukkan alamat asal..." className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none resize-none"></textarea>
-            </label>
+              <span className="text-sm font-medium text-[#6B716D]">{tenant?.occupation || "-"}</span>
+            </div>
 
           </div>
         </section>
 
-        {/* --- SECTION 3: Kontak Darurat --- */}
-        <section>
-          <h2 className="text-sm font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-4 flex items-center gap-2">
-            Kontak Darurat <HeartPulse className="w-4 h-4 text-red-400" />
-          </h2>
-          <div className="bg-white border border-red-100/50 rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-            
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <Contact className="w-4 h-4 text-red-400" />
-                <span className="font-semibold text-[#202321] text-sm">Nama</span>
+        {/* SECTION 3: Kontak Darurat */}
+        {tenant && (tenant.emergencyName || tenant.emergencyPhone) && (
+          <section>
+            <h2 className="text-xs font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-2 flex items-center gap-2">
+              Kontak Darurat <HeartPulse className="w-4 h-4 text-red-500" />
+            </h2>
+            <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-sm divide-y divide-[#E5E3DE]">
+              
+              <div className="flex items-center justify-between p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <Contact className="w-4 h-4 text-red-500" />
+                  <span className="font-semibold text-sm text-[#202321]">Nama Kontak</span>
+                </div>
+                <span className="text-sm font-medium text-[#6B716D]">{tenant.emergencyName || "-"}</span>
               </div>
-              <input type="text" defaultValue={tenantProfile.emergencyContact.name} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
 
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <User className="w-4 h-4 text-red-400" />
-                <span className="font-semibold text-[#202321] text-sm">Hubungan</span>
+              <div className="flex items-center justify-between p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <User className="w-4 h-4 text-red-500" />
+                  <span className="font-semibold text-sm text-[#202321]">Hubungan</span>
+                </div>
+                <span className="text-sm font-medium text-[#6B716D]">{tenant.emergencyRelation || "-"}</span>
               </div>
-              <input type="text" defaultValue={tenantProfile.emergencyContact.relation} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
 
-            <label className="flex items-center justify-between p-4 sm:p-5 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <Phone className="w-4 h-4 text-red-400" />
-                <span className="font-semibold text-[#202321] text-sm">Telepon</span>
+              <div className="flex items-center justify-between p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-red-500" />
+                  <span className="font-semibold text-sm text-[#202321]">Nomor HP</span>
+                </div>
+                <span className="text-sm font-medium text-[#6B716D]">{tenant.emergencyPhone || "-"}</span>
               </div>
-              <input type="tel" defaultValue={tenantProfile.emergencyContact.phone} className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
 
-          </div>
-        </section>
-
-        {/* --- SECTION 4: Keamanan --- */}
-        <section>
-          <h2 className="text-sm font-bold text-[#6B716D] uppercase tracking-widest mb-3 px-4">Keamanan Akun</h2>
-          <div className="bg-white border border-[#E5E3DE] rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
-            
-            <label className="flex items-center justify-between p-4 sm:p-5 border-b border-[#E5E3DE]/60 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <Key className="w-4 h-4 text-[#6B716D]" />
-                <span className="font-semibold text-[#202321] text-sm">Password Lama</span>
-              </div>
-              <input type="password" placeholder="••••••••" className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none tracking-widest placeholder:tracking-normal" />
-            </label>
-
-            <label className="flex items-center justify-between p-4 sm:p-5 hover:bg-[#F8F7F4]/50 transition-colors group cursor-text">
-              <div className="flex items-center gap-3 w-1/3 min-w-[120px]">
-                <Key className="w-4 h-4 text-[#6B716D]" />
-                <span className="font-semibold text-[#202321] text-sm">Password Baru</span>
-              </div>
-              <input type="password" placeholder="Minimal 8 karakter" className="w-full text-right bg-transparent text-[#6B716D] focus:text-[#1F3D35] font-medium outline-none" />
-            </label>
-
-          </div>
-        </section>
-
-        {/* --- ACTION BUTTONS --- */}
-        <div className="pt-6 flex flex-col-reverse sm:flex-row gap-4 justify-end">
-          <button className="px-8 py-3.5 rounded-xl font-bold text-[#6B716D] hover:bg-white hover:text-[#202321] transition-colors border border-transparent hover:border-[#E5E3DE]">
-            Batalkan
-          </button>
-          <button className="px-8 py-3.5 bg-[#1F3D35] text-white rounded-xl font-bold shadow-lg shadow-[#1F3D35]/20 hover:-translate-y-0.5 hover:bg-[#162E28] transition-all">
-            Simpan Perubahan
-          </button>
-        </div>
+            </div>
+          </section>
+        )}
 
       </div>
     </div>

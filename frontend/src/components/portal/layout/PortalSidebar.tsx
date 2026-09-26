@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Receipt, Wrench, User, X, ArrowLeft } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Receipt, Wrench, User, X, LogOut, ArrowLeft } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
 export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems = [
     { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
@@ -13,6 +15,19 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
     { name: "Komplain", href: "/portal/komplain", icon: Wrench },
     { name: "Profil", href: "/portal/profil", icon: User },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // Ignore
+    } finally {
+      localStorage.removeItem("kostara_token");
+      document.cookie = "kostara_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      router.push("/portal/login");
+      router.refresh();
+    }
+  };
 
   return (
     <>
@@ -27,16 +42,16 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#E5E3DE] flex flex-col h-screen
         transform transition-transform duration-300 ease-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
         md:translate-x-0 md:static md:z-auto
       `}>
         {/* Header */}
         <div className="p-6 border-b border-[#E5E3DE] flex items-center justify-between">
           <div>
             <Link href="/" className="text-2xl font-bold text-[#1F3D35]">
-              Pondok Rahmat<span className="text-[#C69C6D]">.</span>
+              Kostara<span className="text-[#C69C6D]">.</span>
             </Link>
-            <p className="text-sm text-[#6B716D] mt-1">Tenant Portal</p>
+            <p className="text-xs text-[#6B716D] mt-0.5">Portal Penghuni</p>
           </div>
           {/* Close Button (Mobile Only) */}
           <button 
@@ -72,15 +87,22 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
           })}
         </nav>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-[#E5E3DE]">
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-[#E5E3DE] space-y-1">
           <Link
             href="/"
-            className="flex items-center gap-3 px-4 py-3 text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35] rounded-xl transition-colors font-medium"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35] rounded-xl transition-colors font-medium"
           >
-            <ArrowLeft className="w-5 h-5" />
-            Kembali ke Website
+            <ArrowLeft className="w-4 h-4" />
+            Website Utama
           </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium"
+          >
+            <LogOut className="w-4 h-4" />
+            Keluar Akun
+          </button>
         </div>
       </aside>
     </>
