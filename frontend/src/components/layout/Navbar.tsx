@@ -44,7 +44,7 @@ export default function Navbar() {
     return () => window.removeEventListener("resize", updatePill);
   }, [activePath]);
 
-  if (pathname.startsWith("/portal") || pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/portal") || pathname.startsWith("/admin") || pathname === "/login") {
     return null;
   }
 
