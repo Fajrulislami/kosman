@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { getRoomBySlug, rooms } from "@/data/rooms";
+import { getRoomBySlug, rooms, type Room } from "@/data/rooms";
 import RoomGallery from "@/components/rooms/RoomGallery";
 import BookingSticky from "@/components/rooms/BookingSticky";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Maximize2 } from "lucide-react";
 import Link from "next/link";
 import type { Metadata, ResolvingMetadata } from "next";
 
@@ -10,20 +10,38 @@ type Props = {
   params: Promise<{ slug: string }>;
 };
 
+async function getRoomData(slug: string): Promise<Room | null> {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  try {
+    const res = await fetch(`${apiUrl}/api/public/rooms/${slug}`, {
+      next: { revalidate: 60 },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && json.data) {
+        return json.data;
+      }
+    }
+  } catch {
+    // fallback below
+  }
+  return getRoomBySlug(slug) || null;
+}
+
 // Generate metadata dinamis berdasarkan nama kamar
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
   const resolvedParams = await params;
-  const room = getRoomBySlug(resolvedParams.slug);
-  
+  const room = await getRoomData(resolvedParams.slug);
+
   if (!room) {
     return { title: "Kamar Tidak Ditemukan" };
   }
-  
+
   return {
-    title: `${room.name} - Pondok Rahmat`,
+    title: `${room.name} - Kostara (Pondok Rahmat)`,
     description: room.description,
   };
 }
@@ -37,7 +55,7 @@ export function generateStaticParams() {
 
 export default async function KamarDetailPage({ params }: Props) {
   const resolvedParams = await params;
-  const room = getRoomBySlug(resolvedParams.slug);
+  const room = await getRoomData(resolvedParams.slug);
 
   if (!room) {
     notFound();
@@ -47,24 +65,31 @@ export default async function KamarDetailPage({ params }: Props) {
     <main className="relative min-h-screen bg-[#F8F7F4] pt-24 pb-20">
       {/* Pola Titik Latar Belakang (Dot Grid) */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
-      
+
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        
         {/* Breadcrumb & Back Link */}
         <div className="mb-6">
-          <Link 
-            href="/kamar" 
+          <Link
+            href="/kamar"
             className="inline-flex items-center text-sm font-medium text-[#6B716D] transition-colors hover:text-[#1F3D35]"
           >
             &larr; Kembali ke Daftar Kamar
           </Link>
         </div>
 
-        {/* Nama Kamar (Header) */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-[#202321] md:text-5xl">
-            {room.name}
-          </h1>
+        {/* Nama Kamar & Metadata Singkat (Header) */}
+        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight text-[#1F3D35] md:text-5xl">
+              {room.name}
+            </h1>
+            {room.size && (
+              <p className="mt-2 flex items-center gap-1.5 text-sm font-medium text-[#6B716D]">
+                <Maximize2 className="h-4 w-4 text-[#C69C6D]" />
+                <span>Dimensi Ruangan: {room.size}</span>
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Bento Gallery dengan Parallax */}
@@ -72,10 +97,8 @@ export default async function KamarDetailPage({ params }: Props) {
 
         {/* Layout Konten 2 Kolom (Desktop) */}
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3">
-          
           {/* Kiri: Detail Lengkap */}
           <div className="lg:col-span-2">
-            
             {/* Deskripsi */}
             <section className="mb-12">
               <h2 className="mb-4 text-2xl font-bold text-[#202321]">Tentang Kamar Ini</h2>
@@ -104,8 +127,8 @@ export default async function KamarDetailPage({ params }: Props) {
                 <hr className="mb-12 border-[#E5E3DE]" />
                 {/* Aturan Khusus */}
                 <section>
-                  <h2 className="mb-6 text-2xl font-bold text-[#202321]">Aturan Kamar</h2>
-                  <div className="rounded-2xl bg-white p-6 border border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+                  <h2 className="mb-6 text-2xl font-bold text-[#202321]">Aturan & Kebijakan Kamar</h2>
+                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
                     <ul className="space-y-4">
                       {room.rules.map((rule, idx) => (
                         <li key={idx} className="flex items-start gap-3">
@@ -118,16 +141,13 @@ export default async function KamarDetailPage({ params }: Props) {
                 </section>
               </>
             )}
-
           </div>
 
           {/* Kanan: Sticky Booking Box */}
           <div className="relative">
             <BookingSticky room={room} />
           </div>
-
         </div>
-
       </div>
     </main>
   );
