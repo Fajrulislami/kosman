@@ -90,7 +90,7 @@ export default function ManajemenKamarPage() {
           roomTypes={roomTypes}
           onRoomCreated={fetchRooms}
         />
-        <RoomTable rooms={filteredRooms} loading={loading} onDelete={handleDeleteRoom} />
+        <RoomTable rooms={filteredRooms} loading={loading} onDelete={handleDeleteRoom} onRefresh={fetchRooms} />
       </div>
     </div>
   );

@@ -1,17 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2, Loader2, AlertCircle } from "lucide-react";
+import { Trash2, Loader2, AlertCircle, Edit } from "lucide-react";
 import { RoomItem } from "@/types/admin";
+import EditRoomModal from "./EditRoomModal";
 
 interface RoomTableProps {
   rooms: RoomItem[];
   loading?: boolean;
   onDelete?: (id: string) => Promise<void>;
+  onRefresh?: () => void;
 }
 
-export default function RoomTable({ rooms, loading = false, onDelete }: RoomTableProps) {
+export default function RoomTable({ rooms, loading = false, onDelete, onRefresh }: RoomTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingRoom, setEditingRoom] = useState<RoomItem | null>(null);
 
   const handleDelete = async (id: string, roomNumber: string) => {
     if (!confirm(`Apakah Anda yakin ingin menghapus kamar ${roomNumber}?`)) {
@@ -112,6 +115,13 @@ export default function RoomTable({ rooms, loading = false, onDelete }: RoomTabl
                   </td>
                   <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                     <button
+                      onClick={() => setEditingRoom(room)}
+                      className="inline-flex items-center gap-1 rounded-lg p-1.5 text-amber-600 transition-colors hover:bg-amber-50 mr-2"
+                      title="Edit kamar"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
                       onClick={() => handleDelete(room.id, room.number)}
                       disabled={deletingId === room.id || room.rawStatus === "OCCUPIED"}
                       title={room.rawStatus === "OCCUPIED" ? "Kamar terisi tidak dapat dihapus" : "Hapus kamar"}
@@ -137,6 +147,15 @@ export default function RoomTable({ rooms, loading = false, onDelete }: RoomTabl
           Menampilkan <span className="font-semibold text-[#1F3D35]">{rooms.length}</span> kamar
         </p>
       </div>
+
+      <EditRoomModal
+        isOpen={!!editingRoom}
+        onClose={() => setEditingRoom(null)}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+        room={editingRoom}
+      />
     </div>
   );
 }
