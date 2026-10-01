@@ -27,6 +27,7 @@ model RoomType {
   name         String
   slug         String   @unique
   basePrice    Int
+  yearlyPrice  Int      @default(0)
   depositPrice Int      @default(0)
   size         String
   description  String

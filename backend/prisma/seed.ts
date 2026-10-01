@@ -34,8 +34,9 @@ async function main() {
     data: {
       name: "Kamar Standar",
       slug: "standar",
-      basePrice: 1500000,
-      depositPrice: 500000,
+      basePrice: 650000,
+      yearlyPrice: 6000000,
+      depositPrice: 300000,
       size: "3 x 4 m",
       description: "Kamar nyaman dengan fasilitas lengkap, cocok untuk mahasiswa dan profesional muda.",
       facilities: JSON.stringify(["Kasur Springbed", "Lemari Pakaian", "Meja Belajar", "WiFi High Speed", "Kamar Mandi Dalam"]),
@@ -43,52 +44,26 @@ async function main() {
     },
   });
 
-  const premiumType = await prisma.roomType.create({
-    data: {
-      name: "Kamar Premium",
-      slug: "premium",
-      basePrice: 2000000,
-      depositPrice: 500000,
-      size: "4 x 4 m",
-      description: "Kamar luas dengan pendingin ruangan (AC), water heater, dan pencahayaan maksimal.",
-      facilities: JSON.stringify(["Kasur Queen Size", "AC Inverter", "Water Heater", "Smart TV", "Lemari 3 Pintu", "WiFi"]),
-      images: JSON.stringify(["https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=800"]),
-    },
-  });
-
-  const vipType = await prisma.roomType.create({
-    data: {
-      name: "Kamar VIP",
-      slug: "vip",
-      basePrice: 3000000,
-      depositPrice: 1000000,
-      size: "5 x 4 m",
-      description: "Kamar eksklusif tipe studio dengan mini kitchen, balkon pribadi, dan pembersihan berkala.",
-      facilities: JSON.stringify(["King Bed", "Balkon Pribadi", "Kulkas Mini", "Microwave", "AC & Water Heater", "Sofa & Meja"]),
-      images: JSON.stringify(["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=800"]),
-    },
-  });
-
-  console.log("✅ Tipe kamar (Standar, Premium, VIP) berhasil dibuat.");
+  console.log("✅ Tipe kamar (Standar) berhasil dibuat.");
 
   // 4. Buat Unit Kamar Fisik
   const room101 = await prisma.room.create({
     data: { roomNumber: "101", floor: 1, roomTypeId: standardType.id, status: "OCCUPIED" },
   });
   await prisma.room.create({
-    data: { roomNumber: "102", floor: 1, roomTypeId: premiumType.id, status: "AVAILABLE" },
+    data: { roomNumber: "102", floor: 1, roomTypeId: standardType.id, status: "AVAILABLE" },
   });
   await prisma.room.create({
     data: { roomNumber: "103", floor: 1, roomTypeId: standardType.id, status: "AVAILABLE" },
   });
   await prisma.room.create({
-    data: { roomNumber: "105", floor: 1, roomTypeId: vipType.id, status: "MAINTENANCE", notes: "Perbaikan wastafel" },
+    data: { roomNumber: "105", floor: 1, roomTypeId: standardType.id, status: "MAINTENANCE", notes: "Perbaikan wastafel" },
   });
   await prisma.room.create({
-    data: { roomNumber: "201", floor: 2, roomTypeId: premiumType.id, status: "AVAILABLE" },
+    data: { roomNumber: "201", floor: 2, roomTypeId: standardType.id, status: "AVAILABLE" },
   });
   await prisma.room.create({
-    data: { roomNumber: "202", floor: 2, roomTypeId: premiumType.id, status: "AVAILABLE" },
+    data: { roomNumber: "202", floor: 2, roomTypeId: standardType.id, status: "AVAILABLE" },
   });
 
   console.log("✅ Unit kamar (101, 102, 103, 105, 201, 202) berhasil dibuat.");
@@ -124,8 +99,8 @@ async function main() {
       roomId: room101.id,
       startDate: new Date("2024-01-15"),
       endDate: new Date("2025-01-15"),
-      rentAmount: 1500000,
-      depositAmount: 500000,
+      rentAmount: 650000,
+      depositAmount: 300000,
       status: "ACTIVE",
     },
   });
@@ -135,14 +110,14 @@ async function main() {
     data: {
       invoiceNumber: "INV-2024-08",
       leaseId: lease.id,
-      amount: 1500000,
+      amount: 650000,
       dueDate: new Date("2024-08-05"),
       periodMonth: 8,
       periodYear: 2024,
       status: "PAID",
       payments: {
         create: {
-          amount: 1500000,
+          amount: 650000,
           paidAt: new Date("2024-08-03"),
           verifiedAt: new Date("2024-08-03"),
           verifiedBy: "Admin Kostara",
@@ -156,7 +131,7 @@ async function main() {
     data: {
       invoiceNumber: "INV-2024-09",
       leaseId: lease.id,
-      amount: 1500000,
+      amount: 650000,
       dueDate: new Date("2024-09-05"),
       periodMonth: 9,
       periodYear: 2024,

@@ -8,7 +8,7 @@ import { PortalInvoiceItem } from "@/types/portal";
 export default function TagihanContent() {
   const [invoices, setInvoices] = useState<PortalInvoiceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Payment modal state
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<PortalInvoiceItem | null>(null);
@@ -102,10 +102,10 @@ export default function TagihanContent() {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        
+
         {/* Kolom Kiri: Tagihan Aktif & Instruksi */}
         <div className="xl:col-span-2 space-y-8">
-          
+
           {/* Card Tagihan Aktif */}
           <div className="relative overflow-hidden bg-white rounded-3xl border border-[#E5E3DE] shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]">
             <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
@@ -133,11 +133,10 @@ export default function TagihanContent() {
                       <span className="text-4xl sm:text-5xl font-black tracking-tight text-[#202321]">
                         Rp {activeBill.amount.toLocaleString("id-ID")}
                       </span>
-                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${
-                        activeBill.rawStatus === "WAITING_CONFIRMATION"
+                      <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full ${activeBill.rawStatus === "WAITING_CONFIRMATION"
                           ? "bg-amber-100 text-amber-800"
                           : "bg-red-50 text-red-700"
-                      }`}>
+                        }`}>
                         {activeBill.rawStatus === "WAITING_CONFIRMATION" ? (
                           <>
                             <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -207,7 +206,7 @@ export default function TagihanContent() {
         <div className="xl:col-span-1">
           <div className="bg-white rounded-3xl p-6 border border-[#E5E3DE] shadow-[0_8px_30px_rgb(0,0,0,0.04)] sticky top-28">
             <h3 className="text-lg font-bold text-[#202321] mb-4">Riwayat Pembayaran</h3>
-            
+
             <div className="space-y-3">
               {pastBills.length > 0 ? (
                 pastBills.map((bill) => (
@@ -221,7 +220,7 @@ export default function TagihanContent() {
                         <CheckCircle2 className="w-3 h-3" /> Lunas
                       </span>
                     </div>
-                    
+
                     <div className="flex items-end justify-between mt-2 pt-2 border-t border-[#E5E3DE]/60">
                       <span className="text-xs text-[#6B716D]">Nominal</span>
                       <p className="font-extrabold text-sm text-[#1F3D35]">
@@ -245,8 +244,8 @@ export default function TagihanContent() {
       {/* Modal Upload Bukti Transfer */}
       {isPayModalOpen && selectedInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="fixed inset-0 bg-[#1F3D35]/40 backdrop-blur-sm transition-opacity" 
+          <div
+            className="fixed inset-0 bg-[#1F3D35]/40 backdrop-blur-sm transition-opacity"
             onClick={() => setIsPayModalOpen(false)}
           />
 
@@ -256,7 +255,7 @@ export default function TagihanContent() {
                 <h3 className="text-xl font-bold text-[#1F3D35]">Konfirmasi Pembayaran</h3>
                 <p className="text-xs text-[#6B716D] mt-0.5">{selectedInvoice.invoiceNumber} • Rp {selectedInvoice.amount.toLocaleString("id-ID")}</p>
               </div>
-              <button 
+              <button
                 onClick={() => setIsPayModalOpen(false)}
                 className="rounded-full p-2 text-[#99A09C] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
               >

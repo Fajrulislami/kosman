@@ -11,7 +11,7 @@ interface RoomCardProps {
 }
 
 export default function RoomCard({ room, index }: RoomCardProps) {
-  const isAvailable = room.status === "AVAILABLE";
+  const isAvailable = room.status === "AVAILABLE" || room.isAvailable === true;
 
   return (
     <div 
@@ -28,19 +28,22 @@ export default function RoomCard({ room, index }: RoomCardProps) {
       {/* Bagian Gambar (Atas) */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
         <Image
-          src={room.images[0]}
+          src={room.images?.[0] || "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"}
           alt={room.name}
           fill
+          unoptimized
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         
         {/* Status Badge */}
-        <div className="absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold backdrop-blur-md">
+        <div className="absolute left-4 top-4 z-10 flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold backdrop-blur-md shadow-sm">
           {isAvailable ? (
             <>
               <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
-              <span className="text-green-700">Tersedia</span>
+              <span className="text-green-700">
+                Tersedia {room.availableUnits !== undefined ? `(${room.availableUnits} Unit)` : ""}
+              </span>
             </>
           ) : (
             <>
@@ -49,6 +52,13 @@ export default function RoomCard({ room, index }: RoomCardProps) {
             </>
           )}
         </div>
+
+        {/* Room Size Pill */}
+        {room.size && (
+          <div className="absolute right-4 top-4 z-10 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md">
+            {room.size}
+          </div>
+        )}
       </div>
 
       {/* Bagian Konten (Bawah) */}

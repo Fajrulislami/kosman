@@ -62,15 +62,15 @@ export default function UnifiedLogin() {
 
   return (
     <div className="min-h-screen w-full flex bg-white font-sans">
-      
+
       {/* Sisi Kiri: Branding & Visual Showcase (Desktop) */}
       <div className="hidden lg:flex w-[50%] relative bg-[#1F3D35] flex-col justify-between overflow-hidden p-12 lg:p-16">
         {/* Background Image */}
-        <div 
+        <div
           className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-overlay"
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=2070&auto=format&fit=crop')" }}
         />
-        
+
         {/* Ambient Glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#C69C6D]/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl pointer-events-none" />
@@ -93,11 +93,11 @@ export default function UnifiedLogin() {
             <KeyRound className="w-3.5 h-3.5" />
             <span>Satu Akses untuk Seluruh Pengguna</span>
           </div>
-          
+
           <h1 className="text-4xl font-extrabold text-white leading-tight tracking-tight">
             Akses Mudah untuk Penghuni & Manajemen Properti.
           </h1>
-          
+
           <p className="text-white/80 text-base leading-relaxed">
             Sistem autentikasi otomatis mengarahkan Anda ke dashboard yang tepat. Cukup masukkan email dan password akun Anda.
           </p>
@@ -124,7 +124,7 @@ export default function UnifiedLogin() {
 
       {/* Sisi Kanan: Formulir Login Tunggal */}
       <div className="w-full lg:w-[50%] flex flex-col justify-center px-6 sm:px-14 lg:px-20 relative bg-[#F8F7F4] lg:bg-white py-12">
-        
+
         {/* Mobile Header Branding */}
         <div className="lg:hidden mb-8">
           <Link href="/" className="text-2xl font-extrabold tracking-tighter text-[#1F3D35]">
@@ -134,7 +134,7 @@ export default function UnifiedLogin() {
         </div>
 
         <div className="max-w-[420px] w-full mx-auto">
-          
+
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-[#202321] tracking-tight">Masuk ke Akun Anda</h2>
             <p className="text-[#6B716D] text-sm mt-2">
@@ -173,7 +173,7 @@ export default function UnifiedLogin() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            
+
             {/* Input Email */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-[#6B716D] uppercase tracking-wider">
@@ -183,7 +183,7 @@ export default function UnifiedLogin() {
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#99A09C]">
                   <Mail className="w-5 h-5" />
                 </div>
-                <input 
+                <input
                   type="email"
                   required
                   value={email}
@@ -205,7 +205,7 @@ export default function UnifiedLogin() {
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#99A09C]">
                   <Lock className="w-5 h-5" />
                 </div>
-                <input 
+                <input
                   type="password"
                   required
                   value={password}
@@ -218,7 +218,7 @@ export default function UnifiedLogin() {
 
             {/* Submit Button */}
             <div className="pt-2">
-              <button 
+              <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-[#1F3D35] hover:bg-[#162E28] disabled:opacity-60 text-white px-6 py-4 rounded-2xl font-bold transition-all shadow-[0_8px_20px_rgba(31,61,53,0.2)] hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
@@ -241,7 +241,7 @@ export default function UnifiedLogin() {
 
           {/* Footer Back */}
           <div className="mt-8 text-center">
-            <Link 
+            <Link
               href="/"
               className="text-xs font-semibold text-[#6B716D] hover:text-[#1F3D35] transition-colors"
             >

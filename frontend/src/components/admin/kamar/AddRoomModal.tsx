@@ -14,6 +14,7 @@ interface RoomTypeOption {
   id: string;
   name: string;
   price: number;
+  yearlyPrice: number;
 }
 
 export default function AddRoomModal({ isOpen, onClose, onSuccess }: AddRoomModalProps) {
@@ -145,7 +146,6 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }: AddRoomModa
                 >
                   <option value="1">Lantai 1</option>
                   <option value="2">Lantai 2</option>
-                  <option value="3">Lantai 3</option>
                 </select>
               </div>
             </div>
@@ -172,8 +172,10 @@ export default function AddRoomModal({ isOpen, onClose, onSuccess }: AddRoomModa
 
             {/* Harga Preview */}
             {selectedType && (
-              <div className="rounded-xl border border-[#E5E3DE] bg-[#F8F7F4] p-4 text-sm text-[#6B716D]">
-                <p>Harga sewa otomatis terisi berdasarkan tipe: <span className="font-bold text-[#1F3D35]">Rp {selectedType.price?.toLocaleString("id-ID")} / bulan</span></p>
+              <div className="rounded-xl border border-[#E5E3DE] bg-[#F8F7F4] p-4 text-sm text-[#6B716D] space-y-1">
+                <p>Opsi sewa tipe ini:</p>
+                <p className="font-bold text-[#1F3D35]">• Rp {selectedType.price?.toLocaleString("id-ID")} / bulan</p>
+                <p className="font-bold text-[#1F3D35]">• Rp {selectedType.yearlyPrice?.toLocaleString("id-ID")} / tahun</p>
               </div>
             )}
 
