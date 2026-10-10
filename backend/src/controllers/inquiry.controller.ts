@@ -94,3 +94,16 @@ export const updateInquiryStatus = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: "Gagal memperbarui status reservasi" });
   }
 };
+
+export const deleteInquiry = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    await prisma.bookingInquiry.delete({
+      where: { id },
+    });
+    res.json({ success: true, message: "Reservasi berhasil dihapus permanen" });
+  } catch (error) {
+    console.error("Delete inquiry error:", error);
+    res.status(500).json({ error: "Gagal menghapus reservasi" });
+  }
+};

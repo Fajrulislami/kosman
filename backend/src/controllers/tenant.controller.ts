@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
-import { registerTenantSchema } from "../validations/tenant.schema";
+import { registerTenantSchema, updateTenantSchema, extendLeaseSchema, moveRoomSchema } from "../validations/tenant.schema";
 
 export const getAdminTenants = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -217,5 +217,115 @@ export const checkoutLease = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error("Checkout lease error:", error);
     res.status(500).json({ error: "Gagal memproses check-out sewa" });
+  }
+};
+
+export const updateTenant = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const parsed = updateTenantSchema.safeParse(req.body);
+    
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten().fieldErrors });
+      return;
+    }
+
+    const updated = await prisma.tenant.update({
+      where: { id },
+      data: parsed.data,
+    });
+
+    res.json({ success: true, message: "Data penghuni berhasil diperbarui", data: updated });
+  } catch (error) {
+    console.error("Update tenant error:", error);
+    res.status(500).json({ error: "Gagal memperbarui data penghuni" });
+  }
+};
+
+export const extendLease = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const parsed = extendLeaseSchema.safeParse(req.body);
+    
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten().fieldErrors });
+      return;
+    }
+
+    const lease = await prisma.lease.findUnique({ where: { id } });
+    if (!lease) {
+      res.status(404).json({ error: "Kontrak sewa tidak ditemukan" });
+      return;
+    }
+
+    const updated = await prisma.lease.update({
+      where: { id },
+      data: { endDate: new Date(parsed.data.endDate) },
+    });
+
+    res.json({ success: true, message: "Masa sewa berhasil diperpanjang", data: updated });
+  } catch (error) {
+    console.error("Extend lease error:", error);
+    res.status(500).json({ error: "Gagal memperpanjang sewa" });
+  }
+};
+
+export const moveRoom = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const parsed = moveRoomSchema.safeParse(req.body);
+    
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten().fieldErrors });
+      return;
+    }
+
+    const lease = await prisma.lease.findUnique({ where: { id } });
+    if (!lease) {
+      res.status(404).json({ error: "Kontrak sewa tidak ditemukan" });
+      return;
+    }
+
+    const newRoom = await prisma.room.findUnique({ 
+      where: { id: parsed.data.newRoomId },
+      include: { roomType: true }
+    });
+    
+    if (!newRoom) {
+      res.status(404).json({ error: "Kamar baru tidak ditemukan" });
+      return;
+    }
+
+    if (newRoom.status === "OCCUPIED") {
+      res.status(400).json({ error: "Kamar baru sudah terisi" });
+      return;
+    }
+
+    // Execute move transaction
+    await prisma.$transaction([
+      // 1. Free old room
+      prisma.room.update({
+        where: { id: lease.roomId },
+        data: { status: "AVAILABLE" }
+      }),
+      // 2. Occupy new room
+      prisma.room.update({
+        where: { id: newRoom.id },
+        data: { status: "OCCUPIED" }
+      }),
+      // 3. Update lease room and rent amount based on new room type
+      prisma.lease.update({
+        where: { id },
+        data: { 
+          roomId: newRoom.id,
+          rentAmount: newRoom.roomType.basePrice
+        }
+      })
+    ]);
+
+    res.json({ success: true, message: `Berhasil pindah ke Kamar ${newRoom.roomNumber}` });
+  } catch (error) {
+    console.error("Move room error:", error);
+    res.status(500).json({ error: "Gagal memproses pindah kamar" });
   }
 };

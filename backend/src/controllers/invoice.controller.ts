@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middlewares/auth";
-import { paySchema, verifySchema, createInvoiceSchema } from "../validations/invoice.schema";
+import { paySchema, verifySchema, createInvoiceSchema, updateInvoiceSchema } from "../validations/invoice.schema";
 
 export const getAdminInvoices = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -313,5 +313,172 @@ export const createInvoice = async (req: Request, res: Response): Promise<void> 
   } catch (error) {
     console.error("Create invoice error:", error);
     res.status(500).json({ error: "Gagal membuat tagihan baru" });
+  }
+};
+
+export const generateMonthlyInvoices = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
+    const currentYear = now.getFullYear();
+
+    // Temukan semua kontrak aktif
+    const activeLeases = await prisma.lease.findMany({
+      where: { status: "ACTIVE" },
+      include: { room: true },
+    });
+
+    if (activeLeases.length === 0) {
+      res.json({ success: true, message: "Tidak ada penyewa aktif saat ini.", generatedCount: 0 });
+      return;
+    }
+
+    // Temukan tagihan yang sudah ada bulan ini untuk mencegah duplikasi
+    const existingInvoices = await prisma.invoice.findMany({
+      where: {
+        periodMonth: currentMonth,
+        periodYear: currentYear,
+      },
+      select: { leaseId: true },
+    });
+
+    const existingLeaseIds = new Set(existingInvoices.map((inv) => inv.leaseId));
+
+    // Saring kontrak yang belum punya tagihan
+    const leasesToInvoice = activeLeases.filter((lease) => !existingLeaseIds.has(lease.id));
+
+    if (leasesToInvoice.length === 0) {
+      res.json({ success: true, message: "Semua penyewa aktif sudah memiliki tagihan bulan ini.", generatedCount: 0 });
+      return;
+    }
+
+    // Siapkan data tagihan baru
+    const newInvoicesData = leasesToInvoice.map((lease) => {
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 5); // Jatuh tempo 5 hari dari sekarang
+
+      return {
+        invoiceNumber: `INV-${currentYear}${String(currentMonth).padStart(2, "0")}-${lease.room.roomNumber}-${Math.floor(1000 + Math.random() * 9000)}`,
+        leaseId: lease.id,
+        amount: lease.rentAmount,
+        dueDate: dueDate,
+        periodMonth: currentMonth,
+        periodYear: currentYear,
+        status: "PENDING",
+      };
+    });
+
+    // Bulk insert menggunakan createMany
+    const result = await prisma.invoice.createMany({
+      data: newInvoicesData,
+    });
+
+    res.json({
+      success: true,
+      message: `Berhasil membuat ${result.count} tagihan baru untuk bulan ini.`,
+      generatedCount: result.count,
+    });
+  } catch (error) {
+    console.error("Generate monthly invoices error:", error);
+    res.status(500).json({ error: "Gagal membuat tagihan otomatis" });
+  }
+};
+
+export const updateInvoice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const parsed = updateInvoiceSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      res.status(400).json({ error: "Input tidak valid", details: parsed.error.flatten() });
+      return;
+    }
+
+    const invoice = await prisma.invoice.findUnique({ where: { id } });
+
+    if (!invoice) {
+      res.status(404).json({ error: "Tagihan tidak ditemukan" });
+      return;
+    }
+
+    if (invoice.status === "PAID" || invoice.status === "WAITING_CONFIRMATION") {
+      res.status(400).json({ error: "Tidak dapat mengubah tagihan yang sudah dibayar atau menunggu verifikasi" });
+      return;
+    }
+
+    const updatedData: any = {};
+    if (parsed.data.amount !== undefined) updatedData.amount = parsed.data.amount;
+    if (parsed.data.penaltyAmount !== undefined) updatedData.penaltyAmount = parsed.data.penaltyAmount;
+    if (parsed.data.dueDate !== undefined) updatedData.dueDate = new Date(parsed.data.dueDate);
+    if (parsed.data.periodMonth !== undefined) updatedData.periodMonth = parsed.data.periodMonth;
+    if (parsed.data.periodYear !== undefined) updatedData.periodYear = parsed.data.periodYear;
+
+    const updatedInvoice = await prisma.invoice.update({
+      where: { id },
+      data: updatedData,
+    });
+
+    res.json({ success: true, message: "Tagihan berhasil diperbarui", data: updatedInvoice });
+  } catch (error) {
+    console.error("Update invoice error:", error);
+    res.status(500).json({ error: "Gagal memperbarui tagihan" });
+  }
+};
+
+export const deleteInvoice = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    
+    const invoice = await prisma.invoice.findUnique({ where: { id } });
+
+    if (!invoice) {
+      res.status(404).json({ error: "Tagihan tidak ditemukan" });
+      return;
+    }
+
+    if (invoice.status === "PAID" || invoice.status === "WAITING_CONFIRMATION") {
+      res.status(400).json({ error: "Tidak dapat menghapus tagihan yang sudah dibayar atau menunggu verifikasi" });
+      return;
+    }
+
+    await prisma.invoice.delete({ where: { id } });
+
+    res.json({ success: true, message: "Tagihan berhasil dihapus" });
+  } catch (error) {
+    console.error("Delete invoice error:", error);
+    res.status(500).json({ error: "Gagal menghapus tagihan" });
+  }
+};
+
+export const getAdminInvoiceById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: {
+        lease: {
+          include: {
+            tenant: true,
+            room: true,
+          }
+        },
+        payments: {
+          where: { status: "VERIFIED" },
+          orderBy: { paidAt: "desc" },
+          take: 1
+        }
+      }
+    });
+
+    if (!invoice) {
+      res.status(404).json({ error: "Tagihan tidak ditemukan" });
+      return;
+    }
+
+    res.json({ data: invoice });
+  } catch (error) {
+    console.error("Get invoice detail error:", error);
+    res.status(500).json({ error: "Gagal mengambil detail tagihan" });
   }
 };

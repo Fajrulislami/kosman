@@ -17,3 +17,11 @@ export const createInvoiceSchema = z.object({
   periodMonth: z.number().int().min(1).max(12),
   periodYear: z.number().int().min(2024),
 });
+
+export const updateInvoiceSchema = z.object({
+  amount: z.number().positive("Nominal harus lebih dari 0").optional(),
+  dueDate: z.string().optional(),
+  periodMonth: z.number().int().min(1).max(12).optional(),
+  periodYear: z.number().int().min(2024).optional(),
+  penaltyAmount: z.number().min(0).optional(),
+});
