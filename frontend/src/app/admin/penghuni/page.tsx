@@ -135,6 +135,7 @@ export default function PenghuniPage() {
         onClose={() => setIsDetailOpen(false)}
         tenant={selectedTenant}
         onCheckout={handleCheckout}
+        onRefresh={fetchData}
       />
     </div>
   );

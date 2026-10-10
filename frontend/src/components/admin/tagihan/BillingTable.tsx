@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Bell, CheckCircle, Loader2 } from "lucide-react";
+import { Eye, Bell, CheckCircle, Loader2, Pencil, Trash2, Printer } from "lucide-react";
 import { BillingItem } from "@/types/admin";
 
 export type TabType = "menunggu" | "nunggak" | "lunas";
@@ -10,6 +10,8 @@ interface BillingTableProps {
   activeTab: TabType;
   loading?: boolean;
   onVerify?: (invoice: BillingItem) => void;
+  onEdit?: (invoice: BillingItem) => void;
+  onDelete?: (invoice: BillingItem) => void;
 }
 
 export default function BillingTable({
@@ -17,6 +19,8 @@ export default function BillingTable({
   activeTab,
   loading = false,
   onVerify,
+  onEdit,
+  onDelete,
 }: BillingTableProps) {
   // Filter invoices according to active tab
   const filtered = invoices.filter((item) => {
@@ -145,18 +149,43 @@ export default function BillingTable({
                     </button>
                   )}
                   {activeTab === "nunggak" && (
-                    <button
-                      onClick={() => handleRemindWhatsApp(item)}
-                      className="inline-flex items-center justify-center space-x-2 rounded-xl bg-[#FFEAEA] px-4 py-2 text-sm font-bold text-[#E54D2E] transition-colors hover:bg-[#E54D2E] hover:text-white"
-                    >
-                      <Bell className="h-4 w-4" />
-                      <span>Ingatkan WA</span>
-                    </button>
+                    <div className="flex items-center justify-end space-x-2">
+                      <button
+                        onClick={() => onEdit && onEdit(item)}
+                        className="p-2 text-[#99A09C] hover:text-[#C69C6D] hover:bg-[#F8F7F4] rounded-lg transition-colors"
+                        title="Edit Tagihan"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onDelete && onDelete(item)}
+                        className="p-2 text-[#99A09C] hover:text-[#E54D2E] hover:bg-[#FFEAEA] rounded-lg transition-colors"
+                        title="Hapus Tagihan"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleRemindWhatsApp(item)}
+                        className="inline-flex items-center justify-center space-x-2 rounded-xl bg-[#FFEAEA] px-4 py-2 text-sm font-bold text-[#E54D2E] transition-colors hover:bg-[#E54D2E] hover:text-white"
+                      >
+                        <Bell className="h-4 w-4" />
+                        <span className="hidden sm:inline">Ingatkan WA</span>
+                      </button>
+                    </div>
                   )}
                   {activeTab === "lunas" && (
-                    <span className="inline-flex items-center justify-center rounded-xl bg-[#E6F4EA] px-4 py-2 text-sm font-bold text-[#1E8E3E]">
-                      Lunas
-                    </span>
+                    <div className="flex items-center justify-end space-x-2">
+                      <span className="inline-flex items-center justify-center rounded-xl bg-[#E6F4EA] px-3 py-2 text-sm font-bold text-[#1E8E3E]">
+                        Lunas
+                      </span>
+                      <button
+                        onClick={() => window.open(`/admin/tagihan/${item.id}/kwitansi`, '_blank')}
+                        className="p-2 text-[#99A09C] hover:text-[#1F3D35] hover:bg-[#F8F7F4] rounded-lg transition-colors"
+                        title="Cetak Kwitansi"
+                      >
+                        <Printer className="h-4 w-4" />
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

@@ -52,8 +52,8 @@ export default function ConfirmModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-[#1F3D35]/40 backdrop-blur-sm transition-opacity" 
+      <div
+        className="fixed inset-0 bg-[#1F3D35]/40 backdrop-blur-sm transition-opacity"
         onClick={onCancel}
         aria-hidden="true"
       />
@@ -77,7 +77,7 @@ export default function ConfirmModal({
             </div>
           </div>
         </div>
-        
+
         {/* Footer */}
         <div className="bg-[#F8F7F4] px-6 py-4 sm:flex sm:flex-row-reverse sm:px-8">
           <button

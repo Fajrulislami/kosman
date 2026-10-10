@@ -40,7 +40,7 @@ export default function CreateBillModal({ isOpen, onClose, onSuccess }: CreateBi
           setSelectedLeaseId(active[0].leaseId!);
           // Extract amount
           const raw = active[0].rentAmount.replace(/\D/g, "");
-          setAmount(raw || "1500000");
+          setAmount(formatNumber(raw || "1500000"));
         }
       } catch (err) {
         console.error("Failed to load active tenants:", err);
@@ -59,8 +59,18 @@ export default function CreateBillModal({ isOpen, onClose, onSuccess }: CreateBi
     const chosen = tenants.find((t) => t.leaseId === leaseId);
     if (chosen) {
       const raw = chosen.rentAmount.replace(/\D/g, "");
-      if (raw) setAmount(raw);
+      if (raw) setAmount(formatNumber(raw));
     }
+  };
+
+  const formatNumber = (val: string) => {
+    const num = val.replace(/\D/g, "");
+    if (!num) return "";
+    return new Intl.NumberFormat("id-ID").format(parseInt(num, 10));
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmount(formatNumber(e.target.value));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,7 +80,7 @@ export default function CreateBillModal({ isOpen, onClose, onSuccess }: CreateBi
       return;
     }
 
-    const numAmount = parseInt(amount);
+    const numAmount = parseInt(amount.replace(/\D/g, ""));
     if (isNaN(numAmount) || numAmount <= 0) {
       setError("Nominal tagihan harus berupa angka positif");
       return;
@@ -165,12 +175,11 @@ export default function CreateBillModal({ isOpen, onClose, onSuccess }: CreateBi
               <div className="relative">
                 <Receipt className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
                 <input 
-                  type="number" 
+                  type="text" 
                   required
-                  min={10000}
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="Contoh: 1500000"
+                  onChange={handleAmountChange}
+                  placeholder="Contoh: 1.500.000"
                   className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3 pl-12 pr-4 text-sm font-bold outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
                 />
               </div>

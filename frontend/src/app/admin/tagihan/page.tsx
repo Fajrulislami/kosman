@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Zap, Loader2 } from "lucide-react";
 import BillingStats from "@/components/admin/tagihan/BillingStats";
 import BillingTable, { TabType } from "@/components/admin/tagihan/BillingTable";
 import CreateBillModal from "@/components/admin/tagihan/CreateBillModal";
+import EditBillModal from "@/components/admin/tagihan/EditBillModal";
 import PaymentVerificationSlideOver from "@/components/admin/tagihan/PaymentVerificationSlideOver";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import AlertModal from "@/components/ui/AlertModal";
 import { apiFetch } from "@/lib/api";
 import { BillingItem } from "@/types/admin";
 
@@ -17,7 +20,94 @@ export default function TagihanPage() {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<BillingItem | null>(null);
+
+  // States for Custom Modals
+  const [isConfirmGenerateOpen, setIsConfirmGenerateOpen] = useState(false);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [invoiceToEditOrDelete, setInvoiceToEditOrDelete] = useState<BillingItem | null>(null);
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: "success" | "error" | "info";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    variant: "info",
+  });
+
+  const handleGenerateInvoices = async () => {
+    setIsConfirmGenerateOpen(false);
+    
+    try {
+      setIsGenerating(true);
+      const res = await apiFetch<{ success: boolean; message: string; generatedCount: number }>("/api/admin/invoices/generate-monthly", {
+        method: "POST",
+      });
+      
+      setAlertConfig({
+        isOpen: true,
+        title: "Berhasil",
+        message: res.message,
+        variant: "success",
+      });
+
+      if (res.generatedCount > 0) {
+        await fetchInvoices();
+      }
+    } catch (err: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Terjadi Kesalahan",
+        message: err.message || "Gagal membuat tagihan massal",
+        variant: "error",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleOpenEdit = (invoice: BillingItem) => {
+    setInvoiceToEditOrDelete(invoice);
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenDelete = (invoice: BillingItem) => {
+    setInvoiceToEditOrDelete(invoice);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  const handleDeleteInvoice = async () => {
+    if (!invoiceToEditOrDelete) return;
+    setIsConfirmDeleteOpen(false);
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/api/admin/invoices/${invoiceToEditOrDelete.id}`, {
+        method: "DELETE",
+      });
+      
+      setAlertConfig({
+        isOpen: true,
+        title: "Berhasil Menghapus",
+        message: res.message,
+        variant: "success",
+      });
+
+      await fetchInvoices();
+    } catch (err: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Gagal Menghapus",
+        message: err.message || "Gagal menghapus tagihan",
+        variant: "error",
+      });
+    }
+  };
 
   const fetchInvoices = useCallback(async () => {
     try {
@@ -79,13 +169,28 @@ export default function TagihanPage() {
         </div>
 
         {/* Call to Action */}
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="group flex items-center justify-center space-x-2 rounded-2xl bg-[#1F3D35] px-6 py-3.5 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#152923] hover:shadow-xl"
-        >
-          <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
-          <span>Buat Tagihan</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setIsConfirmGenerateOpen(true)}
+            disabled={isGenerating}
+            className="group flex items-center justify-center space-x-2 rounded-2xl bg-amber-400 px-6 py-3.5 font-bold text-[#1F3D35] shadow-lg transition-all hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+          >
+            {isGenerating ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Zap className="h-5 w-5 transition-transform group-hover:scale-110" />
+            )}
+            <span>Generate Bulan Ini</span>
+          </button>
+          
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="group flex items-center justify-center space-x-2 rounded-2xl bg-[#1F3D35] px-6 py-3.5 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#152923] hover:shadow-xl"
+          >
+            <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+            <span className="hidden sm:inline">Buat Manual</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Bento Grid */}
@@ -155,6 +260,8 @@ export default function TagihanPage() {
           activeTab={activeTab}
           loading={loading}
           onVerify={handleOpenVerify}
+          onEdit={handleOpenEdit}
+          onDelete={handleOpenDelete}
         />
 
       </div>
@@ -166,11 +273,48 @@ export default function TagihanPage() {
         onSuccess={fetchInvoices}
       />
 
+      <EditBillModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={fetchInvoices}
+        invoice={invoiceToEditOrDelete}
+      />
+
       <PaymentVerificationSlideOver
         isOpen={isVerifyOpen}
         onClose={() => setIsVerifyOpen(false)}
         invoice={selectedInvoice}
         onVerify={handleVerifyPayment}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmGenerateOpen}
+        title="Generate Tagihan Otomatis"
+        message="Sistem akan mengecek seluruh penyewa aktif dan membuatkan tagihan secara otomatis untuk bulan ini. Lanjutkan?"
+        confirmText="Ya, Generate Sekarang"
+        cancelText="Batal"
+        onConfirm={handleGenerateInvoices}
+        onCancel={() => setIsConfirmGenerateOpen(false)}
+        variant="warning"
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmDeleteOpen}
+        title="Hapus Tagihan?"
+        message={`Apakah Anda yakin ingin menghapus tagihan ${invoiceToEditOrDelete?.invoiceNumber} untuk ${invoiceToEditOrDelete?.tenantName}?`}
+        confirmText="Ya, Hapus Tagihan"
+        cancelText="Batal"
+        onConfirm={handleDeleteInvoice}
+        onCancel={() => setIsConfirmDeleteOpen(false)}
+        variant="danger"
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
       />
     </div>
   );

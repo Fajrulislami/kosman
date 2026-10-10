@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquare, Calendar, Phone, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { MessageSquare, Calendar, Phone, CheckCircle2, XCircle, Clock, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { apiFetch } from "@/lib/api";
 
 export interface InquiryItem {
@@ -27,6 +28,8 @@ interface InquiryTableProps {
 
 export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
@@ -41,6 +44,24 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
       toast.error(err.message || "Gagal memperbarui status");
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    try {
+      setUpdatingId(deletingId);
+      await apiFetch(`/api/admin/inquiries/${deletingId}`, {
+        method: "DELETE",
+      });
+      onRefresh();
+      toast.success("Data reservasi berhasil dihapus permanen");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal menghapus data reservasi");
+    } finally {
+      setUpdatingId(null);
+      setDeletingId(null);
+      setIsConfirmOpen(false);
     }
   };
 
@@ -173,24 +194,54 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
                       </a>
 
                       {item.status === "NEW" && (
-                        <button
-                          disabled={updatingId === item.id}
-                          onClick={() => handleUpdateStatus(item.id, "CONTACTED")}
-                          className="rounded-xl border border-[#E5E3DE] px-3 py-1.5 text-xs font-semibold text-[#1F3D35] hover:bg-[#F8F7F4]"
-                        >
-                          Tandai Dihubungi
-                        </button>
+                        <>
+                          <button
+                            disabled={updatingId === item.id}
+                            onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
+                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                          >
+                            Tolak
+                          </button>
+                          <button
+                            disabled={updatingId === item.id}
+                            onClick={() => handleUpdateStatus(item.id, "CONTACTED")}
+                            className="rounded-xl border border-[#E5E3DE] px-3 py-1.5 text-xs font-semibold text-[#1F3D35] hover:bg-[#F8F7F4]"
+                          >
+                            Tandai Dihubungi
+                          </button>
+                        </>
                       )}
 
                       {item.status === "CONTACTED" && (
-                        <button
-                          disabled={updatingId === item.id}
-                          onClick={() => handleUpdateStatus(item.id, "CONVERTED")}
-                          className="rounded-xl bg-[#1F3D35] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162E28]"
-                        >
-                          Tandai Deal
-                        </button>
+                        <>
+                          <button
+                            disabled={updatingId === item.id}
+                            onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
+                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                          >
+                            Batal
+                          </button>
+                          <button
+                            disabled={updatingId === item.id}
+                            onClick={() => handleUpdateStatus(item.id, "CONVERTED")}
+                            className="rounded-xl bg-[#1F3D35] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162E28]"
+                          >
+                            Tandai Deal
+                          </button>
+                        </>
                       )}
+
+                      <button
+                        onClick={() => {
+                          setDeletingId(item.id);
+                          setIsConfirmOpen(true);
+                        }}
+                        title="Hapus Permanen"
+                        disabled={updatingId === item.id}
+                        className="ml-2 flex items-center justify-center rounded-xl p-2 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -199,6 +250,21 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Hapus Data Reservasi"
+        message="Apakah Anda yakin ingin menghapus data reservasi ini secara permanen? Data yang sudah dihapus tidak dapat dikembalikan."
+        confirmText={updatingId === deletingId ? "Menghapus..." : "Ya, Hapus Permanen"}
+        cancelText="Batal"
+        onConfirm={handleDelete}
+        onCancel={() => {
+          if (updatingId === deletingId) return;
+          setIsConfirmOpen(false);
+          setDeletingId(null);
+        }}
+        variant="danger"
+      />
     </div>
   );
 }

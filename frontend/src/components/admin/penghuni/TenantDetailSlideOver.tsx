@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { X, Phone, Mail, Briefcase, Calendar, CreditCard, ShieldCheck, Loader2 } from "lucide-react";
+import { X, Phone, Mail, Briefcase, Calendar, CreditCard, ShieldCheck, Loader2, MoreVertical, Edit2, CalendarPlus, ArrowRightLeft } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import EditTenantModal from "@/components/admin/penghuni/EditTenantModal";
+import LeaseActionModal from "@/components/admin/penghuni/LeaseActionModal";
 import { TenantItem } from "@/types/admin";
 
 interface TenantDetailSlideOverProps {
@@ -11,6 +13,7 @@ interface TenantDetailSlideOverProps {
   onClose: () => void;
   tenant: TenantItem | null;
   onCheckout?: (leaseId: string) => Promise<void>;
+  onRefresh?: () => void;
 }
 
 export default function TenantDetailSlideOver({
@@ -18,9 +21,13 @@ export default function TenantDetailSlideOver({
   onClose,
   tenant,
   onCheckout,
+  onRefresh,
 }: TenantDetailSlideOverProps) {
   const [checkingOut, setCheckingOut] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isLeaseActionOpen, setIsLeaseActionOpen] = useState(false);
 
   if (!isOpen || !tenant) return null;
 
@@ -74,7 +81,45 @@ export default function TenantDetailSlideOver({
               <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#2A5247] blur-3xl pointer-events-none"></div>
               
               <div className="relative z-10">
-                <div className="flex justify-end">
+                <div className="flex justify-end items-center gap-2 relative">
+                  
+                  {tenant?.status === "Aktif" && (
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                        className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-all backdrop-blur-md"
+                      >
+                        <MoreVertical className="h-5 w-5" />
+                      </button>
+                      
+                      {isMenuOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                          <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white py-1 shadow-lg ring-1 ring-black/5 z-50 text-left overflow-hidden">
+                            <button
+                              onClick={() => { setIsMenuOpen(false); setIsEditOpen(true); }}
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#1F3D35] hover:bg-[#F8F7F4] font-medium"
+                            >
+                              <Edit2 className="h-4 w-4 text-[#C69C6D]" /> Edit Data Profil
+                            </button>
+                            <button
+                              onClick={() => { setIsMenuOpen(false); setIsLeaseActionOpen(true); }}
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#1F3D35] hover:bg-[#F8F7F4] font-medium border-t border-[#E5E3DE]/50"
+                            >
+                              <CalendarPlus className="h-4 w-4 text-[#C69C6D]" /> Perpanjang Sewa
+                            </button>
+                            <button
+                              onClick={() => { setIsMenuOpen(false); setIsLeaseActionOpen(true); }}
+                              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-[#1F3D35] hover:bg-[#F8F7F4] font-medium"
+                            >
+                              <ArrowRightLeft className="h-4 w-4 text-[#C69C6D]" /> Pindah Kamar
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     onClick={onClose}
@@ -208,7 +253,9 @@ export default function TenantDetailSlideOver({
             </div>
           </div>
         </div>
-        <ConfirmModal
+      </div>
+
+      <ConfirmModal
         isOpen={isConfirmOpen}
         title="Konfirmasi Check-out"
         message={`Apakah Anda yakin ingin memproses check-out untuk ${tenant?.name} dari ${tenant?.room}? Kamar akan otomatis diubah statusnya menjadi Kosong.`}
@@ -218,7 +265,24 @@ export default function TenantDetailSlideOver({
         onCancel={() => !checkingOut && setIsConfirmOpen(false)}
         variant="danger"
       />
-    </div>
+
+      <EditTenantModal
+        isOpen={isEditOpen}
+        onClose={() => setIsEditOpen(false)}
+        tenant={tenant}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
+
+      <LeaseActionModal
+        isOpen={isLeaseActionOpen}
+        onClose={() => setIsLeaseActionOpen(false)}
+        tenant={tenant}
+        onSuccess={() => {
+          if (onRefresh) onRefresh();
+        }}
+      />
     </div>
   );
 }

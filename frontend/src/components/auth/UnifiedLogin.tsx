@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Lock, Mail, Loader2, AlertCircle, ShieldCheck, UserCheck, KeyRound } from "lucide-react";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 export default function UnifiedLogin() {
   const router = useRouter();
@@ -49,19 +50,45 @@ export default function UnifiedLogin() {
     }
   };
 
-  const handleFillDemo = (type: "admin" | "tenant") => {
+  const handleGoogleSuccess = async (credentialResponse: any) => {
+    setLoading(true);
     setError(null);
-    if (type === "admin") {
-      setEmail("admin@kostara.id");
-      setPassword("adminpassword123");
-    } else {
-      setEmail("budi.santoso@example.com");
-      setPassword("tenantpassword123");
+    try {
+      const res = await fetch("/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Gagal login dengan Google");
+      }
+
+      if (data.token) {
+        localStorage.setItem("kostara_token", data.token);
+        document.cookie = `kostara_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+      }
+
+      if (data.user?.role === "ADMIN") {
+        router.push("/admin");
+      } else {
+        router.push("/portal/dashboard");
+      }
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan saat masuk dengan Google");
+    } finally {
+      setLoading(false);
     }
   };
 
+
+
   return (
-    <div className="min-h-screen w-full flex bg-white font-sans">
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+      <div className="min-h-screen w-full flex bg-white font-sans">
 
       {/* Sisi Kiri: Branding & Visual Showcase (Desktop) */}
       <div className="hidden lg:flex w-[50%] relative bg-[#1F3D35] flex-col justify-between overflow-hidden p-12 lg:p-16">
@@ -142,28 +169,7 @@ export default function UnifiedLogin() {
             </p>
           </div>
 
-          {/* Quick Demo Fill Buttons (Sangat Membantu untuk Pengujian & Audit) */}
-          <div className="mb-6 rounded-2xl border border-[#E5E3DE] bg-[#F8F7F4] p-3.5 space-y-2">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-[#6B716D]">
-              ⚡ Akses Pengujian Cepat (1-Klik Isi):
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => handleFillDemo("admin")}
-                className="flex-1 rounded-xl bg-white border border-[#E5E3DE] py-2 px-3 text-xs font-bold text-[#1F3D35] hover:bg-[#1F3D35] hover:text-white transition-all shadow-sm"
-              >
-                Isi Akun Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleFillDemo("tenant")}
-                className="flex-1 rounded-xl bg-white border border-[#E5E3DE] py-2 px-3 text-xs font-bold text-[#C69C6D] hover:bg-[#C69C6D] hover:text-white transition-all shadow-sm"
-              >
-                Isi Akun Penghuni
-              </button>
-            </div>
-          </div>
+
 
           {error && (
             <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -171,6 +177,25 @@ export default function UnifiedLogin() {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Opsi Login Google */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => setError("Gagal tersambung ke Google. Silakan coba lagi.")}
+              theme="outline"
+              size="large"
+              shape="pill"
+            />
+          </div>
+          
+          <div className="relative flex py-6 items-center">
+            <div className="flex-grow border-t border-[#E5E3DE]"></div>
+            <span className="flex-shrink-0 mx-4 text-[#99A09C] text-[10px] font-bold uppercase tracking-widest">
+              Atau masuk dengan email
+            </span>
+            <div className="flex-grow border-t border-[#E5E3DE]"></div>
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -252,5 +277,6 @@ export default function UnifiedLogin() {
         </div>
       </div>
     </div>
+    </GoogleOAuthProvider>
   );
 }
