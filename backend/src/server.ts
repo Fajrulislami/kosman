@@ -10,6 +10,7 @@ import { tenantRouter } from "./routes/tenant.routes";
 import { invoiceRouter } from "./routes/invoice.routes";
 import { complaintRouter } from "./routes/complaint.routes";
 import { analyticsRouter } from "./routes/analytics.routes";
+import { inquiryRouter } from "./routes/inquiry.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -41,6 +42,7 @@ app.use("/api", tenantRouter);
 app.use("/api", invoiceRouter);
 app.use("/api", complaintRouter);
 app.use("/api", analyticsRouter);
+app.use("/api", inquiryRouter);
 
 // Global Error Handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
