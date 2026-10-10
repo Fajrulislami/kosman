@@ -4,33 +4,40 @@ import { useState } from "react";
 import { Trash2, Loader2, AlertCircle, Edit } from "lucide-react";
 import { RoomItem } from "@/types/admin";
 import EditRoomModal from "./EditRoomModal";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface RoomTableProps {
   rooms: RoomItem[];
   loading?: boolean;
   onDelete?: (id: string) => Promise<void>;
-  onRefresh?: () => void;
+  onRefresh?: (msg?: string) => void;
+  hasActiveFilters?: boolean;
+  onClearFilters?: () => void;
 }
 
-export default function RoomTable({ rooms, loading = false, onDelete, onRefresh }: RoomTableProps) {
+export default function RoomTable({ rooms, loading = false, onDelete, onRefresh, hasActiveFilters, onClearFilters }: RoomTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingRoom, setEditingRoom] = useState<RoomItem | null>(null);
+  const [roomToDelete, setRoomToDelete] = useState<{ id: string; number: string } | null>(null);
 
-  const handleDelete = async (id: string, roomNumber: string) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus kamar ${roomNumber}?`)) {
-      return;
-    }
-
+  const executeDelete = async () => {
+    if (!roomToDelete) return;
+    
     try {
-      setDeletingId(id);
+      setDeletingId(roomToDelete.id);
       if (onDelete) {
-        await onDelete(id);
+        await onDelete(roomToDelete.id);
       }
     } catch (err) {
       alert(err instanceof Error ? err.message : "Gagal menghapus kamar");
     } finally {
       setDeletingId(null);
+      setRoomToDelete(null);
     }
+  };
+
+  const handleDelete = (id: string, roomNumber: string) => {
+    setRoomToDelete({ id, number: roomNumber });
   };
 
   return (
@@ -75,10 +82,20 @@ export default function RoomTable({ rooms, loading = false, onDelete, onRefresh 
             ) : rooms.length === 0 ? (
               <tr>
                 <td colSpan={7} className="py-12 text-center text-[#6B716D]">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <AlertCircle className="h-8 w-8 text-[#99A09C]" />
-                    <p className="font-medium text-[#202321]">Tidak ada data kamar ditemukan</p>
-                    <p className="text-xs text-[#99A09C]">Coba ubah kata kunci pencarian atau filter status</p>
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <AlertCircle className="h-10 w-10 text-[#99A09C]" />
+                    <div className="space-y-1">
+                      <p className="font-medium text-[#202321]">Tidak ada data kamar ditemukan</p>
+                      <p className="text-xs text-[#99A09C]">Coba ubah kata kunci pencarian atau filter status</p>
+                    </div>
+                    {hasActiveFilters && onClearFilters && (
+                      <button
+                        onClick={onClearFilters}
+                        className="mt-2 rounded-lg bg-[#F8F7F4] px-4 py-2 text-sm font-medium text-[#1F3D35] ring-1 ring-inset ring-[#E5E3DE] hover:bg-[#E5E3DE] transition-colors"
+                      >
+                        Hapus Filter
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -151,10 +168,21 @@ export default function RoomTable({ rooms, loading = false, onDelete, onRefresh 
       <EditRoomModal
         isOpen={!!editingRoom}
         onClose={() => setEditingRoom(null)}
-        onSuccess={() => {
-          if (onRefresh) onRefresh();
+        onSuccess={(msg) => {
+          if (onRefresh) onRefresh(msg);
         }}
         room={editingRoom}
+      />
+
+      <ConfirmModal
+        isOpen={!!roomToDelete}
+        title="Hapus Kamar"
+        message={`Apakah Anda yakin ingin menghapus kamar ${roomToDelete?.number}? Data yang dihapus tidak dapat dikembalikan.`}
+        confirmText="Ya, Hapus Kamar"
+        cancelText="Batal"
+        variant="danger"
+        onConfirm={executeDelete}
+        onCancel={() => setRoomToDelete(null)}
       />
     </div>
   );

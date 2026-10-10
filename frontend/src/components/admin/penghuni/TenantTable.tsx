@@ -147,6 +147,17 @@ export default function TenantTable({ tenants, loading = false, onViewDetail }: 
                     <Users className="h-8 w-8 text-[#99A09C]" />
                     <p className="font-medium text-[#202321]">Tidak ada data penghuni</p>
                     <p className="text-xs text-[#99A09C]">Belum ada penghuni yang terdaftar atau hasil filter kosong</p>
+                    {(searchTerm || statusFilter !== "semua") && (
+                      <button
+                        onClick={() => {
+                          setSearchTerm("");
+                          setStatusFilter("semua");
+                        }}
+                        className="mt-3 inline-flex items-center rounded-xl bg-white px-4 py-2 text-sm font-semibold text-[#1F3D35] shadow-sm ring-1 ring-inset ring-[#E5E3DE] hover:bg-gray-50"
+                      >
+                        Hapus Filter
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

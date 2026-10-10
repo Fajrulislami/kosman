@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { CheckCircle } from "lucide-react";
 import RoomStats from "@/components/admin/kamar/RoomStats";
 import RoomFilters from "@/components/admin/kamar/RoomFilters";
 import RoomTable from "@/components/admin/kamar/RoomTable";
@@ -14,6 +15,12 @@ export default function ManajemenKamarPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const fetchRooms = useCallback(async () => {
     try {
@@ -35,6 +42,7 @@ export default function ManajemenKamarPage() {
   const handleDeleteRoom = async (id: string) => {
     await apiFetch(`/api/admin/rooms/${id}`, { method: "DELETE" });
     await fetchRooms();
+    showToast("Kamar berhasil dihapus");
   };
 
   // Filtered rooms
@@ -88,10 +96,25 @@ export default function ManajemenKamarPage() {
           typeFilter={typeFilter}
           onTypeChange={setTypeFilter}
           roomTypes={roomTypes}
-          onRoomCreated={fetchRooms}
+          onRoomCreated={() => { fetchRooms(); showToast("Kamar berhasil ditambahkan"); }}
         />
-        <RoomTable rooms={filteredRooms} loading={loading} onDelete={handleDeleteRoom} onRefresh={fetchRooms} />
+        <RoomTable 
+          rooms={filteredRooms} 
+          loading={loading} 
+          onDelete={handleDeleteRoom} 
+          onRefresh={(msg?: string) => { fetchRooms(); if (msg) showToast(msg); }} 
+          hasActiveFilters={search !== "" || statusFilter !== "" || typeFilter !== ""}
+          onClearFilters={() => { setSearch(""); setStatusFilter(""); setTypeFilter(""); }}
+        />
       </div>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-xl bg-[#1F3D35] px-4 py-3 text-sm font-medium text-white shadow-lg transition-all animate-in fade-in slide-in-from-bottom-4">
+          <CheckCircle className="h-5 w-5 text-[#C69C6D]" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }

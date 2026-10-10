@@ -6,6 +6,7 @@ import "./globals.css";
 // (Sesuaikan path-nya jika Tuan Puteri menggunakan relative path seperti "../components/...")
 import Navbar from "@/components/layout/Navbar"; 
 import Footer from "@/components/layout/Footer";
+import { Toaster } from "react-hot-toast";
 
 // Mengatur font utama sesuai pedoman desain
 const plusJakartaSans = Plus_Jakarta_Sans({ 
@@ -36,6 +37,8 @@ export default function RootLayout({
         {/* 3. Panggil Footer di sini */}
         <Footer />
         
+        {/* Toast Notifications */}
+        <Toaster position="top-right" />
       </body>
     </html>
   );

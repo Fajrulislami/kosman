@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, User, Phone, Home, Mail, ShieldCheck, Briefcase, Calendar, Loader2, AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
 import { apiFetch } from "@/lib/api";
 import { RoomItem } from "@/types/admin";
 
@@ -103,9 +104,11 @@ export default function AddTenantModal({ isOpen, onClose, onSuccess }: AddTenant
       setEmergencyPhone("");
 
       if (onSuccess) onSuccess();
+      toast.success("Penghuni baru berhasil didaftarkan!");
       onClose();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal mendaftarkan penghuni baru");
+    } catch (err: any) {
+      setError(err.message || "Gagal mendaftarkan penghuni baru");
+      toast.error(err.message || "Gagal mendaftarkan penghuni baru");
     } finally {
       setLoading(false);
     }

@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { X, Loader2, AlertCircle } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { RoomItem } from "@/types/admin";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 
 interface EditRoomModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess?: () => void;
+  onSuccess?: (msg?: string) => void;
   room: RoomItem | null;
 }
 
@@ -30,6 +31,7 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
   const [loading, setLoading] = useState(false);
   const [fetchingTypes, setFetchingTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (room) {
@@ -66,13 +68,12 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
 
   if (!isOpen || !room) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const executeSave = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      await apiFetch(`/api/admin/rooms/${room.id}`, {
+      await apiFetch(`/api/admin/rooms/${room!.id}`, {
         method: "PUT",
         body: JSON.stringify({
           roomNumber,
@@ -83,13 +84,25 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
         }),
       });
 
-      if (onSuccess) onSuccess();
+      if (onSuccess) onSuccess("Data kamar berhasil diperbarui");
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal memperbarui kamar");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Peringatan jika mengubah status kamar terisi
+    if (room.rawStatus === "OCCUPIED" && status !== "OCCUPIED") {
+      setShowConfirm(true);
+      return;
+    }
+
+    await executeSave();
   };
 
   return (
@@ -233,6 +246,20 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
           </div>
         </form>
       </div>
+
+      <ConfirmModal
+        isOpen={showConfirm}
+        title="Ubah Status Kamar Terisi?"
+        message="Kamar ini sedang dihuni. Mengubah status menjadi tidak terisi dapat berdampak pada data kontrak penghuni yang sedang aktif. Apakah Anda yakin ingin melanjutkan?"
+        confirmText="Ya, Ubah Status"
+        cancelText="Batal"
+        variant="warning"
+        onConfirm={() => {
+          setShowConfirm(false);
+          executeSave();
+        }}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   );
 }

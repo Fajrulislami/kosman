@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MessageSquare, Calendar, Phone, CheckCircle2, XCircle, Clock } from "lucide-react";
+import toast from "react-hot-toast";
 import { apiFetch } from "@/lib/api";
 
 export interface InquiryItem {
@@ -35,8 +36,9 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
         body: JSON.stringify({ status }),
       });
       onRefresh();
+      toast.success(`Status berhasil diubah menjadi ${status === "CONTACTED" ? "Sudah Dihubungi" : "Deal"}`);
     } catch (err: any) {
-      alert(err.message || "Gagal memperbarui status");
+      toast.error(err.message || "Gagal memperbarui status");
     } finally {
       setUpdatingId(null);
     }

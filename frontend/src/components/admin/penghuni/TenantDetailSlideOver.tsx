@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { X, Phone, Mail, Briefcase, Calendar, CreditCard, ShieldCheck, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { TenantItem } from "@/types/admin";
 
 interface TenantDetailSlideOverProps {
@@ -18,27 +20,29 @@ export default function TenantDetailSlideOver({
   onCheckout,
 }: TenantDetailSlideOverProps) {
   const [checkingOut, setCheckingOut] = useState(false);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   if (!isOpen || !tenant) return null;
 
   const handleCheckout = async () => {
     if (!tenant.leaseId) {
-      alert("Penghuni tidak memiliki kontrak sewa aktif saat ini.");
+      toast.error("Penghuni tidak memiliki kontrak sewa aktif saat ini.");
       return;
     }
+    setIsConfirmOpen(true);
+  };
 
-    if (!confirm(`Apakah Anda yakin ingin memproses check-out untuk ${tenant.name} dari ${tenant.room}? Kamar akan otomatis diubah statusnya menjadi Kosong.`)) {
-      return;
-    }
-
+  const executeCheckout = async () => {
     try {
       setCheckingOut(true);
       if (onCheckout) {
-        await onCheckout(tenant.leaseId);
+        await onCheckout(tenant.leaseId!);
+        toast.success(`Check-out berhasil. Kamar ${tenant.room} kini Kosong.`);
       }
+      setIsConfirmOpen(false);
       onClose();
-    } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memproses check-out sewa");
+    } catch (err: any) {
+      toast.error(err.message || "Gagal memproses check-out sewa");
     } finally {
       setCheckingOut(false);
     }
@@ -64,41 +68,54 @@ export default function TenantDetailSlideOver({
       <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
         <div className="pointer-events-auto w-screen max-w-md transform transition-all ease-in-out duration-300">
           <div className="flex h-full flex-col overflow-y-scroll bg-white shadow-2xl">
-            {/* Header */}
-            <div className="bg-[#1F3D35] px-6 py-8 relative overflow-hidden text-white">
-              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
+            {/* Header Premium */}
+            <div className="bg-[#1F3D35] px-6 pb-12 pt-8 relative text-white rounded-b-[2rem] z-10 shadow-md">
+              <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-[#C69C6D]/20 blur-3xl pointer-events-none"></div>
+              <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-[#2A5247] blur-3xl pointer-events-none"></div>
               
-              <div className="relative z-10 flex items-start justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-white bg-white/10 text-2xl font-bold">
-                    {tenant.name.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">{tenant.name}</h2>
-                    <p className="text-sm font-medium text-[#C69C6D]">{tenant.room}</p>
-                  </div>
-                </div>
-                <div className="ml-3 flex h-7 items-center">
+              <div className="relative z-10">
+                <div className="flex justify-end">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="rounded-full bg-white/20 p-2 text-white hover:bg-white/30 transition-colors"
+                    className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 transition-all backdrop-blur-md"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
+
+                <div className="flex flex-col items-center text-center mt-2">
+                  <div className="relative">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white/20 bg-gradient-to-br from-[#2A5247] to-[#152923] text-3xl font-black text-white shadow-xl">
+                      {tenant.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div 
+                      className={`absolute bottom-1 right-1 h-6 w-6 rounded-full border-4 border-[#1F3D35] ${
+                        tenant.status === "Aktif" ? "bg-[#1E8E3E]" : "bg-gray-400"
+                      }`}
+                    ></div>
+                  </div>
+                  
+                  <div className="mt-4 space-y-1.5">
+                    <h2 className="text-2xl font-black tracking-tight">{tenant.name}</h2>
+                    <div className="inline-flex items-center rounded-full bg-[#C69C6D]/20 px-3.5 py-1 border border-[#C69C6D]/30 backdrop-blur-sm">
+                      <span className="text-sm font-bold text-[#E5D3B3]">{tenant.room}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Content */}
-            <div className="relative flex-1 px-6 py-6 bg-[#F8F7F4] space-y-6">
-              {/* Status Badge */}
-              <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">
+            {/* Content (Overlapping) */}
+            <div className="relative flex-1 px-6 pb-6 bg-[#F8F7F4] space-y-6">
+              
+              {/* Status Badge - Overlapping the header slightly */}
+              <div className="-mt-6 relative z-20 flex items-center justify-between rounded-2xl bg-white p-4 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#E5E3DE]/50">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-[#99A09C]">Status Sewa</p>
-                  <p className="mt-1 text-sm font-semibold text-[#1F3D35]">{tenant.status}</p>
+                  <p className="mt-1 text-sm font-bold text-[#1F3D35]">{tenant.status}</p>
                 </div>
-                <div className="h-10 w-10 rounded-full bg-[#E6F4EA] flex items-center justify-center">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-full ${tenant.status === "Aktif" ? "bg-[#E6F4EA]" : "bg-gray-100"}`}>
                   <span className={`h-3 w-3 rounded-full ${tenant.status === "Aktif" ? "bg-[#1E8E3E]" : "bg-gray-400"}`}></span>
                 </div>
               </div>
@@ -191,7 +208,17 @@ export default function TenantDetailSlideOver({
             </div>
           </div>
         </div>
-      </div>
+        <ConfirmModal
+        isOpen={isConfirmOpen}
+        title="Konfirmasi Check-out"
+        message={`Apakah Anda yakin ingin memproses check-out untuk ${tenant?.name} dari ${tenant?.room}? Kamar akan otomatis diubah statusnya menjadi Kosong.`}
+        confirmText={checkingOut ? "Memproses..." : "Ya, Check-out"}
+        cancelText="Batal"
+        onConfirm={executeCheckout}
+        onCancel={() => !checkingOut && setIsConfirmOpen(false)}
+        variant="danger"
+      />
+    </div>
     </div>
   );
 }
