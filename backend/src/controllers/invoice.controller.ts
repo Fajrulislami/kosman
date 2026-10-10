@@ -482,3 +482,50 @@ export const getAdminInvoiceById = async (req: Request, res: Response): Promise<
     res.status(500).json({ error: "Gagal mengambil detail tagihan" });
   }
 };
+
+export const payCash = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+    });
+
+    if (!invoice) {
+      res.status(404).json({ error: "Tagihan tidak ditemukan" });
+      return;
+    }
+
+    if (invoice.status === "PAID") {
+      res.status(400).json({ error: "Tagihan sudah berstatus lunas" });
+      return;
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      // Buat record pembayaran tunai
+      const payment = await tx.payment.create({
+        data: {
+          invoiceId: invoice.id,
+          amount: invoice.amount,
+          method: "CASH",
+          status: "VERIFIED",
+          verifiedBy: (req as AuthenticatedRequest).user?.id || "admin",
+          verifiedAt: new Date(),
+        },
+      });
+
+      // Update status tagihan jadi PAID
+      await tx.invoice.update({
+        where: { id: invoice.id },
+        data: { status: "PAID" },
+      });
+
+      return payment;
+    });
+
+    res.json({ success: true, message: "Berhasil menandai tagihan sebagai lunas (Tunai)", data: result });
+  } catch (error) {
+    console.error("Pay cash error:", error);
+    res.status(500).json({ error: "Gagal memproses pembayaran tunai" });
+  }
+};

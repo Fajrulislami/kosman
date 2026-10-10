@@ -10,6 +10,7 @@ import {
   generateMonthlyInvoices,
   updateInvoice,
   deleteInvoice,
+  payCash,
 } from "../controllers/invoice.controller";
 
 export const invoiceRouter = Router();
@@ -21,6 +22,7 @@ invoiceRouter.post("/admin/invoices", requireAdmin, createInvoice);
 invoiceRouter.put("/admin/invoices/:id", requireAdmin, updateInvoice);
 invoiceRouter.delete("/admin/invoices/:id", requireAdmin, deleteInvoice);
 invoiceRouter.post("/admin/invoices/generate-monthly", requireAdmin, generateMonthlyInvoices);
+invoiceRouter.post("/admin/invoices/:id/pay-cash", requireAdmin, payCash);
 invoiceRouter.post("/admin/payments/:id/verify", requireAdmin, verifyPayment);
 
 // Portal Routes

@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Bell, CheckCircle, Loader2, Pencil, Trash2, Printer } from "lucide-react";
+import { Eye, Bell, CheckCircle, Loader2, Pencil, Trash2, Printer, Wallet } from "lucide-react";
 import { BillingItem } from "@/types/admin";
 
 export type TabType = "menunggu" | "nunggak" | "lunas";
@@ -12,6 +12,7 @@ interface BillingTableProps {
   onVerify?: (invoice: BillingItem) => void;
   onEdit?: (invoice: BillingItem) => void;
   onDelete?: (invoice: BillingItem) => void;
+  onPayCash?: (invoice: BillingItem) => void;
 }
 
 export default function BillingTable({
@@ -21,6 +22,7 @@ export default function BillingTable({
   onVerify,
   onEdit,
   onDelete,
+  onPayCash,
 }: BillingTableProps) {
   // Filter invoices according to active tab
   const filtered = invoices.filter((item) => {
@@ -163,6 +165,13 @@ export default function BillingTable({
                         title="Hapus Tagihan"
                       >
                         <Trash2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => onPayCash && onPayCash(item)}
+                        className="p-2 text-[#99A09C] hover:text-[#1E8E3E] hover:bg-[#E6F4EA] rounded-lg transition-colors"
+                        title="Terima Pembayaran Tunai"
+                      >
+                        <Wallet className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleRemindWhatsApp(item)}

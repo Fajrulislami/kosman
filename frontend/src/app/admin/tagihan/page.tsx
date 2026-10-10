@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, Zap, Loader2 } from "lucide-react";
+import { Plus, Zap, Loader2, Search, Download } from "lucide-react";
 import BillingStats from "@/components/admin/tagihan/BillingStats";
 import BillingTable, { TabType } from "@/components/admin/tagihan/BillingTable";
 import CreateBillModal from "@/components/admin/tagihan/CreateBillModal";
@@ -27,7 +27,13 @@ export default function TagihanPage() {
   const [isConfirmGenerateOpen, setIsConfirmGenerateOpen] = useState(false);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isConfirmPayCashOpen, setIsConfirmPayCashOpen] = useState(false);
   const [invoiceToEditOrDelete, setInvoiceToEditOrDelete] = useState<BillingItem | null>(null);
+
+  // Filters & Search
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [alertConfig, setAlertConfig] = useState<{
     isOpen: boolean;
@@ -109,10 +115,48 @@ export default function TagihanPage() {
     }
   };
 
+  const handleOpenPayCash = (invoice: BillingItem) => {
+    setInvoiceToEditOrDelete(invoice);
+    setIsConfirmPayCashOpen(true);
+  };
+
+  const handlePayCash = async () => {
+    if (!invoiceToEditOrDelete) return;
+    setIsConfirmPayCashOpen(false);
+
+    try {
+      const res = await apiFetch<{ success: boolean; message: string }>(`/api/admin/invoices/${invoiceToEditOrDelete.id}/pay-cash`, {
+        method: "POST",
+      });
+      
+      setAlertConfig({
+        isOpen: true,
+        title: "Pembayaran Berhasil",
+        message: res.message,
+        variant: "success",
+      });
+
+      await fetchInvoices();
+    } catch (err: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Gagal",
+        message: err.message || "Gagal memproses pembayaran tunai",
+        variant: "error",
+      });
+    }
+  };
+
   const fetchInvoices = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await apiFetch<{ data: BillingItem[]; stats: any }>("/api/admin/invoices");
+      let url = "/api/admin/invoices";
+      const params = new URLSearchParams();
+      if (selectedMonth) params.append("month", selectedMonth);
+      if (selectedYear) params.append("year", selectedYear);
+      if (params.toString()) url += `?${params.toString()}`;
+      
+      const res = await apiFetch<{ data: BillingItem[]; stats: any }>(url);
       setInvoices(res.data || []);
       setStats(res.stats);
     } catch (err) {
@@ -120,7 +164,7 @@ export default function TagihanPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedMonth, selectedYear]);
 
   useEffect(() => {
     fetchInvoices();
@@ -140,6 +184,48 @@ export default function TagihanPage() {
 
     return { totalRevenue: rev, waitingAmount: wait, unpaidAmount: unp };
   }, [invoices]);
+
+  // Client-side search filtering
+  const searchedInvoices = useMemo(() => {
+    if (!searchQuery) return invoices;
+    const q = searchQuery.toLowerCase();
+    return invoices.filter(
+      (inv) =>
+        inv.tenantName.toLowerCase().includes(q) ||
+        inv.roomNumber.toLowerCase().includes(q) ||
+        inv.invoiceNumber.toLowerCase().includes(q)
+    );
+  }, [invoices, searchQuery]);
+
+  const handleExportCSV = () => {
+    if (searchedInvoices.length === 0) return;
+    
+    const headers = ["No. Invoice", "Nama Penghuni", "Kamar", "Periode", "Nominal", "Status", "Jatuh Tempo"];
+    const rows = searchedInvoices.map(inv => [
+      inv.invoiceNumber,
+      inv.tenantName,
+      inv.roomNumber,
+      inv.period,
+      inv.rawAmount.toString(),
+      inv.rawStatus,
+      inv.dueDate
+    ]);
+    
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+    
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Laporan_Tagihan_${selectedMonth || 'Semua'}_${selectedYear || 'Semua'}.csv`);
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleOpenVerify = (invoice: BillingItem) => {
     setSelectedInvoice(invoice);
@@ -204,6 +290,59 @@ export default function TagihanPage() {
       {/* Main Content Area (Tabs & Table) */}
       <div className="space-y-6">
 
+        {/* Filters & Search */}
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 rounded-[2rem] bg-white p-4 shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-[#E5E3DE]">
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
+              <input
+                type="text"
+                placeholder="Cari nama atau tagihan..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 pl-12 pr-4 text-sm font-bold outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="w-full sm:w-auto appearance-none rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 px-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+            >
+              <option value="">Bulan (Semua)</option>
+              {Array.from({ length: 12 }).map((_, i) => (
+                <option key={i + 1} value={String(i + 1)}>
+                  {new Date(0, i).toLocaleString('id-ID', { month: 'long' })}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="w-full sm:w-auto appearance-none rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 px-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+            >
+              <option value="">Tahun (Semua)</option>
+              {Array.from({ length: 5 }).map((_, i) => {
+                const year = new Date().getFullYear() - i;
+                return (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                );
+              })}
+            </select>
+            <button
+              onClick={handleExportCSV}
+              title="Export CSV"
+              className="group flex items-center justify-center space-x-2 rounded-2xl bg-[#E6F4EA] px-4 py-2.5 font-bold text-[#1E8E3E] transition-all hover:bg-[#D3EADD]"
+            >
+              <Download className="h-5 w-5" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+          </div>
+        </div>
+
         {/* Custom Tab Navigation */}
         <div className="flex space-x-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
           <button
@@ -256,12 +395,13 @@ export default function TagihanPage() {
 
         {/* Dynamic Table based on Active Tab */}
         <BillingTable
-          invoices={invoices}
+          invoices={searchedInvoices}
           activeTab={activeTab}
           loading={loading}
           onVerify={handleOpenVerify}
           onEdit={handleOpenEdit}
           onDelete={handleOpenDelete}
+          onPayCash={handleOpenPayCash}
         />
 
       </div>
@@ -307,6 +447,17 @@ export default function TagihanPage() {
         onConfirm={handleDeleteInvoice}
         onCancel={() => setIsConfirmDeleteOpen(false)}
         variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmPayCashOpen}
+        title="Terima Pembayaran Tunai?"
+        message={`Anda akan menandai tagihan ${invoiceToEditOrDelete?.invoiceNumber} sebesar Rp ${invoiceToEditOrDelete?.amount} milik ${invoiceToEditOrDelete?.tenantName} sebagai LUNAS. Lanjutkan?`}
+        confirmText="Ya, Tandai Lunas"
+        cancelText="Batal"
+        onConfirm={handlePayCash}
+        onCancel={() => setIsConfirmPayCashOpen(false)}
+        variant="success"
       />
 
       <AlertModal

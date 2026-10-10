@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Clock, MapPin, User, Phone, CheckCircle2, Wrench, XCircle, Loader2 } from "lucide-react";
+import { X, Clock, MapPin, User, MessageCircle, CheckCircle2, Wrench, XCircle, Loader2 } from "lucide-react";
 import { ComplaintItem } from "@/types/admin";
 
 interface ComplaintDetailSlideOverProps {
@@ -46,7 +46,7 @@ export default function ComplaintDetailSlideOver({
     if (cleanPhone.startsWith("0")) {
       cleanPhone = "62" + cleanPhone.slice(1);
     }
-    const msg = `Halo ${complaint.tenantName}, terkait laporan "${complaint.title}" di kamar ${complaint.roomNumber}...`;
+    const msg = `Halo ${complaint.tenantName} (Kamar ${complaint.roomNumber}), terkait laporan keluhan Anda dengan nomor tiket *${complaint.ticketNumber}* tentang *${complaint.title}*, kami ingin menginformasikan bahwa...`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
@@ -117,15 +117,17 @@ export default function ComplaintDetailSlideOver({
                     <Clock className="h-4 w-4 text-[#C69C6D]" />
                     <span className="font-medium text-xs text-[#6B716D]">{complaint.createdAt.split("T")[0]}</span>
                   </div>
-                  <button
-                    onClick={handleOpenWA}
-                    className="text-xs font-semibold text-green-600 hover:underline flex items-center gap-1 sm:justify-end"
-                  >
-                    <Phone className="h-3 w-3" />
-                    <span>Hubungi WA</span>
-                  </button>
                 </div>
               </div>
+              
+              {/* WhatsApp Quick Action */}
+              <button
+                onClick={handleOpenWA}
+                className="w-full flex items-center justify-center space-x-2 rounded-2xl bg-[#25D366] py-3 text-sm font-bold text-white shadow-md hover:bg-[#20bd5a] transition-all"
+              >
+                <MessageCircle className="h-5 w-5" />
+                <span>Chat via WhatsApp</span>
+              </button>
 
               {/* Status Badge */}
               <div className="rounded-2xl bg-white p-4 shadow-sm border border-[#E5E3DE] flex items-center justify-between">

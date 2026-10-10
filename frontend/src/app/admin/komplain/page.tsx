@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { Search } from "lucide-react";
 import ComplaintPipeline from "@/components/admin/komplain/ComplaintPipeline";
 import ComplaintList, { ComplaintTab } from "@/components/admin/komplain/ComplaintList";
 import ComplaintDetailSlideOver from "@/components/admin/komplain/ComplaintDetailSlideOver";
@@ -15,6 +16,10 @@ export default function KomplainPage() {
 
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedComplaint, setSelectedComplaint] = useState<ComplaintItem | null>(null);
+
+  // Search & Filter
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("ALL");
 
   const fetchComplaints = useCallback(async () => {
     try {
@@ -54,6 +59,20 @@ export default function KomplainPage() {
   const inProgressCount = complaints.filter((c) => c.status === "IN_PROGRESS").length;
   const resolvedCount = complaints.filter((c) => c.status === "RESOLVED" || c.status === "REJECTED").length;
 
+  const filteredComplaints = useMemo(() => {
+    return complaints.filter((c) => {
+      const matchPriority = priorityFilter === "ALL" || c.priority === priorityFilter;
+      
+      const q = searchQuery.toLowerCase();
+      const matchSearch = !q || 
+        c.tenantName.toLowerCase().includes(q) ||
+        c.ticketNumber.toLowerCase().includes(q) ||
+        c.roomNumber.toLowerCase().includes(q);
+
+      return matchPriority && matchSearch;
+    });
+  }, [complaints, searchQuery, priorityFilter]);
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -70,6 +89,34 @@ export default function KomplainPage() {
       {/* Main Content Area (Tabs & Ticket List) */}
       <div className="space-y-6">
         
+        {/* Filters & Search */}
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 rounded-[2rem] bg-white p-4 shadow-[0_2px_15px_rgb(0,0,0,0.04)] border border-[#E5E3DE]">
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <div className="relative w-full sm:w-80">
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
+              <input
+                type="text"
+                placeholder="Cari nama, tiket, atau kamar..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 pl-12 pr-4 text-sm font-bold outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+              />
+            </div>
+          </div>
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <select
+              value={priorityFilter}
+              onChange={(e) => setPriorityFilter(e.target.value)}
+              className="w-full sm:w-auto appearance-none rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 px-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+            >
+              <option value="ALL">Semua Prioritas</option>
+              <option value="HIGH">Tinggi (High)</option>
+              <option value="MEDIUM">Sedang (Medium)</option>
+              <option value="LOW">Rendah (Low)</option>
+            </select>
+          </div>
+        </div>
+
         {/* Custom Tab Navigation */}
         <div className="flex space-x-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide border-b border-[#E5E3DE]">
           <button
@@ -131,7 +178,7 @@ export default function KomplainPage() {
 
         {/* Dynamic Ticket List based on Active Tab */}
         <ComplaintList
-          complaints={complaints}
+          complaints={filteredComplaints}
           activeTab={activeTab}
           loading={loading}
           onOpenDetail={handleOpenDetail}
