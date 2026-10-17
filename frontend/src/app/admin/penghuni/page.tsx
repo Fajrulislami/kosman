@@ -6,9 +6,10 @@ import TenantTable from "@/components/admin/penghuni/TenantTable";
 import AddTenantModal from "@/components/admin/penghuni/AddTenantModal";
 import TenantDetailSlideOver from "@/components/admin/penghuni/TenantDetailSlideOver";
 import InquiryTable, { InquiryItem } from "@/components/admin/penghuni/InquiryTable";
-import { Plus, Users, CalendarCheck } from "lucide-react";
+import { Plus, Users, CalendarCheck, RefreshCw } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { TenantItem } from "@/types/admin";
+import AlertModal from "@/components/ui/AlertModal";
 
 export default function PenghuniPage() {
   const [tenants, setTenants] = useState<TenantItem[]>([]);
@@ -16,15 +17,30 @@ export default function PenghuniPage() {
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number } | undefined>();
   const [totalRooms, setTotalRooms] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<"tenants" | "inquiries">("tenants");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<TenantItem | null>(null);
 
-  const fetchData = useCallback(async () => {
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: "success" | "error" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    variant: "success",
+  });
+
+  const fetchData = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) {
+        setIsRefreshing(true);
+      }
       const [tenantRes, roomRes, inquiryRes] = await Promise.all([
         apiFetch<{ data: TenantItem[]; stats: any }>("/api/admin/tenants"),
         apiFetch<{ stats: { total: number } }>("/api/admin/rooms").catch(() => ({ stats: { total: 10 } })),
@@ -41,12 +57,39 @@ export default function PenghuniPage() {
       console.error("Error fetching tenants & inquiries:", err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
+
+    // Auto-refresh di latar belakang setiap 15 detik agar reservasi baru otomatis muncul
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 15000);
+
+    // Auto-refresh saat admin beralih kembali ke tab ini
+    const handleFocus = () => {
+      fetchData(true);
+    };
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, [fetchData]);
+
+  // Cek parameter ?tab=inquiries di URL (misal saat diklik dari notifikasi lonceng)
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("tab") === "inquiries") {
+        setActiveTab("inquiries");
+      }
+    }
+  }, []);
 
   const handleViewDetail = (tenant: TenantItem) => {
     setSelectedTenant(tenant);
@@ -54,8 +97,24 @@ export default function PenghuniPage() {
   };
 
   const handleCheckout = async (leaseId: string) => {
-    await apiFetch(`/api/admin/leases/${leaseId}/checkout`, { method: "POST" });
-    await fetchData();
+    try {
+      await apiFetch(`/api/admin/leases/${leaseId}/checkout`, { method: "POST" });
+      await fetchData();
+      setAlertConfig({
+        isOpen: true,
+        title: "Checkout Berhasil",
+        message: "Penghuni telah berhasil di-checkout dan kamar kembali tersedia.",
+        variant: "success",
+      });
+      setIsDetailOpen(false);
+    } catch (error: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Checkout Gagal",
+        message: error.message || "Terjadi kesalahan saat memproses checkout.",
+        variant: "error",
+      });
+    }
   };
 
   const newInquiriesCount = inquiries.filter((i) => i.status === "NEW").length;
@@ -71,14 +130,26 @@ export default function PenghuniPage() {
           </p>
         </div>
 
-        {/* Call to Action */}
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="group flex items-center justify-center space-x-2 rounded-xl bg-[#1F3D35] px-6 py-3 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#152923] hover:shadow-xl cursor-pointer"
-        >
-          <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
-          <span>Tambah Penghuni</span>
-        </button>
+        {/* Call to Action Buttons */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => fetchData(false)}
+            disabled={isRefreshing}
+            title="Segarkan Data"
+            className="flex items-center gap-2 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 text-sm font-semibold text-[#1F3D35] shadow-sm transition-all hover:bg-[#F8F7F4] active:scale-95 cursor-pointer disabled:opacity-60"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-[#C69C6D]" : ""}`} />
+            <span>{isRefreshing ? "Memperbarui..." : "Segarkan"}</span>
+          </button>
+
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="group flex items-center justify-center space-x-2 rounded-xl bg-[#1F3D35] px-6 py-3 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#152923] hover:shadow-xl cursor-pointer"
+          >
+            <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+            <span>Tambah Penghuni</span>
+          </button>
+        </div>
       </div>
 
       {/* Stats Bento Grid */}
@@ -136,6 +207,14 @@ export default function PenghuniPage() {
         tenant={selectedTenant}
         onCheckout={handleCheckout}
         onRefresh={fetchData}
+      />
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
       />
     </div>
   );

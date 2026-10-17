@@ -1,7 +1,8 @@
 "use client";
 
-import { Bell, Search, Menu } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import Image from "next/image";
+import NotificationDropdown from "./NotificationDropdown";
 
 export default function AdminHeader() {
   return (
@@ -35,17 +36,8 @@ export default function AdminHeader() {
         </form>
 
         <div className="flex items-center gap-x-4 lg:gap-x-6">
-          {/* Notification Button */}
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-[#99A09C] transition-colors hover:text-[#1F3D35]"
-          >
-            <span className="sr-only">View notifications</span>
-            <div className="relative">
-              <Bell className="h-6 w-6" aria-hidden="true" />
-              <span className="absolute right-0 top-0 block h-2 w-2 rounded-full bg-[#E54D2E] ring-2 ring-white" />
-            </div>
-          </button>
+          {/* Notification Dropdown Component */}
+          <NotificationDropdown />
 
           {/* Separator */}
           <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-[#E5E3DE]" aria-hidden="true" />

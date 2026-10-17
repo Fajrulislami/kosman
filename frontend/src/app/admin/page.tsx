@@ -14,9 +14,9 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchOverview = async () => {
+    const fetchOverview = async (silent = false) => {
       try {
-        setLoading(true);
+        if (!silent) setLoading(true);
         const res = await apiFetch<DashboardOverview>("/api/admin/analytics/overview");
         setData(res);
       } catch (err) {
@@ -27,7 +27,30 @@ export default function AdminDashboardPage() {
     };
 
     fetchOverview();
+
+    const interval = setInterval(() => {
+      fetchOverview(true);
+    }, 20000);
+
+    const handleFocus = () => {
+      fetchOverview(true);
+    };
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] w-full flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-10 w-10 animate-spin text-[#C69C6D]" />
+        <p className="text-sm font-bold text-[#99A09C]">Memuat ringkasan data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -2,7 +2,12 @@
 
 import { ShieldAlert, Info } from "lucide-react";
 
-export default function RuleSettings() {
+interface RuleSettingsProps {
+  data: { text: string };
+  onChange: (text: string) => void;
+}
+
+export default function RuleSettings({ data, onChange }: RuleSettingsProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -27,12 +32,9 @@ export default function RuleSettings() {
             <ShieldAlert className="absolute left-4 top-4 h-5 w-5 text-[#99A09C]" />
             <textarea 
               rows={12}
-              defaultValue={`- Jam malam dibatasi hingga pukul 23:00 WIB. Gerbang utama akan dikunci setelah jam tersebut.
-- Tamu lawan jenis tidak diperkenankan masuk ke dalam kamar. Ruang tamu disediakan di lantai 1.
-- Dilarang membawa dan memelihara hewan peliharaan jenis apapun (kucing, anjing, burung, reptil).
-- Menjaga ketenangan pada jam istirahat (22:00 - 06:00 WIB).
-- Dilarang membawa atau mengonsumsi minuman keras dan obat-obatan terlarang di area kos.
-- Menjaga kebersihan area dapur bersama setelah selesai digunakan.`}
+              value={data.text || ""}
+              onChange={(e) => onChange(e.target.value)}
+              placeholder="- Dilarang membawa peliharaan..."
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white resize-none leading-relaxed"
             ></textarea>
           </div>

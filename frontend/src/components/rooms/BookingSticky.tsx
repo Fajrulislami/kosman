@@ -34,7 +34,7 @@ export default function BookingSticky({ room }: BookingStickyProps) {
 
     try {
       setSubmitting(true);
-      const res = await apiFetch("/api/public/inquiries", {
+      await apiFetch("/api/public/inquiries", {
         method: "POST",
         body: JSON.stringify({
           name: formData.name,
@@ -47,10 +47,6 @@ export default function BookingSticky({ room }: BookingStickyProps) {
       });
 
       setSubmitted(true);
-      // Buka WhatsApp otomatis
-      if (res && res.whatsappUrl) {
-        window.open(res.whatsappUrl, "_blank");
-      }
     } catch (err: any) {
       alert(err.message || "Gagal mengirim data pemesanan, silakan coba lagi.");
     } finally {
@@ -169,14 +165,18 @@ export default function BookingSticky({ room }: BookingStickyProps) {
                 <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
                   <CheckCircle2 className="h-10 w-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-[#1F3D35]">Permintaan Diterima!</h3>
+                <h3 className="text-2xl font-bold text-[#1F3D35]">Permintaan Berhasil Terkirim!</h3>
                 <p className="mt-2 text-sm text-[#6B716D]">
-                  Data Anda telah kami simpan. Halaman WhatsApp pengelola kos telah dibuka untuk melanjutkan konfirmasi langsung.
+                  Data reservasi Anda telah berhasil disimpan di sistem. Pengelola Kostara akan segera menghubungi kontak Anda untuk konfirmasi jadwal dan ketersediaan kamar.
                 </p>
                 <div className="mt-6 flex flex-col gap-2">
                   <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="w-full rounded-2xl bg-[#1F3D35] py-3 text-sm font-semibold text-white hover:bg-[#162E28]"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setSubmitted(false);
+                      setFormData({ name: "", phone: "", checkInDate: "", notes: "" });
+                    }}
+                    className="w-full rounded-2xl bg-[#1F3D35] py-3 text-sm font-semibold text-white hover:bg-[#162E28] cursor-pointer"
                   >
                     Tutup
                   </button>
@@ -190,7 +190,7 @@ export default function BookingSticky({ room }: BookingStickyProps) {
                   </span>
                   <h3 className="text-2xl font-bold text-[#1F3D35]">{room.name}</h3>
                   <p className="text-xs text-[#6B716D]">
-                    Isi formulir singkat di bawah untuk terhubung langsung dengan pengelola kos.
+                    Isi formulir singkat di bawah untuk mengirimkan permintaan reservasi ke pengelola kos.
                   </p>
                 </div>
 
@@ -274,7 +274,7 @@ export default function BookingSticky({ room }: BookingStickyProps) {
                       ) : (
                         <>
                           <Send className="h-4 w-4 text-[#C69C6D]" />
-                          <span>Kirim Permintaan & Buka WhatsApp</span>
+                          <span>Kirim Permintaan Booking</span>
                         </>
                       )}
                     </button>

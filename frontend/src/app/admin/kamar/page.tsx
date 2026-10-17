@@ -7,6 +7,7 @@ import RoomFilters from "@/components/admin/kamar/RoomFilters";
 import RoomTable from "@/components/admin/kamar/RoomTable";
 import { apiFetch } from "@/lib/api";
 import { RoomItem, RoomStatsData } from "@/types/admin";
+import AlertModal from "@/components/ui/AlertModal";
 
 export default function ManajemenKamarPage() {
   const [rooms, setRooms] = useState<RoomItem[]>([]);
@@ -16,6 +17,18 @@ export default function ManajemenKamarPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const [alertConfig, setAlertConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    variant: "success" | "error" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    variant: "success",
+  });
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -40,9 +53,18 @@ export default function ManajemenKamarPage() {
   }, [fetchRooms]);
 
   const handleDeleteRoom = async (id: string) => {
-    await apiFetch(`/api/admin/rooms/${id}`, { method: "DELETE" });
-    await fetchRooms();
-    showToast("Kamar berhasil dihapus");
+    try {
+      await apiFetch(`/api/admin/rooms/${id}`, { method: "DELETE" });
+      await fetchRooms();
+      showToast("Kamar berhasil dihapus");
+    } catch (error: any) {
+      setAlertConfig({
+        isOpen: true,
+        title: "Gagal Menghapus",
+        message: error.message || "Terjadi kesalahan saat menghapus kamar.",
+        variant: "error",
+      });
+    }
   };
 
   // Filtered rooms
@@ -115,6 +137,14 @@ export default function ManajemenKamarPage() {
           <span>{toastMessage}</span>
         </div>
       )}
+
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        variant={alertConfig.variant}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+      />
     </div>
   );
 }

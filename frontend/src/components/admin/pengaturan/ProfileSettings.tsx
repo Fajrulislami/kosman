@@ -2,7 +2,17 @@
 
 import { Building2, MapPin, Phone, AlignLeft } from "lucide-react";
 
-export default function ProfileSettings() {
+interface ProfileSettingsProps {
+  data: {
+    name: string;
+    phone: string;
+    address: string;
+    description: string;
+  };
+  onChange: (field: string, value: string) => void;
+}
+
+export default function ProfileSettings({ data, onChange }: ProfileSettingsProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -21,7 +31,9 @@ export default function ProfileSettings() {
             <Building2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
             <input 
               type="text" 
-              defaultValue="Pondok Rahmat Eksklusif"
+              value={data.name || ""}
+              onChange={(e) => onChange("name", e.target.value)}
+              placeholder="Contoh: Pondok Rahmat Eksklusif"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>
@@ -34,7 +46,9 @@ export default function ProfileSettings() {
             <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
             <input 
               type="tel" 
-              defaultValue="081234567890"
+              value={data.phone || ""}
+              onChange={(e) => onChange("phone", e.target.value)}
+              placeholder="Contoh: 081234567890"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>
@@ -47,7 +61,9 @@ export default function ProfileSettings() {
             <MapPin className="absolute left-4 top-4 h-5 w-5 text-[#99A09C]" />
             <textarea 
               rows={2}
-              defaultValue="Jl. Sudirman No. 123, Jakarta Selatan, 12190"
+              value={data.address || ""}
+              onChange={(e) => onChange("address", e.target.value)}
+              placeholder="Contoh: Jl. Sudirman No. 123..."
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white resize-none"
             ></textarea>
           </div>
@@ -60,7 +76,9 @@ export default function ProfileSettings() {
             <AlignLeft className="absolute left-4 top-4 h-5 w-5 text-[#99A09C]" />
             <textarea 
               rows={3}
-              defaultValue="Kost eksklusif modern dengan fasilitas lengkap dan keamanan 24 jam untuk kenyamanan istirahat Anda."
+              value={data.description || ""}
+              onChange={(e) => onChange("description", e.target.value)}
+              placeholder="Slogan atau deskripsi singkat..."
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white resize-none"
             ></textarea>
           </div>

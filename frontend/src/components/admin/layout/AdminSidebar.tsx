@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
@@ -8,7 +9,7 @@ import {
   Users, 
   Receipt, 
   MessageSquareWarning, 
-  Settings,
+  Settings, 
   LogOut
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -25,6 +26,49 @@ const menuItems = [
 export default function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+
+  const [counts, setCounts] = useState<{
+    inquiries: number;
+    pendingPayments: number;
+    pendingComplaints: number;
+    overdueInvoices: number;
+  }>({
+    inquiries: 0,
+    pendingPayments: 0,
+    pendingComplaints: 0,
+    overdueInvoices: 0,
+  });
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const res = await apiFetch<{
+          success: boolean;
+          counts: {
+            inquiries: number;
+            pendingPayments: number;
+            pendingComplaints: number;
+            overdueInvoices: number;
+          };
+        }>("/api/admin/notifications");
+        if (res && res.counts) {
+          setCounts(res.counts);
+        }
+      } catch {
+        // silent fail on network error
+      }
+    };
+
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 20000);
+    const handleFocus = () => fetchCounts();
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -57,22 +101,46 @@ export default function AdminSidebar() {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
+          // Hitung badge untuk menu tertentu
+          let badgeCount = 0;
+          if (item.href === "/admin/penghuni") {
+            badgeCount = counts.inquiries;
+          } else if (item.href === "/admin/tagihan") {
+            badgeCount = counts.pendingPayments + counts.overdueInvoices;
+          } else if (item.href === "/admin/komplain") {
+            badgeCount = counts.pendingComplaints;
+          }
+
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`group flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
+              className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
                 isActive
                   ? "bg-[#1F3D35] text-white shadow-md"
                   : "text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
               }`}
             >
-              <Icon
-                className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
-                  isActive ? "text-white" : "text-[#99A09C] group-hover:text-[#1F3D35]"
-                }`}
-              />
-              {item.name}
+              <div className="flex items-center">
+                <Icon
+                  className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
+                    isActive ? "text-white" : "text-[#99A09C] group-hover:text-[#1F3D35]"
+                  }`}
+                />
+                <span>{item.name}</span>
+              </div>
+
+              {badgeCount > 0 && (
+                <span
+                  className={`flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-extrabold shadow-sm ${
+                    isActive
+                      ? "bg-white text-[#1F3D35]"
+                      : "bg-[#E54D2E] text-white animate-pulse"
+                  }`}
+                >
+                  {badgeCount > 99 ? "99+" : badgeCount}
+                </span>
+              )}
             </Link>
           );
         })}
