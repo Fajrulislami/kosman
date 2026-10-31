@@ -144,8 +144,11 @@ export default function NotificationDropdown() {
 
         prevCountRef.current = res.totalUnread;
       }
-    } catch (err) {
-      console.error("Gagal mengambil notifikasi admin:", err);
+    } catch (err: any) {
+      // Abaikan error saat polling background hening atau koneksi terputus sesaat
+      if (!isSilent && err?.status !== 401 && err?.code !== "NETWORK_ERROR") {
+        console.warn("Gagal mengambil notifikasi admin:", err?.message || err);
+      }
     } finally {
       setLoading(false);
     }

@@ -40,11 +40,22 @@ export async function apiFetch<T = any>(
 
   // Token sesi kini dilindungi penuh oleh browser via httpOnly Cookie (credentials: "include"),
   // sehingga terbebas dari celah pencurian token skrip XSS di localStorage.
-  const response = await fetch(endpoint, {
-    ...options,
-    headers,
-    credentials: "include",
-  });
+  let response: Response;
+  try {
+    response = await fetch(endpoint, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+  } catch (netErr: any) {
+    // Tangani jika terjadi kegagalan koneksi/server offline (Failed to fetch)
+    throw new ApiError(
+      "Gagal terhubung ke server. Pastikan backend sedang berjalan.",
+      0,
+      undefined,
+      "NETWORK_ERROR"
+    );
+  }
 
   const data = await response.json().catch(() => ({}));
 
