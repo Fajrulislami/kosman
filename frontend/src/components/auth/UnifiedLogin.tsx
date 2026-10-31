@@ -1,17 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Lock, Mail, Loader2, AlertCircle, ShieldCheck, UserCheck, KeyRound } from "lucide-react";
+import { ArrowRight, Lock, Mail, Loader2, AlertCircle, ShieldCheck, UserCheck, KeyRound, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 export default function UnifiedLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("notice") === "password_updated") {
+        setNotice("Kata sandi berhasil diperbarui. Silakan masuk kembali dengan kata sandi baru Anda.");
+        return; // Jangan auto-redirect jika pengguna baru saja ganti password dan harus login ulang
+      }
+
+      // Bersihkan residu token lama di localStorage jika pengguna pernah login di versi sebelumnya
+      localStorage.removeItem("kostara_admin_token");
+      localStorage.removeItem("kostara_tenant_token");
+      localStorage.removeItem("kostara_token");
+    }
+  }, [router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,21 +48,28 @@ export default function UnifiedLogin() {
         throw new Error(data.error || "Email atau password yang Anda masukkan tidak sesuai");
       }
 
-      if (data.token) {
-        localStorage.setItem("kostara_token", data.token);
-        document.cookie = `kostara_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+      // Bersihkan token dari localStorage agar murni menggunakan proteksi httpOnly Cookie
+      localStorage.removeItem("kostara_admin_token");
+      localStorage.removeItem("kostara_tenant_token");
+      localStorage.removeItem("kostara_token");
+
+      // Periksa apakah ada parameter redirect di URL
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectParam = searchParams.get("redirect");
+
+      let targetUrl = "/portal/dashboard";
+      if (redirectParam && (
+        (data.user?.role === "ADMIN" && redirectParam.startsWith("/admin")) ||
+        (data.user?.role === "TENANT" && redirectParam.startsWith("/portal"))
+      )) {
+        targetUrl = redirectParam;
+      } else if (data.user?.role === "ADMIN") {
+        targetUrl = "/admin";
       }
 
-      // Otomatis arahkan sesuai hak akses (Role-Based Routing)
-      if (data.user?.role === "ADMIN") {
-        router.push("/admin");
-      } else {
-        router.push("/portal/dashboard");
-      }
-      router.refresh();
+      window.location.href = targetUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat masuk");
-    } finally {
       setLoading(false);
     }
   };
@@ -66,20 +90,27 @@ export default function UnifiedLogin() {
         throw new Error(data.error || "Gagal login dengan Google");
       }
 
-      if (data.token) {
-        localStorage.setItem("kostara_token", data.token);
-        document.cookie = `kostara_session=${data.token}; path=/; max-age=604800; SameSite=Lax`;
+      // Bersihkan token dari localStorage agar murni menggunakan proteksi httpOnly Cookie
+      localStorage.removeItem("kostara_admin_token");
+      localStorage.removeItem("kostara_tenant_token");
+      localStorage.removeItem("kostara_token");
+
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectParam = searchParams.get("redirect");
+
+      let targetUrl = "/portal/dashboard";
+      if (redirectParam && (
+        (data.user?.role === "ADMIN" && redirectParam.startsWith("/admin")) ||
+        (data.user?.role === "TENANT" && redirectParam.startsWith("/portal"))
+      )) {
+        targetUrl = redirectParam;
+      } else if (data.user?.role === "ADMIN") {
+        targetUrl = "/admin";
       }
 
-      if (data.user?.role === "ADMIN") {
-        router.push("/admin");
-      } else {
-        router.push("/portal/dashboard");
-      }
-      router.refresh();
+      window.location.href = targetUrl;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan saat masuk dengan Google");
-    } finally {
       setLoading(false);
     }
   };
@@ -171,6 +202,13 @@ export default function UnifiedLogin() {
 
 
 
+          {notice && (
+            <div className="mb-6 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 animate-in fade-in slide-in-from-top-2 duration-300">
+              <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
+              <span>{notice}</span>
+            </div>
+          )}
+
           {error && (
             <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               <AlertCircle className="h-5 w-5 shrink-0" />
@@ -178,24 +216,28 @@ export default function UnifiedLogin() {
             </div>
           )}
 
-          {/* Opsi Login Google */}
-          <div className="flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => setError("Gagal tersambung ke Google. Silakan coba lagi.")}
-              theme="outline"
-              size="large"
-              shape="pill"
-            />
-          </div>
-          
-          <div className="relative flex py-6 items-center">
-            <div className="flex-grow border-t border-[#E5E3DE]"></div>
-            <span className="flex-shrink-0 mx-4 text-[#99A09C] text-[10px] font-bold uppercase tracking-widest">
-              Atau masuk dengan email
-            </span>
-            <div className="flex-grow border-t border-[#E5E3DE]"></div>
-          </div>
+          {/* Opsi Login Google (Ditampilkan jika Google Client ID terkonfigurasi) */}
+          {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ? (
+            <>
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError("Gagal tersambung ke Google. Silakan coba lagi.")}
+                  theme="outline"
+                  size="large"
+                  shape="pill"
+                />
+              </div>
+              
+              <div className="relative flex py-6 items-center">
+                <div className="flex-grow border-t border-[#E5E3DE]"></div>
+                <span className="flex-shrink-0 mx-4 text-[#99A09C] text-[10px] font-bold uppercase tracking-widest">
+                  Atau masuk dengan email
+                </span>
+                <div className="flex-grow border-t border-[#E5E3DE]"></div>
+              </div>
+            </>
+          ) : null}
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -231,13 +273,28 @@ export default function UnifiedLogin() {
                   <Lock className="w-5 h-5" />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-[#F8F7F4] border border-[#E5E3DE] rounded-2xl pl-12 pr-4 py-3.5 text-[#202321] text-sm font-medium focus:outline-none focus:border-[#1F3D35] focus:bg-white transition-all tracking-wider placeholder:tracking-normal placeholder:text-[#99A09C]"
+                  className={`w-full bg-[#F8F7F4] border border-[#E5E3DE] rounded-2xl pl-12 pr-12 py-3.5 text-[#202321] text-sm font-medium focus:outline-none focus:border-[#1F3D35] focus:bg-white transition-all placeholder:text-[#99A09C] placeholder:tracking-normal ${
+                    showPassword ? "tracking-normal" : "tracking-wider"
+                  }`}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#99A09C] hover:text-[#1F3D35] transition-colors focus:outline-none p-1 rounded-lg"
+                  aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
+                  title={showPassword ? "Sembunyikan password" : "Lihat password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
               </div>
             </div>
 

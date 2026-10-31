@@ -39,7 +39,10 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
 };
 
 
+import { useProperty } from "@/context/PropertyContext";
+
 export default function CTA() {
+  const { profile, waUrl } = useProperty();
   return (
     <section className="relative flex min-h-[80vh] items-center justify-center overflow-hidden bg-[#F8F7F4] py-32 md:py-48">
       
@@ -125,7 +128,7 @@ export default function CTA() {
         <Reveal delay={100}>
           {/* Teks Sub-heading pendukung */}
           <p className="mx-auto mb-12 max-w-[500px] text-[16px] leading-relaxed text-[#6B716D] md:text-[18px]">
-            Jangan biarkan hari-hari sibuk Anda dihabiskan di tempat yang salah. Berikan diri Anda hunian premium, aman, dan tenang di Pondok Rahmat hari ini juga.
+            Jangan biarkan hari-hari sibuk Anda dihabiskan di tempat yang salah. Berikan diri Anda hunian premium, aman, dan tenang di {profile.name || "Pondok Rahmat"} hari ini juga.
           </p>
 
           {/* 
@@ -135,7 +138,7 @@ export default function CTA() {
           */}
           <div className="flex justify-center">
             <Link 
-              href="https://wa.me/6281234567890" // Ganti dengan nomor WhatsApp admin yang asli
+              href={waUrl("Halo admin, saya ingin pesan kamar kos.")}
               target="_blank"
               className="inline-flex items-center justify-center rounded-full bg-[#1F3D35] px-8 py-4 text-[16px] font-bold text-white shadow-xl transition-colors duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] md:px-10 md:py-5 md:text-[18px]"
             >

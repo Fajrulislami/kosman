@@ -11,6 +11,7 @@ import {
   updateInvoice,
   deleteInvoice,
   payCash,
+  getPortalInvoiceById,
 } from "../controllers/invoice.controller";
 
 export const invoiceRouter = Router();
@@ -27,4 +28,5 @@ invoiceRouter.post("/admin/payments/:id/verify", requireAdmin, verifyPayment);
 
 // Portal Routes
 invoiceRouter.get("/portal/invoices", requireTenant, getPortalInvoices);
+invoiceRouter.get("/portal/invoices/:id", requireTenant, getPortalInvoiceById);
 invoiceRouter.post("/portal/invoices/:id/pay", requireTenant, payInvoice);

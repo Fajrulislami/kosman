@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, MapPin, Phone, AlignLeft } from "lucide-react";
+import { Building2, MapPin, Phone, AlignLeft, Navigation, ExternalLink } from "lucide-react";
 
 interface ProfileSettingsProps {
   data: {
@@ -8,6 +8,7 @@ interface ProfileSettingsProps {
     phone: string;
     address: string;
     description: string;
+    mapsUrl?: string;
   };
   onChange: (field: string, value: string) => void;
 }
@@ -18,7 +19,7 @@ export default function ProfileSettings({ data, onChange }: ProfileSettingsProps
       <div>
         <h2 className="text-xl font-black text-[#1F3D35]">Profil Properti</h2>
         <p className="mt-1 text-sm font-medium text-[#6B716D]">
-          Informasi ini akan ditampilkan di halaman depan (Landing Page) untuk dilihat oleh calon penghuni.
+          Informasi ini akan ditampilkan di halaman depan (Landing Page) dan kwitansi untuk dilihat oleh calon penghuni.
         </p>
       </div>
 
@@ -33,7 +34,7 @@ export default function ProfileSettings({ data, onChange }: ProfileSettingsProps
               type="text" 
               value={data.name || ""}
               onChange={(e) => onChange("name", e.target.value)}
-              placeholder="Contoh: Pondok Rahmat Eksklusif"
+              placeholder="Contoh: Pondok Rahmat Samata"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>
@@ -41,17 +42,48 @@ export default function ProfileSettings({ data, onChange }: ProfileSettingsProps
 
         {/* Nomor WhatsApp */}
         <div>
-          <label className="mb-2 block text-sm font-bold text-[#1F3D35]">Nomor WhatsApp Resmi</label>
+          <label className="mb-2 block text-sm font-bold text-[#1F3D35]">Nomor WhatsApp Resmi Pengelola</label>
           <div className="relative">
             <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
             <input 
               type="tel" 
               value={data.phone || ""}
               onChange={(e) => onChange("phone", e.target.value)}
-              placeholder="Contoh: 081234567890"
+              placeholder="Contoh: 081234567890 / +62 812-3456-7890"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             />
           </div>
+        </div>
+
+        {/* Tautan Google Maps */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-bold text-[#1F3D35]">Tautan Google Maps Lokasi</label>
+            {data.mapsUrl && (
+              <a
+                href={data.mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-bold text-[#C69C6D] hover:underline"
+              >
+                <span>Uji Buka Peta</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+          <div className="relative">
+            <Navigation className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#99A09C]" />
+            <input 
+              type="url" 
+              value={data.mapsUrl || ""}
+              onChange={(e) => onChange("mapsUrl", e.target.value)}
+              placeholder="Contoh: https://maps.app.goo.gl/mHwa7ppvN4231RZz5?g_st=aw"
+              className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
+            />
+          </div>
+          <p className="mt-1.5 text-xs text-[#99A09C]">
+            Tautan ini digunakan oleh tombol &ldquo;Buka di Google Maps&rdquo; pada seluruh halaman publik dan halaman rute.
+          </p>
         </div>
 
         {/* Alamat Lengkap */}
@@ -63,7 +95,7 @@ export default function ProfileSettings({ data, onChange }: ProfileSettingsProps
               rows={2}
               value={data.address || ""}
               onChange={(e) => onChange("address", e.target.value)}
-              placeholder="Contoh: Jl. Sudirman No. 123..."
+              placeholder="Contoh: Romangpolong, Kec. Somba Opu, Kabupaten Gowa, Sulawesi Selatan 92113"
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white resize-none"
             ></textarea>
           </div>
@@ -71,14 +103,14 @@ export default function ProfileSettings({ data, onChange }: ProfileSettingsProps
 
         {/* Deskripsi Singkat */}
         <div>
-          <label className="mb-2 block text-sm font-bold text-[#1F3D35]">Deskripsi / Slogan</label>
+          <label className="mb-2 block text-sm font-bold text-[#1F3D35]">Deskripsi / Slogan Properti</label>
           <div className="relative">
             <AlignLeft className="absolute left-4 top-4 h-5 w-5 text-[#99A09C]" />
             <textarea 
               rows={3}
               value={data.description || ""}
               onChange={(e) => onChange("description", e.target.value)}
-              placeholder="Slogan atau deskripsi singkat..."
+              placeholder="Deskripsi hunian kos..."
               className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-3.5 pl-12 pr-4 text-sm font-medium text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white resize-none"
             ></textarea>
           </div>

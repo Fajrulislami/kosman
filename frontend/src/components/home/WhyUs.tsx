@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, Sparkles, Users, BedDouble } from "lucide-react";
+import { useProperty } from "@/context/PropertyContext";
 
 // Komponen Reveal untuk animasi masuk
 const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => {
@@ -34,29 +35,31 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
 };
 
 export default function WhyUs() {
+  const { profile } = useProperty();
+
   const advantages = [
     {
       num: "01",
       title: "Keamanan & Privasi 24 Jam",
-      desc: "Setiap kamar dilengkapi Smart Lock Keyless. Area publik terpantau CCTV 24/7 dengan akses gerbang eksklusif. Ketenangan Anda adalah prioritas absolut kami.",
+      desc: "Setiap kamar dilengkapi Smart Lock Keyless. Area publik terpantau CCTV 24/7 dengan akses gerbang eksklusif untuk ketenangan absolut Anda.",
       icon: ShieldCheck,
     },
     {
       num: "02",
-      title: "Kebersihan Terjadwal",
-      desc: "Fokus pada kesibukan Anda, biarkan kami yang mengurus sisanya. Layanan pembersihan kamar profesional tersedia dua kali seminggu secara gratis.",
+      title: "Housekeeping Terjadwal",
+      desc: "Fokus pada studi dan karier Anda. Layanan pembersihan berkala untuk area komunal dan fasilitas bersama menjaga kebersihan tetap prima.",
       icon: Sparkles,
     },
     {
       num: "03",
-      title: "Komunitas Berkualitas",
-      desc: "Bergabunglah dengan lingkungan yang diisi oleh para profesional dan mahasiswa pilihan. Ruang komunal dirancang khusus untuk memfasilitasi networking yang positif.",
+      title: "Komunitas Sehat & Tertib",
+      desc: "Lingkungan kondusif yang dihuni mahasiswa dan profesional pilihan, didukung tata tertib yang tegas demi kenyamanan istirahat bersama.",
       icon: Users,
     },
     {
       num: "04",
-      title: "Fasilitas Standar Hotel",
-      desc: "Kasur premium, AC dingin, Wi-Fi berkecepatan tinggi, hingga kamar mandi dalam dengan water heater. Standar hidup tinggi tanpa kompromi.",
+      title: "Fasilitas Standar Residensial",
+      desc: "Kasur premium, AC dingin, Wi-Fi berkecepatan tinggi, hingga kamar mandi dalam dengan water heater. Standar hidup tinggi siap huni.",
       icon: BedDouble,
     }
   ];
@@ -73,12 +76,12 @@ export default function WhyUs() {
             <div className="max-w-2xl">
               {/* Badge konsisten dengan lokasi dan kontak */}
               <span className="mb-6 inline-block rounded-full bg-white px-5 py-2 text-[12px] font-bold tracking-[0.2em] text-[#C69C6D] shadow-sm border border-[#E5E3DE]">
-                MENGAPA pondokrahmat
+                MENGAPA {(profile?.name || "PONDOK RAHMAT").toUpperCase()}
               </span>
               <h2 className="text-4xl font-extrabold tracking-tight text-[#1F3D35] md:text-5xl lg:text-[56px] leading-[1.1]">
-                Bukan Sekadar <br />
+                Kenyamanan Nyata, <br />
                 <span className="relative inline-flex items-center">
-                  <span className="relative z-10 text-[#C69C6D]">Tempat Singgah.</span>
+                  <span className="relative z-10 text-[#C69C6D]">Tanpa Kompromi.</span>
                   {/* SVG Underline hybrid dari HeroKontak */}
                   <svg className="absolute -bottom-1 left-0 -z-10 w-full h-[12px] text-[#C69C6D]/30" viewBox="0 0 200 9" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                     <path d="M2.00021 6.84039C52.6106 1.4878 141.258 -1.74567 197.809 6.84039" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
@@ -87,7 +90,7 @@ export default function WhyUs() {
               </h2>
             </div>
             <p className="text-lg text-[#6B716D] max-w-sm leading-relaxed pb-2">
-              Kami meredefinisi standar hunian kos dengan memadukan kenyamanan, privasi, dan layanan premium.
+              Empat pilar utama yang kami hadirkan untuk memastikan masa tinggal Anda selalu aman, tertib, dan bebas rasa khawatir.
             </p>
           </div>
         </Reveal>

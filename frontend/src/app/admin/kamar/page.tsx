@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import RoomStats from "@/components/admin/kamar/RoomStats";
 import RoomFilters from "@/components/admin/kamar/RoomFilters";
@@ -9,7 +10,8 @@ import { apiFetch } from "@/lib/api";
 import { RoomItem, RoomStatsData } from "@/types/admin";
 import AlertModal from "@/components/ui/AlertModal";
 
-export default function ManajemenKamarPage() {
+function ManajemenKamarContent() {
+  const searchParams = useSearchParams();
   const [rooms, setRooms] = useState<RoomItem[]>([]);
   const [stats, setStats] = useState<RoomStatsData | undefined>();
   const [loading, setLoading] = useState(true);
@@ -17,6 +19,21 @@ export default function ManajemenKamarPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Baca query parameter dari URL saat diakses via StatCards (cth: ?status=kosong)
+  useEffect(() => {
+    const statusParam = searchParams?.get("status");
+    if (statusParam) {
+      if (statusParam === "AVAILABLE" || statusParam === "kosong") setStatusFilter("kosong");
+      else if (statusParam === "OCCUPIED" || statusParam === "terisi") setStatusFilter("terisi");
+      else if (statusParam === "MAINTENANCE" || statusParam === "perbaikan") setStatusFilter("perbaikan");
+      else setStatusFilter(statusParam);
+    }
+    const searchParam = searchParams?.get("search");
+    if (searchParam) {
+      setSearch(searchParam);
+    }
+  }, [searchParams]);
 
   const [alertConfig, setAlertConfig] = useState<{
     isOpen: boolean;
@@ -146,5 +163,13 @@ export default function ManajemenKamarPage() {
         onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
       />
     </div>
+  );
+}
+
+export default function ManajemenKamarPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#99A09C]">Memuat filter kamar...</div>}>
+      <ManajemenKamarContent />
+    </Suspense>
   );
 }

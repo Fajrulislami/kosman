@@ -170,6 +170,8 @@ model BookingInquiry {
   id          String    @id @default(cuid())
   name        String
   phone       String
+  email       String?
+  nik         String?
   roomTypeId  String?
   roomType    RoomType? @relation(fields: [roomTypeId], references: [id], onDelete: SetNull)
   checkInDate DateTime?

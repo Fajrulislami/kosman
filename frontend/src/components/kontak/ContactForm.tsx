@@ -29,7 +29,10 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
   );
 };
 
+import { useProperty } from "@/context/PropertyContext";
+
 export default function ContactForm() {
+  const { profile, waUrl } = useProperty();
   const [formData, setFormData] = useState({
     name: "",
     topic: "Ketersediaan Kamar",
@@ -43,10 +46,8 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const waNumber = "6281234567890";
-    const text = `Halo Pondok Rahmat, saya ${formData.name}.\n\nSaya ingin bertanya mengenai *${formData.topic}*.\n\n${formData.message}`;
-    const encodedText = encodeURIComponent(text);
-    window.open(`https://wa.me/${waNumber}?text=${encodedText}`, "_blank");
+    const text = `Halo ${profile.name || "Pondok Rahmat"}, saya ${formData.name}.\n\nSaya ingin bertanya mengenai *${formData.topic}*.\n\n${formData.message}`;
+    window.open(waUrl(text), "_blank");
   };
 
   return (

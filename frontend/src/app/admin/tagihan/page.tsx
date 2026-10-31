@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Plus, Zap, Loader2, Search, Download } from "lucide-react";
 import BillingStats from "@/components/admin/tagihan/BillingStats";
 import BillingTable, { TabType } from "@/components/admin/tagihan/BillingTable";
@@ -12,11 +13,28 @@ import AlertModal from "@/components/ui/AlertModal";
 import { apiFetch } from "@/lib/api";
 import { BillingItem } from "@/types/admin";
 
-export default function TagihanPage() {
+function TagihanContent() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>("menunggu");
   const [invoices, setInvoices] = useState<BillingItem[]>([]);
   const [stats, setStats] = useState<{ total: number; paid: number; pending: number; waitingVerification: number } | undefined>();
   const [loading, setLoading] = useState(true);
+
+  // Baca query parameter dari URL saat diakses via StatCards (cth: ?tab=nunggak atau ?tab=lunas)
+  useEffect(() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam === "nunggak" || tabParam === "lunas" || tabParam === "menunggu") {
+      setActiveTab(tabParam as TabType);
+    }
+    const statusParam = searchParams?.get("status");
+    if (statusParam === "UNPAID") setActiveTab("nunggak");
+    if (statusParam === "PAID") setActiveTab("lunas");
+
+    const searchParam = searchParams?.get("search");
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [searchParams]);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
@@ -457,8 +475,9 @@ export default function TagihanPage() {
         cancelText="Batal"
         onConfirm={handlePayCash}
         onCancel={() => setIsConfirmPayCashOpen(false)}
-        variant="success"
+        variant="primary"
       />
+
 
       <AlertModal
         isOpen={alertConfig.isOpen}
@@ -468,5 +487,13 @@ export default function TagihanPage() {
         onClose={() => setAlertConfig(prev => ({ ...prev, isOpen: false }))}
       />
     </div>
+  );
+}
+
+export default function TagihanPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#99A09C]">Memuat data tagihan...</div>}>
+      <TagihanContent />
+    </Suspense>
   );
 }

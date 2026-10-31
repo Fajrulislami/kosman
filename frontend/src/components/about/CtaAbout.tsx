@@ -37,7 +37,10 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
   );
 };
 
+import { useProperty } from "@/context/PropertyContext";
+
 export default function CtaAbout() {
+  const { profile, waUrl } = useProperty();
   return (
     <section className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden bg-[#F8F7F4] py-32 md:min-h-[80vh] md:py-48">
       
@@ -94,13 +97,13 @@ export default function CtaAbout() {
         <Reveal delay={200}>
           {/* Teks Pendukung */}
           <p className="mx-auto mb-12 max-w-[500px] text-[16px] leading-relaxed text-[#6B716D] md:text-[18px]">
-            Jangan biarkan keseharian Anda terbebani oleh lingkungan yang salah. Jadikan Pondok Rahmat sebagai titik pulang Anda hari ini.
+            Jangan biarkan keseharian Anda terbebani oleh lingkungan yang salah. Jadikan {profile.name || "Pondok Rahmat"} sebagai titik pulang Anda hari ini.
           </p>
 
           {/* Tombol Aksi */}
           <div className="flex justify-center">
             <Link 
-              href="https://wa.me/6281234567890" // Ganti dengan nomor WA admin
+              href={waUrl("Halo admin, saya ingin tahu informasi lebih lanjut mengenai hunian kos.")}
               target="_blank"
               className="inline-flex items-center justify-center rounded-full bg-[#1F3D35] px-8 py-4 text-[16px] font-bold text-white shadow-xl transition-colors duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] md:px-10 md:py-5 md:text-[18px]"
             >

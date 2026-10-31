@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import TenantStats from "@/components/admin/penghuni/TenantStats";
 import TenantTable from "@/components/admin/penghuni/TenantTable";
 import AddTenantModal from "@/components/admin/penghuni/AddTenantModal";
@@ -11,7 +12,8 @@ import { apiFetch } from "@/lib/api";
 import { TenantItem } from "@/types/admin";
 import AlertModal from "@/components/ui/AlertModal";
 
-export default function PenghuniPage() {
+function PenghuniContent() {
+  const searchParams = useSearchParams();
   const [tenants, setTenants] = useState<TenantItem[]>([]);
   const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number } | undefined>();
@@ -21,6 +23,7 @@ export default function PenghuniPage() {
   const [activeTab, setActiveTab] = useState<"tenants" | "inquiries">("tenants");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [selectedInquiryForTenant, setSelectedInquiryForTenant] = useState<InquiryItem | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<TenantItem | null>(null);
 
@@ -54,7 +57,9 @@ export default function PenghuniPage() {
         setTotalRooms(roomRes.stats.total);
       }
     } catch (err) {
-      console.error("Error fetching tenants & inquiries:", err);
+      if (!silent) {
+        console.error("Error fetching tenants & inquiries:", err);
+      }
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -81,15 +86,15 @@ export default function PenghuniPage() {
     };
   }, [fetchData]);
 
-  // Cek parameter ?tab=inquiries di URL (misal saat diklik dari notifikasi lonceng)
+  // Reaktif terhadap parameter ?tab=inquiries di URL (misal saat diklik dari notifikasi lonceng)
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("tab") === "inquiries") {
-        setActiveTab("inquiries");
-      }
+    const tabParam = searchParams?.get("tab");
+    if (tabParam === "inquiries") {
+      setActiveTab("inquiries");
+    } else if (tabParam === "tenants") {
+      setActiveTab("tenants");
     }
-  }, []);
+  }, [searchParams]);
 
   const handleViewDetail = (tenant: TenantItem) => {
     setSelectedTenant(tenant);
@@ -143,7 +148,10 @@ export default function PenghuniPage() {
           </button>
 
           <button
-            onClick={() => setIsAddModalOpen(true)}
+            onClick={() => {
+              setSelectedInquiryForTenant(null);
+              setIsAddModalOpen(true);
+            }}
             className="group flex items-center justify-center space-x-2 rounded-xl bg-[#1F3D35] px-6 py-3 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-[#152923] hover:shadow-xl cursor-pointer"
           >
             <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
@@ -191,13 +199,25 @@ export default function PenghuniPage() {
       {activeTab === "tenants" ? (
         <TenantTable tenants={tenants} loading={loading} onViewDetail={handleViewDetail} />
       ) : (
-        <InquiryTable inquiries={inquiries} loading={loading} onRefresh={fetchData} />
+        <InquiryTable
+          inquiries={inquiries}
+          loading={loading}
+          onRefresh={fetchData}
+          onConvertToTenant={(inquiry) => {
+            setSelectedInquiryForTenant(inquiry);
+            setIsAddModalOpen(true);
+          }}
+        />
       )}
 
       {/* Modals & Slide-overs */}
       <AddTenantModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        initialInquiry={selectedInquiryForTenant}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setSelectedInquiryForTenant(null);
+        }}
         onSuccess={fetchData}
       />
 
@@ -217,5 +237,18 @@ export default function PenghuniPage() {
         onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
       />
     </div>
+  );
+}
+
+export default function PenghuniPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-[60vh] w-full flex-col items-center justify-center space-y-4">
+        <RefreshCw className="h-8 w-8 animate-spin text-[#1F3D35]" />
+        <p className="text-sm font-bold text-[#6B716D]">Memuat data penghuni & reservasi...</p>
+      </div>
+    }>
+      <PenghuniContent />
+    </Suspense>
   );
 }

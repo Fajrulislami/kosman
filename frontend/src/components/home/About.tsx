@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Sparkles, ShieldCheck } from "lucide-react";
+import { Sparkles, Wind } from "lucide-react";
 
 export default function About() {
   return (
@@ -21,16 +21,16 @@ export default function About() {
             </span>
 
             <h2 className="mb-6 text-[32px] font-extrabold leading-[1.2] tracking-tight text-[#1F3D35] md:text-[42px]">
-              Lebih dari sekadar <br className="hidden md:block" />
-              tempat singgah.
+              Ruang Tenang untuk <br className="hidden md:block" />
+              Pribadi Produktif.
             </h2>
 
             <div className="mb-8 flex flex-col gap-4 text-[16px] leading-[1.8] text-[#6B716D]">
               <p>
-                Kami memahami bahwa kos bukan sekadar tempat untuk tidur setelah seharian beraktivitas. Ini adalah ruang privasi Anda, tempat mengembalikan energi, dan rumah kedua yang harus selalu terasa aman.
+                Setelah seharian beraktivitas di kampus atau kantor, Anda berhak mendapatkan ruang istirahat yang sesungguhnya. Kami merancang setiap sudut hunian ini dengan atmosfer tenang dan pencahayaan alami, memberi Anda ketenangan pikiran untuk memulihkan energi dan berkarya.
               </p>
               <p>
-                Oleh karena itu, kami menghadirkan konsep hunian modern yang mengutamakan <strong>kebersihan, keamanan, dan ketenangan</strong>, agar Anda dapat fokus mengejar produktivitas setiap hari.
+                Bukan sekadar kamar kos, kami menghadirkan rumah kedua yang mengutamakan <strong>kebersihan, privasi, dan ketertiban</strong> agar Anda dapat fokus mengejar impian setiap hari.
               </p>
             </div>
 
@@ -56,8 +56,8 @@ export default function About() {
               <div className="absolute -bottom-6 -right-4 flex items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 shadow-sm md:px-6 md:py-4 lg:-right-8">
                 <Sparkles className="h-5 w-5 text-[#C69C6D]" />
                 <div>
-                  <p className="text-[14px] font-bold text-[#1F3D35]">Privasi Terjaga</p>
-                  <p className="text-[13px] text-[#6B716D]">Desain interior tenang</p>
+                  <p className="text-[14px] font-bold text-[#1F3D35]">Atmosfer Tenang</p>
+                  <p className="text-[13px] text-[#6B716D]">Bebas kebisingan luar</p>
                 </div>
               </div>
             </div>
@@ -70,10 +70,10 @@ export default function About() {
               
               {/* Kartu Info 2 */}
               <div className="absolute -left-2 bottom-8 flex items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 shadow-sm md:-left-6 md:bottom-12 md:px-6 md:py-4 lg:-left-12">
-                <ShieldCheck className="h-5 w-5 text-[#C69C6D]" />
+                <Wind className="h-5 w-5 text-[#C69C6D]" />
                 <div>
-                  <p className="text-[14px] font-bold text-[#1F3D35]">Lingkungan Bersih</p>
-                  <p className="text-[13px] text-[#6B716D]">Perawatan harian</p>
+                  <p className="text-[14px] font-bold text-[#1F3D35]">Sirkulasi Sehat</p>
+                  <p className="text-[13px] text-[#6B716D]">Pencahayaan & udara alami</p>
                 </div>
               </div>
             </div>

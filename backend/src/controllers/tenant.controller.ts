@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
+import { AuthenticatedRequest } from "../middlewares/auth";
 import { registerTenantSchema, updateTenantSchema, extendLeaseSchema, moveRoomSchema } from "../validations/tenant.schema";
 
 export const getAdminTenants = async (req: Request, res: Response): Promise<void> => {
@@ -92,6 +93,7 @@ export const registerTenant = async (req: Request, res: Response): Promise<void>
       emergencyPhone,
       emergencyRelation,
       occupation,
+      inquiryId,
     } = parsed.data;
 
     const existingNik = await prisma.tenant.findUnique({ where: { nik } });
@@ -121,7 +123,7 @@ export const registerTenant = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const defaultPassword = password || "kostara123456";
+    const defaultPassword = password || "kos12345";
     const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
     const result = await prisma.$transaction(async (tx) => {
@@ -142,6 +144,8 @@ export const registerTenant = async (req: Request, res: Response): Promise<void>
         },
       });
 
+      const finalDeposit = depositAmount !== undefined ? depositAmount : room.roomType.depositPrice;
+
       const lease = await tx.lease.create({
         data: {
           tenantId: tenant.id,
@@ -149,7 +153,7 @@ export const registerTenant = async (req: Request, res: Response): Promise<void>
           startDate: new Date(startDate),
           endDate: new Date(endDate),
           rentAmount: room.roomType.basePrice,
-          depositAmount: depositAmount || room.roomType.depositPrice,
+          depositAmount: finalDeposit,
           status: "ACTIVE",
         },
       });
@@ -159,19 +163,56 @@ export const registerTenant = async (req: Request, res: Response): Promise<void>
         data: { status: "OCCUPIED" },
       });
 
-      const invoiceNumber = `INV-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}-${room.roomNumber}`;
-      await tx.invoice.create({
+      // Update inquiry status jika berasal dari alur reservasi
+      if (inquiryId) {
+        await tx.bookingInquiry.update({
+          where: { id: inquiryId },
+          data: { status: "CONVERTED" },
+        });
+      }
+
+      // Generate guaranteed unique invoice number
+      const currentYear = new Date().getFullYear();
+      const currentMonth = new Date().getMonth() + 1;
+      const baseInvoiceNumber = `INV-${currentYear}${String(currentMonth).padStart(2, "0")}-${room.roomNumber}`;
+      let invoiceNumber = baseInvoiceNumber;
+      let counter = 1;
+
+      while (await tx.invoice.findUnique({ where: { invoiceNumber } })) {
+        invoiceNumber = `${baseInvoiceNumber}-${String(counter).padStart(2, "0")}`;
+        counter++;
+        if (counter > 100) {
+          invoiceNumber = `${baseInvoiceNumber}-${Date.now().toString().slice(-6)}`;
+          break;
+        }
+      }
+
+      const firstInvoiceAmount = room.roomType.basePrice + finalDeposit;
+
+      const invoice = await tx.invoice.create({
         data: {
           invoiceNumber,
           leaseId: lease.id,
-          amount: room.roomType.basePrice,
+          amount: firstInvoiceAmount,
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-          periodMonth: new Date().getMonth() + 1,
-          periodYear: new Date().getFullYear(),
+          periodMonth: currentMonth,
+          periodYear: currentYear,
         },
       });
 
-      return { tenant, lease };
+
+      return {
+        tenant,
+        lease,
+        roomNumber: room.roomNumber,
+        roomTypeName: room.roomType.name,
+        rentAmount: room.roomType.basePrice,
+        depositAmount: finalDeposit,
+        totalFirstPayment: firstInvoiceAmount,
+        invoiceNumber,
+        email,
+        rawPassword: defaultPassword,
+      };
     });
 
     res.status(201).json({
@@ -327,5 +368,80 @@ export const moveRoom = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error("Move room error:", error);
     res.status(500).json({ error: "Gagal memproses pindah kamar" });
+  }
+};
+
+export const requestLeaseExtension = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.userId;
+    if (!userId) {
+      res.status(401).json({ error: "Sesi tidak ditemukan atau belum login" });
+      return;
+    }
+
+    const tenant = await prisma.tenant.findUnique({
+      where: { userId },
+      include: {
+        leases: {
+          where: { status: "ACTIVE" },
+          include: { 
+            room: {
+              include: { roomType: true }
+            } 
+          },
+          take: 1,
+        },
+      },
+    });
+
+    if (!tenant || tenant.leases.length === 0) {
+      res.status(400).json({ error: "Anda tidak memiliki kontrak sewa kamar aktif saat ini" });
+      return;
+    }
+
+    const activeLease = tenant.leases[0];
+    const { durationMonths, notes } = req.body;
+
+    const months = parseInt(String(durationMonths), 10);
+    if (isNaN(months) || months < 1 || months > 24) {
+      res.status(400).json({ error: "Durasi perpanjangan harus antara 1 sampai 24 bulan" });
+      return;
+    }
+
+    // Hitung tanggal akhir baru
+    const currentEnd = new Date(activeLease.endDate);
+    const proposedEnd = new Date(currentEnd);
+    proposedEnd.setMonth(proposedEnd.getMonth() + months);
+
+    const formattedCurrentEnd = currentEnd.toISOString().split("T")[0];
+    const formattedProposedEnd = proposedEnd.toISOString().split("T")[0];
+
+    // Buat tiket komplain/administrasi agar otomatis masuk ke notifikasi & daftar tugas admin
+    const ticketNumber = `EXT-${Date.now().toString().slice(-6)}`;
+    const complaint = await prisma.complaint.create({
+      data: {
+        ticketNumber,
+        tenantId: tenant.id,
+        roomId: activeLease.roomId,
+        category: "Administrasi & Sewa",
+        title: `Pengajuan Perpanjangan Sewa Kamar ${activeLease.room.roomNumber} (${months} Bulan)`,
+        description: `Pengajuan perpanjangan sewa kamar ${activeLease.room.roomNumber} selama ${months} bulan (dari ${formattedCurrentEnd} s/d ${formattedProposedEnd}). ${notes ? `Catatan penghuni: "${notes}"` : ""}`,
+        priority: "HIGH",
+        status: "PENDING",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Pengajuan perpanjangan sewa berhasil dikirim ke pengelola",
+      data: {
+        ticketNumber: complaint.ticketNumber,
+        proposedEndDate: formattedProposedEnd,
+        durationMonths: months,
+      },
+    });
+  } catch (error) {
+    console.error("Request lease extension error:", error);
+    res.status(500).json({ error: "Gagal mengirim pengajuan perpanjangan sewa" });
   }
 };

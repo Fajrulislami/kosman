@@ -30,10 +30,12 @@ export const createInquiry = async (req: Request, res: Response): Promise<void> 
 
     const checkIn = parsed.data.checkInDate ? new Date(parsed.data.checkInDate) : null;
 
-    const inquiry = await prisma.bookingInquiry.create({
+    const inquiry = await (prisma.bookingInquiry as any).create({
       data: {
         name: parsed.data.name,
         phone: parsed.data.phone,
+        email: parsed.data.email || null,
+        nik: parsed.data.nik || null,
         roomTypeId: roomTypeId || null,
         checkInDate: checkIn,
         notes: parsed.data.notes || null,
@@ -43,9 +45,14 @@ export const createInquiry = async (req: Request, res: Response): Promise<void> 
 
     const adminPhone = "6281234567890";
     const waText = encodeURIComponent(
-      `Halo Pengelola Kostara, saya ${parsed.data.name} (${parsed.data.phone}) ingin menanyakan ketersediaan/reservasi untuk ${roomTypeName}.\n` +
-      (checkIn ? `Rencana masuk: ${checkIn.toLocaleDateString("id-ID")}\n` : "") +
-      (parsed.data.notes ? `Catatan: ${parsed.data.notes}` : "")
+      `Halo Pengelola Kostara, saya *${parsed.data.name}* ingin menanyakan ketersediaan/reservasi untuk *${roomTypeName}*.\n\n` +
+      `📋 *Rincian Data Reservasi Saya:*\n` +
+      `• No. WhatsApp: ${parsed.data.phone}\n` +
+      `• Email (Gmail): ${parsed.data.email || "[Tulis Gmail Anda di sini]"}\n` +
+      `• NIK KTP (16 Digit): ${parsed.data.nik || "[Tulis 16 digit NIK KTP Anda di sini]"}\n` +
+      (checkIn ? `• Rencana Masuk: ${checkIn.toLocaleDateString("id-ID")}\n` : "") +
+      (parsed.data.notes ? `• Catatan: ${parsed.data.notes}\n` : "") +
+      `\nMohon informasi ketersediaan kamar dan panduan berikutnya. Terima kasih!`
     );
     const whatsappUrl = `https://wa.me/${adminPhone}?text=${waText}`;
 

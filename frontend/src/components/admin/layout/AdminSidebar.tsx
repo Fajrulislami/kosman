@@ -10,7 +10,8 @@ import {
   Receipt, 
   MessageSquareWarning, 
   Settings, 
-  LogOut
+  LogOut,
+  X
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 
@@ -23,7 +24,17 @@ const menuItems = [
   { name: "Pengaturan", href: "/admin/pengaturan", icon: Settings },
 ];
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  isMobile?: boolean;
+  onClose?: () => void;
+  brandName?: string;
+}
+
+export default function AdminSidebar({
+  isMobile = false,
+  onClose,
+  brandName = "Kostara",
+}: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -72,24 +83,50 @@ export default function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
+      await apiFetch("/api/auth/logout?role=admin", { method: "POST" });
     } catch {
       // Ignore
     } finally {
+      localStorage.removeItem("kostara_admin_token");
       localStorage.removeItem("kostara_token");
+      document.cookie = "kostara_admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       document.cookie = "kostara_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       router.push("/login");
       router.refresh();
     }
   };
 
+  const handleLinkClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
   return (
-    <aside className="hidden w-64 flex-col border-r border-[#E5E3DE] bg-white lg:flex">
-      {/* Logo Area */}
-      <div className="flex h-16 items-center justify-center border-b border-[#E5E3DE]">
-        <Link href="/admin" className="text-2xl font-black tracking-tighter text-[#1F3D35]">
-          Kostara<span className="text-[#C69C6D]">.</span>
+    <aside
+      className={`flex flex-col border-r border-[#E5E3DE] bg-white ${
+        isMobile ? "h-full w-72 shadow-2xl" : "hidden w-64 lg:flex"
+      }`}
+    >
+      {/* Logo & Brand Header */}
+      <div className="flex h-16 items-center justify-between border-b border-[#E5E3DE] px-6">
+        <Link
+          href="/admin"
+          onClick={handleLinkClick}
+          className="text-2xl font-black tracking-tighter text-[#1F3D35] truncate"
+        >
+          {brandName}<span className="text-[#C69C6D]">.</span>
         </Link>
+        {isMobile && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-2 text-[#99A09C] hover:bg-[#F8F7F4] hover:text-[#1F3D35] cursor-pointer"
+            aria-label="Tutup navigasi"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -115,6 +152,7 @@ export default function AdminSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={handleLinkClick}
               className={`group flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
                 isActive
                   ? "bg-[#1F3D35] text-white shadow-md"
@@ -150,7 +188,7 @@ export default function AdminSidebar() {
       <div className="border-t border-[#E5E3DE] p-4">
         <button
           onClick={handleLogout}
-          className="group flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-[#E54D2E] transition-all hover:bg-[#FCECE9]"
+          className="group flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-[#E54D2E] transition-all hover:bg-[#FCECE9] cursor-pointer"
         >
           <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-[#E54D2E]" />
           Keluar Akun

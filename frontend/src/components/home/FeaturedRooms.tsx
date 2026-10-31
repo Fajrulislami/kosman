@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, Bed, MessageCircle } from "lucide-react";
 import { rooms as initialRooms, type Room } from "@/data/rooms";
 import { apiFetch } from "@/lib/api";
+import { useProperty } from "@/context/PropertyContext";
+import SafeImage from "@/components/ui/SafeImage";
 
 const Reveal = ({ children }: { children: React.ReactNode }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -36,12 +37,15 @@ const Reveal = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function FeaturedRooms() {
+  const { profile, waUrl } = useProperty();
   const [roomList, setRoomList] = useState<Room[]>(initialRooms);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
     const fetchRooms = async () => {
       try {
+        setIsLoading(true);
         const res = await apiFetch("/api/public/rooms");
         if (res && res.data && isMounted) {
           const formatted: Room[] = res.data.map((r: any) => ({
@@ -62,10 +66,13 @@ export default function FeaturedRooms() {
             facilities: Array.isArray(r.facilities) ? r.facilities : [],
             description: r.description || "",
           }));
-          setRoomList(formatted);
+          // Jika backend mengembalikan daftar kamar yang valid, gunakan itu; jika array kosong, simpan state
+          setRoomList(formatted.length > 0 ? formatted : []);
         }
       } catch {
-        // Fallback already set
+        // Fallback sudah diset dari initialRooms
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
 
@@ -123,115 +130,146 @@ export default function FeaturedRooms() {
           </div>
         </Reveal>
 
-        <div className="flex flex-col gap-28 md:gap-36">
-          {roomList.slice(0, 3).map((room, index) => {
-            const isEven = index % 2 === 0;
-            const isAvailable = room.status === "AVAILABLE" || room.isAvailable === true;
+        {/* Empty State jika tidak ada kamar */}
+        {roomList.length === 0 && !isLoading ? (
+          <Reveal>
+            <div className="mx-auto max-w-lg rounded-3xl border border-[#E5E3DE] bg-white p-10 text-center shadow-lg">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#F8F7F4] text-[#C69C6D] shadow-inner">
+                <Bed className="h-8 w-8" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-[#1F3D35]">
+                Informasi Kamar Sedang Diperbarui
+              </h3>
+              <p className="mb-8 text-sm leading-relaxed text-[#6B716D]">
+                Data tipe kamar sedang diselaraskan dengan ketersediaan unit terbaru. Anda tetap dapat menanyakan ketersediaan kamar secara langsung kepada pengelola kami.
+              </p>
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+                <a
+                  href={waUrl("Halo admin, saya ingin menanyakan ketersediaan kamar yang siap huni saat ini.")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1F3D35] px-6 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#162E28] hover:text-[#C69C6D] sm:w-auto"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  <span>Tanya Pengelola via WhatsApp</span>
+                </a>
+              </div>
+            </div>
+          </Reveal>
+        ) : (
+          <div className="flex flex-col gap-28 md:gap-36">
+            {roomList.slice(0, 3).map((room, index) => {
+              const isEven = index % 2 === 0;
+              const isAvailable = room.status === "AVAILABLE" || room.isAvailable === true;
 
-            return (
-              <Reveal key={room.id}>
-                <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
-                  {/* Bagian Konten Teks */}
-                  <div className={`flex flex-col items-start ${isEven ? "order-2 lg:order-1" : "order-2 lg:order-2"}`}>
-                    <div className="mb-3 flex items-center gap-2">
-                      <div className="inline-block rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#1F3D35] to-[#2A5247] px-6 py-2.5 shadow-md">
-                        <span className="text-[17px] font-bold text-white">
-                          {room.name}
+              return (
+                <Reveal key={room.id}>
+                  <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-20">
+                    {/* Bagian Konten Teks */}
+                    <div className={`flex flex-col items-start ${isEven ? "order-2 lg:order-1" : "order-2 lg:order-2"}`}>
+                      <div className="mb-3 flex items-center gap-2">
+                        <div className="inline-block rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#1F3D35] to-[#2A5247] px-6 py-2.5 shadow-md">
+                          <span className="text-[17px] font-bold text-white">
+                            {room.name}
+                          </span>
+                        </div>
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          isAvailable ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
+                        }`}>
+                          {isAvailable ? `Tersedia (${room.availableUnits ?? 1} Unit)` : "Penuh"}
                         </span>
                       </div>
-                      <span className={`rounded-full px-3 py-1 text-xs font-bold ${
-                        isAvailable ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
-                      }`}>
-                        {isAvailable ? `Tersedia (${room.availableUnits ?? 1} Unit)` : "Penuh"}
-                      </span>
-                    </div>
 
-                    {/* Chat Bubble Harga */}
-                    <div className="mb-6 inline-block rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#C69C6D] to-[#D5A97A] px-5 py-2.5 shadow-md">
-                      <span className="text-[15px] font-bold text-white shadow-sm">
-                        Rp {room.price.toLocaleString("id-ID")} / bulan {room.size ? `• Ukuran ${room.size}` : ""}
-                      </span>
-                    </div>
-
-                    <h3 className="mb-2 text-[20px] font-bold text-[#202321]">Fasilitas Utama</h3>
-                    <p className="mb-6 max-w-md text-[15px] leading-relaxed text-[#6B716D]">
-                      {room.description}
-                    </p>
-
-                    {/* Daftar Fasilitas */}
-                    <ul className="flex flex-wrap gap-2.5 text-[14px]">
-                      {room.facilities.slice(0, 4).map((fac, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-center gap-2 rounded-xl border border-[#E5E3DE] bg-white px-3.5 py-2 shadow-sm"
-                        >
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F8F7F4]">
-                            <Check className="h-3 w-3 text-[#1F3D35]" />
-                          </div>
-                          <span className="font-semibold text-[#6B716D] text-xs">{fac}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <div className="mt-8">
-                      <Link
-                        href={`/kamar/${room.slug}`}
-                        className="inline-flex items-center gap-2 rounded-xl bg-[#1F3D35] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#162E28] hover:shadow-lg"
-                      >
-                        <span>Lihat Spesifikasi & Pesan</span>
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                    </div>
-                  </div>
-
-                  {/* Jendela Foto Kamar */}
-                  <div className={`${isEven ? "order-1 lg:order-2" : "order-1 lg:order-1"}`}>
-                    <div className="group/img overflow-hidden rounded-[20px] border border-[#E5E3DE] bg-white shadow-xl transition-transform duration-500 hover:-translate-y-2 hover:shadow-2xl">
-                      <div className="flex items-center gap-2 border-b border-[#E5E3DE] bg-[#F8F7F4] px-4 py-3">
-                        <div className="h-3 w-3 rounded-full bg-[#FF5F56]"></div>
-                        <div className="h-3 w-3 rounded-full bg-[#FFBD2E]"></div>
-                        <div className="h-3 w-3 rounded-full bg-[#27C93F]"></div>
-                        <span className="ml-2 text-xs font-mono text-[#99A09C] truncate">
-                          pondokrahmat.id/kamar/{room.slug}
+                      {/* Chat Bubble Harga */}
+                      <div className="mb-6 inline-block rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#C69C6D] to-[#D5A97A] px-5 py-2.5 shadow-md">
+                        <span className="text-[15px] font-bold text-white shadow-sm">
+                          Rp {room.price.toLocaleString("id-ID")} / bulan {room.size ? `• Ukuran ${room.size}` : ""}
                         </span>
                       </div>
-                      <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E3DE]">
-                        <Image
-                          src={room.images?.[0] || "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"}
-                          alt={room.name}
-                          fill
-                          unoptimized
-                          className="object-cover transition-transform duration-700 ease-out group-hover/img:scale-105"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center bg-[#1F3D35]/0 transition-all duration-500 group-hover/img:bg-[#1F3D35]/40">
-                          <Link
-                            href={`/kamar/${room.slug}`}
-                            className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-[#1F3D35] opacity-0 shadow-lg transition-all duration-500 hover:bg-[#1F3D35] hover:text-white group-hover/img:opacity-100 group-hover/img:translate-y-0 translate-y-4"
+
+                      <h3 className="mb-2 text-[20px] font-bold text-[#202321]">Fasilitas Utama</h3>
+                      <p className="mb-6 max-w-md text-[15px] leading-relaxed text-[#6B716D]">
+                        {room.description}
+                      </p>
+
+                      {/* Daftar Fasilitas */}
+                      <ul className="flex flex-wrap gap-2.5 text-[14px]">
+                        {room.facilities.slice(0, 4).map((fac, idx) => (
+                          <li
+                            key={idx}
+                            className="flex items-center gap-2 rounded-xl border border-[#E5E3DE] bg-white px-3.5 py-2 shadow-sm"
                           >
-                            Lihat Detail Kamar
-                          </Link>
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#F8F7F4]">
+                              <Check className="h-3 w-3 text-[#1F3D35]" />
+                            </div>
+                            <span className="font-semibold text-[#6B716D] text-xs">{fac}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <div className="mt-8">
+                        <Link
+                          href={`/kamar/${room.slug}`}
+                          className="inline-flex items-center gap-2 rounded-xl bg-[#1F3D35] px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-[#162E28] hover:shadow-lg"
+                        >
+                          <span>Lihat Spesifikasi & Pesan</span>
+                          <ArrowRight className="h-4 w-4" />
+                        </Link>
+                      </div>
+                    </div>
+
+                    {/* Jendela Foto Kamar dengan SafeImage Fallback */}
+                    <div className={`${isEven ? "order-1 lg:order-2" : "order-1 lg:order-1"}`}>
+                      <div className="group/img overflow-hidden rounded-[20px] border border-[#E5E3DE] bg-white shadow-xl transition-transform duration-500 hover:-translate-y-2 hover:shadow-2xl">
+                        <div className="flex items-center gap-2 border-b border-[#E5E3DE] bg-[#F8F7F4] px-4 py-3">
+                          <div className="h-3 w-3 rounded-full bg-[#FF5F56]"></div>
+                          <div className="h-3 w-3 rounded-full bg-[#FFBD2E]"></div>
+                          <div className="h-3 w-3 rounded-full bg-[#27C93F]"></div>
+                          <span className="ml-2 text-xs font-mono text-[#99A09C] truncate">
+                            {profile.name?.toLowerCase().replace(/\s+/g, '') || "pondokrahmat"}.id/kamar/{room.slug}
+                          </span>
+                        </div>
+                        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E3DE]">
+                          <SafeImage
+                            src={room.images?.[0] || "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"}
+                            alt={room.name}
+                            fill
+                            unoptimized
+                            fallbackLabel={room.name}
+                            className="object-cover transition-transform duration-700 ease-out group-hover/img:scale-105"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center bg-[#1F3D35]/0 transition-all duration-500 group-hover/img:bg-[#1F3D35]/40">
+                            <Link
+                              href={`/kamar/${room.slug}`}
+                              className="flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[14px] font-semibold text-[#1F3D35] opacity-0 shadow-lg transition-all duration-500 hover:bg-[#1F3D35] hover:text-white group-hover/img:opacity-100 group-hover/img:translate-y-0 translate-y-4"
+                            >
+                              Lihat Detail Kamar
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        )}
 
         {/* Tombol Lihat Semua Kamar */}
-        <Reveal>
-          <div className="mt-20 flex justify-center">
-            <Link
-              href="/kamar"
-              className="inline-flex items-center justify-center rounded-[12px] bg-[#1F3D35] px-[32px] py-[16px] text-[15px] font-semibold text-white transition-all duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] hover:shadow-[0_8px_20px_rgba(31,61,53,0.3)]"
-            >
-              Lihat Semua Pilihan Kamar
-            </Link>
-          </div>
-        </Reveal>
+        {roomList.length > 0 && (
+          <Reveal>
+            <div className="mt-20 flex justify-center">
+              <Link
+                href="/kamar"
+                className="inline-flex items-center justify-center rounded-[12px] bg-[#1F3D35] px-[32px] py-[16px] text-[15px] font-semibold text-white transition-all duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] hover:shadow-[0_8px_20px_rgba(31,61,53,0.3)]"
+              >
+                Lihat Semua Pilihan Kamar
+              </Link>
+            </div>
+          </Reveal>
+        )}
       </div>
     </section>
   );

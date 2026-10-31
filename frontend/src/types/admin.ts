@@ -87,10 +87,13 @@ export interface ComplaintItem {
 export interface DashboardOverview {
   metrics: {
     revenueThisMonth: number;
+    revenueLastMonth?: number;
+    revenueGrowth?: number;
     revenueFormatted: string;
     totalRooms: number;
     occupiedRooms: number;
     availableRooms: number;
+    activeTenants?: number;
     occupancyRate: number;
     unpaidInvoices: number;
     activeComplaints: number;
@@ -103,5 +106,6 @@ export interface DashboardOverview {
   recentActivities: {
     payments: any[];
     complaints: any[];
+    inquiries?: any[];
   };
 }

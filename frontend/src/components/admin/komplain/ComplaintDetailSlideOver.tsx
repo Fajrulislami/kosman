@@ -1,8 +1,10 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useState } from "react";
-import { X, Clock, MapPin, User, MessageCircle, CheckCircle2, Wrench, XCircle, Loader2 } from "lucide-react";
+import { X, Clock, MapPin, MessageCircle, CheckCircle2, Wrench, XCircle, Loader2, RotateCw, AlertTriangle } from "lucide-react";
 import { ComplaintItem } from "@/types/admin";
+import { createWhatsAppLink, formatWhatsAppNumber } from "@/lib/whatsapp";
 
 interface ComplaintDetailSlideOverProps {
   isOpen: boolean;
@@ -22,32 +24,45 @@ export default function ComplaintDetailSlideOver({
   onUpdateStatus,
 }: ComplaintDetailSlideOverProps) {
   const [resolutionNote, setResolutionNote] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   if (!isOpen || !complaint) return null;
 
+  const isClosed = complaint.status === "RESOLVED" || complaint.status === "REJECTED";
+
   const handleAction = async (status: "PENDING" | "IN_PROGRESS" | "RESOLVED" | "REJECTED") => {
+    // Wajibkan catatan jika admin menolak tiket
+    if (status === "REJECTED" && !resolutionNote.trim()) {
+      setActionError("Wajib mengisi catatan alasan penolakan di bawah agar penghuni mengetahui alasan keluhannya ditolak.");
+      return;
+    }
+
     try {
       setLoading(true);
+      setActionError(null);
       if (onUpdateStatus) {
         await onUpdateStatus(complaint.id, status, resolutionNote || undefined);
       }
       setResolutionNote("");
       onClose();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memperbarui status komplain");
+      setActionError(err instanceof Error ? err.message : "Gagal memperbarui status komplain");
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenWA = () => {
-    let cleanPhone = complaint.tenantPhone.replace(/\D/g, "");
-    if (cleanPhone.startsWith("0")) {
-      cleanPhone = "62" + cleanPhone.slice(1);
+    const rawPhone = complaint.tenantPhone || "";
+    const cleanPhone = formatWhatsAppNumber(rawPhone);
+    if (!cleanPhone) {
+      toast.error(`Nomor WhatsApp untuk penghuni ${complaint.tenantName} belum terdaftar.`);
+      return;
     }
     const msg = `Halo ${complaint.tenantName} (Kamar ${complaint.roomNumber}), terkait laporan keluhan Anda dengan nomor tiket *${complaint.ticketNumber}* tentang *${complaint.title}*, kami ingin menginformasikan bahwa...`;
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank");
+    const waUrl = createWhatsAppLink(cleanPhone, msg);
+    window.open(waUrl, "_blank");
   };
 
   return (
@@ -123,7 +138,7 @@ export default function ComplaintDetailSlideOver({
               {/* WhatsApp Quick Action */}
               <button
                 onClick={handleOpenWA}
-                className="w-full flex items-center justify-center space-x-2 rounded-2xl bg-[#25D366] py-3 text-sm font-bold text-white shadow-md hover:bg-[#20bd5a] transition-all"
+                className="w-full flex items-center justify-center space-x-2 rounded-2xl bg-[#25D366] py-3 text-sm font-bold text-white shadow-md hover:bg-[#20bd5a] transition-all cursor-pointer"
               >
                 <MessageCircle className="h-5 w-5" />
                 <span>Chat via WhatsApp</span>
@@ -185,25 +200,49 @@ export default function ComplaintDetailSlideOver({
               )}
 
               {/* Catatan Penyelesaian Sebelumnya (jika ada) */}
-              {complaint.resolutionNote && (
+              {complaint.resolutionNote && complaint.status === "RESOLVED" && (
                 <div className="rounded-2xl bg-green-50 p-4 border border-green-200">
                   <p className="text-xs font-bold uppercase tracking-wider text-green-800">Catatan Penyelesaian:</p>
                   <p className="mt-1 text-sm font-medium text-green-900">{complaint.resolutionNote}</p>
                 </div>
               )}
 
-              {/* Pembaruan Status / Catatan */}
-              {complaint.status !== "RESOLVED" && (
+              {/* Catatan Penolakan (jika ada) */}
+              {complaint.resolutionNote && complaint.status === "REJECTED" && (
+                <div className="rounded-2xl bg-red-50 p-4 border border-red-200">
+                  <p className="text-xs font-bold uppercase tracking-wider text-red-800">Alasan Penolakan:</p>
+                  <p className="mt-1 text-sm font-medium text-red-900">{complaint.resolutionNote}</p>
+                </div>
+              )}
+
+              {/* Pembaruan Status / Catatan untuk tiket aktif */}
+              {!isClosed && (
                 <div>
-                  <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-[#99A09C]">
-                    Catatan Solusi / Tindak Lanjut
-                  </h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-[#99A09C]">
+                      Catatan Solusi / Alasan Penolakan
+                    </h3>
+                    <span className="text-[11px] text-[#99A09C]">Wajib diisi jika menolak</span>
+                  </div>
+
+                  {actionError && (
+                    <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700 animate-in fade-in">
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+                      <span>{actionError}</span>
+                    </div>
+                  )}
+
                   <textarea 
                     rows={3}
                     value={resolutionNote}
-                    onChange={(e) => setResolutionNote(e.target.value)}
-                    placeholder="Tulis catatan penanganan teknisi (misal: pipa sudah diganti)..."
-                    className="w-full rounded-2xl border-2 border-[#E5E3DE] bg-white p-4 text-sm font-medium outline-none transition-all focus:border-[#C69C6D] resize-none"
+                    onChange={(e) => {
+                      setResolutionNote(e.target.value);
+                      if (actionError) setActionError(null);
+                    }}
+                    placeholder="Tulis catatan penanganan teknisi atau alasan jika laporan ditolak..."
+                    className={`w-full rounded-2xl border-2 bg-white p-4 text-sm font-medium outline-none transition-all resize-none ${
+                      actionError ? "border-red-400 focus:border-red-500" : "border-[#E5E3DE] focus:border-[#C69C6D]"
+                    }`}
                   />
                 </div>
               )}
@@ -211,13 +250,13 @@ export default function ComplaintDetailSlideOver({
             </div>
 
             {/* Footer Actions */}
-            {complaint.status !== "RESOLVED" && (
+            {!isClosed ? (
               <div className="bg-white px-6 py-4 sm:px-8 border-t border-[#E5E3DE] flex flex-wrap gap-2 sticky bottom-0 z-10">
                 {complaint.status === "PENDING" && (
                   <button
                     disabled={loading}
                     onClick={() => handleAction("IN_PROGRESS")}
-                    className="flex-1 flex items-center justify-center space-x-2 rounded-xl bg-[#C69C6D] py-3 text-sm font-bold text-white shadow-md hover:bg-[#b08759] transition-all disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center space-x-2 rounded-xl bg-[#C69C6D] py-3 text-sm font-bold text-white shadow-md hover:bg-[#b08759] transition-all disabled:opacity-50 cursor-pointer"
                   >
                     {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wrench className="h-4 w-4" />}
                     <span>Mulai Kerjakan</span>
@@ -227,7 +266,7 @@ export default function ComplaintDetailSlideOver({
                 <button
                   disabled={loading}
                   onClick={() => handleAction("RESOLVED")}
-                  className="flex-1 flex items-center justify-center space-x-2 rounded-xl bg-[#1F3D35] py-3 text-sm font-bold text-white shadow-md hover:bg-[#152923] transition-all disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center space-x-2 rounded-xl bg-[#1F3D35] py-3 text-sm font-bold text-white shadow-md hover:bg-[#152923] transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                   <span>Tandai Selesai</span>
@@ -237,11 +276,39 @@ export default function ComplaintDetailSlideOver({
                   <button
                     disabled={loading}
                     onClick={() => handleAction("REJECTED")}
-                    className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all disabled:opacity-50"
+                    className="flex items-center justify-center space-x-1.5 rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-all disabled:opacity-50 cursor-pointer"
+                    title="Tolak Laporan"
                   >
                     <XCircle className="h-4 w-4" />
+                    <span>Tolak</span>
                   </button>
                 )}
+              </div>
+            ) : (
+              <div className="bg-white px-6 py-4 sm:px-8 border-t border-[#E5E3DE] flex items-center justify-between gap-3 sticky bottom-0 z-10">
+                <div className="flex items-center gap-2 text-xs font-semibold text-[#6B716D]">
+                  {complaint.status === "RESOLVED" ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
+                      <span>Laporan telah selesai ditangani</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="w-4 h-4 text-red-600 shrink-0" />
+                      <span>Laporan ini telah ditolak</span>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  disabled={loading}
+                  onClick={() => handleAction("IN_PROGRESS")}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#E5E3DE] bg-[#F8F7F4] hover:bg-white hover:border-[#1F3D35] px-4 py-2.5 text-xs font-bold text-[#1F3D35] transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
+                  title="Buka kembali tiket untuk dikerjakan ulang"
+                >
+                  <RotateCw className="w-3.5 h-3.5 text-[#C69C6D]" />
+                  <span>Buka Kembali Tiket</span>
+                </button>
               </div>
             )}
             

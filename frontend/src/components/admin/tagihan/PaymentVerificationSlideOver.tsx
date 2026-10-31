@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { X, Calendar, Receipt, CreditCard, User, AlertCircle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { BillingItem } from "@/types/admin";
@@ -25,7 +26,7 @@ export default function PaymentVerificationSlideOver({
 
   const handleAction = async (action: "APPROVE" | "REJECT") => {
     if (!invoice.payment) {
-      alert("Data pembayaran tidak valid");
+      toast.error("Data pembayaran tidak valid");
       return;
     }
 
@@ -38,7 +39,7 @@ export default function PaymentVerificationSlideOver({
       setRejectReason("");
       onClose();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal memproses verifikasi");
+      toast.error(err instanceof Error ? err.message : "Gagal memproses verifikasi");
     } finally {
       setLoading(false);
     }

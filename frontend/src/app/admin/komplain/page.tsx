@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import ComplaintPipeline from "@/components/admin/komplain/ComplaintPipeline";
 import ComplaintList, { ComplaintTab } from "@/components/admin/komplain/ComplaintList";
@@ -8,7 +9,8 @@ import ComplaintDetailSlideOver from "@/components/admin/komplain/ComplaintDetai
 import { apiFetch } from "@/lib/api";
 import { ComplaintItem } from "@/types/admin";
 
-export default function KomplainPage() {
+function KomplainContent() {
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<ComplaintTab>("masuk");
   const [complaints, setComplaints] = useState<ComplaintItem[]>([]);
   const [stats, setStats] = useState<{ total: number; pending: number; inProgress: number; resolved: number } | undefined>();
@@ -21,21 +23,51 @@ export default function KomplainPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
 
-  const fetchComplaints = useCallback(async () => {
+  // Baca query parameter dari URL saat diakses via StatCards / Banner (cth: ?tab=masuk atau ?search=...)
+  useEffect(() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam === "masuk" || tabParam === "proses" || tabParam === "selesai" || tabParam === "semua") {
+      setActiveTab(tabParam as ComplaintTab);
+    }
+    const searchParam = searchParams?.get("search");
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [searchParams]);
+
+  const fetchComplaints = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await apiFetch<{ data: ComplaintItem[]; stats: any }>("/api/admin/complaints");
       setComplaints(res.data || []);
       setStats(res.stats);
     } catch (err) {
-      console.error("Error fetching complaints:", err);
+      if (!silent) console.error("Error fetching complaints:", err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchComplaints();
+
+    // Auto-refresh saat pengguna kembali ke tab ini
+    const handleSync = () => {
+      fetchComplaints(true);
+    };
+    window.addEventListener("focus", handleSync);
+    document.addEventListener("visibilitychange", handleSync);
+
+    // Polling setiap 10 detik agar komplain baru langsung muncul tanpa reload manual
+    const interval = setInterval(() => {
+      fetchComplaints(true);
+    }, 10000);
+
+    return () => {
+      window.removeEventListener("focus", handleSync);
+      document.removeEventListener("visibilitychange", handleSync);
+      clearInterval(interval);
+    };
   }, [fetchComplaints]);
 
   const handleOpenDetail = (complaint: ComplaintItem) => {
@@ -52,7 +84,7 @@ export default function KomplainPage() {
       method: "PUT",
       body: JSON.stringify({ status, resolutionNote: note }),
     });
-    await fetchComplaints();
+    await fetchComplaints(true);
   };
 
   const pendingCount = complaints.filter((c) => c.status === "PENDING").length;
@@ -110,6 +142,7 @@ export default function KomplainPage() {
               className="w-full sm:w-auto appearance-none rounded-2xl border-2 border-[#E5E3DE] bg-[#F8F7F4] py-2.5 px-4 text-sm font-bold text-[#1F3D35] outline-none transition-all focus:border-[#C69C6D] focus:bg-white"
             >
               <option value="ALL">Semua Prioritas</option>
+              <option value="URGENT">🔴 Darurat (Urgent)</option>
               <option value="HIGH">Tinggi (High)</option>
               <option value="MEDIUM">Sedang (Medium)</option>
               <option value="LOW">Rendah (Low)</option>
@@ -194,5 +227,13 @@ export default function KomplainPage() {
         onUpdateStatus={handleUpdateStatus}
       />
     </div>
+  );
+}
+
+export default function KomplainPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-[#99A09C]">Memuat data komplain...</div>}>
+      <KomplainContent />
+    </Suspense>
   );
 }

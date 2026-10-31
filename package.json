@@ -1,0 +1,14 @@
+{
+  "name": "kos-landing-page",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Kostara Property Management & Landing Page System",
+  "scripts": {
+    "dev": "node run-dev.js",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build"
+  }
+}

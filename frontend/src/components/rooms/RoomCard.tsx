@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { BedDouble, CheckCircle2, XCircle } from "lucide-react";
 import type { Room } from "@/data/rooms";
+import SafeImage from "@/components/ui/SafeImage";
 
 interface RoomCardProps {
   room: Room;
@@ -25,13 +25,14 @@ export default function RoomCard({ room, index }: RoomCardProps) {
         <div className="h-3 w-3 rounded-full bg-[#27C93F]"></div>
       </div>
 
-      {/* Bagian Gambar (Atas) */}
+      {/* Bagian Gambar (Atas) dengan SafeImage */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
-        <Image
+        <SafeImage
           src={room.images?.[0] || "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"}
           alt={room.name}
           fill
           unoptimized
+          fallbackLabel={room.name}
           className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
@@ -97,10 +98,10 @@ export default function RoomCard({ room, index }: RoomCardProps) {
               Rp {room.price.toLocaleString("id-ID")} <span className="text-xs font-normal text-[#6B716D]">/bln</span>
             </p>
           </div>
-          
-          <Link 
+
+          <Link
             href={`/kamar/${room.slug}`}
-            className="flex items-center justify-center rounded-xl bg-[#F8F7F4] px-4 py-2.5 text-sm font-semibold text-[#1F3D35] transition-colors duration-300 group-hover:bg-[#1F3D35] group-hover:text-white"
+            className="rounded-xl bg-[#1F3D35] px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] hover:shadow-md"
           >
             Lihat Detail
           </Link>

@@ -4,7 +4,7 @@ import { OAuth2Client } from "google-auth-library";
 import { prisma } from "../lib/prisma";
 import { signToken } from "../lib/jwt";
 import { AuthenticatedRequest } from "../middlewares/auth";
-import { loginSchema } from "../validations/auth.schema";
+import { loginSchema, updateProfileSchema, changePasswordSchema } from "../validations/auth.schema";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -42,13 +42,21 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       tenantId: user.tenant?.id,
     });
 
-    // Set cookie untuk Next.js proxy/client
-    res.cookie("kostara_session", token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "lax" as const,
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
-    });
+    };
+
+    // Set cookie spesifik role agar sesi admin & tenant tidak bentrok
+    if (user.role === "ADMIN") {
+      res.cookie("kostara_admin_session", token, cookieOptions);
+    } else {
+      res.cookie("kostara_tenant_session", token, cookieOptions);
+    }
+    res.cookie("kostara_session", token, cookieOptions);
 
     res.json({
       success: true,
@@ -107,12 +115,20 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
       tenantId: user.tenant?.id,
     });
 
-    res.cookie("kostara_session", jwtToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "lax" as const,
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    };
+
+    if (user.role === "ADMIN") {
+      res.cookie("kostara_admin_session", jwtToken, cookieOptions);
+    } else {
+      res.cookie("kostara_tenant_session", jwtToken, cookieOptions);
+    }
+    res.cookie("kostara_session", jwtToken, cookieOptions);
 
     res.json({
       success: true,
@@ -133,8 +149,24 @@ export const googleLogin = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-export const logout = (_req: Request, res: Response): void => {
-  res.clearCookie("kostara_session");
+export const logout = (req: Request, res: Response): void => {
+  const role = req.query.role as string;
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+  };
+
+  if (role === "admin") {
+    res.clearCookie("kostara_admin_session", cookieOptions);
+  } else if (role === "tenant") {
+    res.clearCookie("kostara_tenant_session", cookieOptions);
+  } else {
+    res.clearCookie("kostara_admin_session", cookieOptions);
+    res.clearCookie("kostara_tenant_session", cookieOptions);
+  }
+  res.clearCookie("kostara_session", cookieOptions);
   res.json({ success: true, message: "Logout berhasil" });
 };
 
@@ -151,7 +183,8 @@ export const getMe = async (req: AuthenticatedRequest, res: Response): Promise<v
         tenant: {
           include: {
             leases: {
-              where: { status: "ACTIVE" },
+              orderBy: [{ status: "asc" }, { endDate: "desc" }],
+              take: 5,
               include: { room: { include: { roomType: true } } },
             },
           },
@@ -170,3 +203,117 @@ export const getMe = async (req: AuthenticatedRequest, res: Response): Promise<v
     res.status(500).json({ error: "Gagal mengambil data profil sesi" });
   }
 };
+
+export const updateProfile = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = updateProfileSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten().fieldErrors });
+      return;
+    }
+
+    const { name, email } = parsed.data;
+    const userId = req.user!.userId;
+
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email,
+        NOT: { id: userId },
+      },
+    });
+
+    if (existingUser) {
+      res.status(409).json({ error: "Email sudah digunakan oleh akun lain" });
+      return;
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { name, email },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        avatarUrl: true,
+      },
+    });
+
+    const jwtToken = signToken({
+      userId: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      role: updatedUser.role,
+      tenantId: req.user!.tenantId,
+    });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    };
+
+    if (updatedUser.role === "ADMIN") {
+      res.cookie("kostara_admin_session", jwtToken, cookieOptions);
+    } else {
+      res.cookie("kostara_tenant_session", jwtToken, cookieOptions);
+    }
+    res.cookie("kostara_session", jwtToken, cookieOptions);
+
+    res.json({
+      success: true,
+      message: "Profil berhasil diperbarui",
+      token: jwtToken,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ error: "Gagal memperbarui profil pengguna" });
+  }
+};
+
+export const changePassword = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const parsed = changePasswordSchema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Validasi gagal", details: parsed.error.flatten().fieldErrors });
+      return;
+    }
+
+    const { currentPassword, newPassword } = parsed.data;
+    const userId = req.user!.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      res.status(404).json({ error: "Pengguna tidak ditemukan" });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isMatch) {
+      res.status(400).json({ error: "Kata sandi lama yang Anda masukkan tidak sesuai" });
+      return;
+    }
+
+    const newHash = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash: newHash },
+    });
+
+    res.json({
+      success: true,
+      message: "Kata sandi berhasil diubah",
+    });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Gagal mengubah kata sandi" });
+  }
+};
+

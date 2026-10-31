@@ -32,14 +32,18 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
   );
 };
 
+import { useProperty } from "@/context/PropertyContext";
+
 export default function ContactInfo() {
+  const { profile, waUrl } = useProperty();
+
   const contactDetails = [
     {
       title: "WhatsApp / Telepon",
-      value: "+62 812-3456-7890",
+      value: profile.phone || "+62 853-9740-3114",
       description: "Fast response selama jam operasional",
       icon: Phone,
-      link: "https://wa.me/6281234567890",
+      link: waUrl("Halo pengelola, saya ingin bertanya mengenai info kamar dan survey."),
       delay: 100
     },
     {
@@ -51,11 +55,11 @@ export default function ContactInfo() {
       delay: 200
     },
     {
-      title: "Alamat Pondok Rahmat",
-      value: "Jl. Setiabudi No. 123, Jakarta Selatan",
-      description: "Kunjungi kami untuk survey langsung.",
+      title: `Alamat ${profile.name || "Pondok Rahmat"}`,
+      value: profile.address || "Romangpolong, Kec. Somba Opu, Kab. Gowa, Sulawesi Selatan 92113",
+      description: "Dekat Kampus II UIN Alauddin Samata. Kunjungi kami untuk survey langsung.",
       icon: MapPin,
-      link: "https://maps.google.com",
+      link: profile.mapsUrl || "https://maps.app.goo.gl/mHwa7ppvN4231RZz5?g_st=aw",
       delay: 300
     }
   ];

@@ -4,9 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { LogIn } from "lucide-react";
+import { useProperty } from "@/context/PropertyContext";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { profile } = useProperty();
   const [pillStyle, setPillStyle] = useState({ left: 0, width: 0, opacity: 0 });
   const navRefs = useRef<{ [key: string]: HTMLLIElement | null }>({});
 
@@ -63,7 +65,7 @@ export default function Navbar() {
         {/* Logo Pondok Rahmat */}
         <Link href="/" className="flex items-center transition-opacity duration-300 hover:opacity-70">
           <span className="text-2xl font-extrabold tracking-tighter text-[#1F3D35]">
-            Pondok Rahmat<span className="text-[#C69C6D]">.</span>
+            {profile.name || "Pondok Rahmat"}<span className="text-[#C69C6D]">.</span>
           </span>
         </Link>
 

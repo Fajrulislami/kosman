@@ -1,5 +1,6 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { Trash2, Loader2, AlertCircle, Edit } from "lucide-react";
 import { RoomItem } from "@/types/admin";
@@ -29,7 +30,7 @@ export default function RoomTable({ rooms, loading = false, onDelete, onRefresh,
         await onDelete(roomToDelete.id);
       }
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Gagal menghapus kamar");
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus kamar");
     } finally {
       setDeletingId(null);
       setRoomToDelete(null);

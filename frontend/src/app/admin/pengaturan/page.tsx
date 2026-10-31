@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Save, Loader2 } from "lucide-react";
 import SettingsSidebar, { SettingsMenu } from "@/components/admin/pengaturan/SettingsSidebar";
 import ProfileSettings from "@/components/admin/pengaturan/ProfileSettings";
@@ -10,18 +11,31 @@ import AccountSettings from "@/components/admin/pengaturan/AccountSettings";
 import { apiFetch } from "@/lib/api";
 import AlertModal from "@/components/ui/AlertModal";
 
-export default function PengaturanPage() {
+function PengaturanContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeMenu, setActiveMenu] = useState<SettingsMenu>("profil");
   const [hasChanges, setHasChanges] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<{
+    profile: {
+      name: string;
+      phone: string;
+      address: string;
+      description: string;
+      mapsUrl?: string;
+    };
+    paymentMethods: any[];
+    rules: { text: string };
+  }>({
     profile: {
       name: "",
       phone: "",
       address: "",
-      description: ""
+      description: "",
+      mapsUrl: "",
     },
     paymentMethods: [],
     rules: { text: "" }
@@ -38,6 +52,18 @@ export default function PengaturanPage() {
     message: "",
     variant: "success",
   });
+
+  useEffect(() => {
+    const tab = searchParams?.get("tab");
+    if (tab === "akun" || tab === "rekening" || tab === "aturan" || tab === "profil") {
+      setActiveMenu(tab as SettingsMenu);
+    }
+  }, [searchParams]);
+
+  const handleMenuChange = (menu: SettingsMenu) => {
+    setActiveMenu(menu);
+    router.replace(`/admin/pengaturan?tab=${menu}`, { scroll: false });
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -101,6 +127,14 @@ export default function PengaturanPage() {
         variant: "success"
       });
       setHasChanges(false);
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("kostara_settings_updated", {
+            detail: settings.profile,
+          })
+        );
+      }
     } catch (err: any) {
       setAlertConfig({
         isOpen: true,
@@ -151,7 +185,7 @@ export default function PengaturanPage() {
         
         {/* Kolom Kiri: Sidebar Menu */}
         <div className="w-full md:w-1/3 lg:w-1/4 shrink-0">
-          <SettingsSidebar activeMenu={activeMenu} onMenuChange={setActiveMenu} />
+          <SettingsSidebar activeMenu={activeMenu} onMenuChange={handleMenuChange} />
         </div>
 
         {/* Kolom Kanan: Konten Aktif */}
@@ -160,9 +194,9 @@ export default function PengaturanPage() {
         </div>
       </div>
 
-      {/* Floating Save Button (Muncul jika ada perubahan) */}
-      {hasChanges && (
-        <div className="fixed bottom-8 right-8 z-40 animate-in slide-in-from-bottom-8 duration-500">
+      {/* Floating Save Button (Hanya untuk tab Profil, Rekening, dan Aturan saat ada perubahan) */}
+      {hasChanges && activeMenu !== "akun" && (
+        <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 animate-in slide-in-from-bottom-8 duration-500">
           <button 
             disabled={saving}
             onClick={handleSave}
@@ -182,5 +216,17 @@ export default function PengaturanPage() {
         onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
       />
     </div>
+  );
+}
+
+export default function PengaturanPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#C69C6D]" />
+      </div>
+    }>
+      <PengaturanContent />
+    </Suspense>
   );
 }

@@ -8,54 +8,54 @@ const pois = [
     category: "Pendidikan",
     icon: BookOpen,
     items: [
-      { name: "Universitas Indonesia (UI) Salemba", distance: "1.2 km", time: "5 Menit" },
-      { name: "Universitas Y.A.I", distance: "800 m", time: "3 Menit" },
-      { name: "Universitas Gunadarma", distance: "1.5 km", time: "7 Menit" }
+      { name: "UIN Alauddin Makassar (Kampus II Samata)", distance: "800 m", time: "3 Menit" },
+      { name: "Fakultas Teknik Unhas Gowa", distance: "3.5 km", time: "8 Menit" },
+      { name: "Universitas Terbuka / Poltekkes", distance: "4.0 km", time: "10 Menit" }
     ]
   },
   {
-    category: "Transportasi Umum",
+    category: "Transportasi & Akses",
     icon: TrainFront,
     items: [
-      { name: "Stasiun KRL Cikini", distance: "500 m", time: "2 Menit" },
-      { name: "Halte TransJakarta Salemba", distance: "800 m", time: "3 Menit" },
-      { name: "Stasiun MRT Bundaran HI", distance: "3.5 km", time: "10 Menit" }
+      { name: "Titik Jemput Ojek Online Samata", distance: "50 m", time: "Langsung" },
+      { name: "Jalan Poros H.M. Yasin Limpo", distance: "200 m", time: "2 Menit" },
+      { name: "Akses Poros Malino & Pettarani", distance: "2.5 km", time: "6 Menit" }
     ]
   },
   {
     category: "Gaya Hidup & Belanja",
     icon: ShoppingBag,
     items: [
-      { name: "Grand Indonesia", distance: "4.0 km", time: "12 Menit" },
-      { name: "Plaza Indonesia", distance: "4.2 km", time: "15 Menit" },
-      { name: "Metropole XXI", distance: "1.0 km", time: "4 Menit" }
+      { name: "Living Plaza Pettarani", distance: "5.0 km", time: "12 Menit" },
+      { name: "Mall Panakkukang (MP)", distance: "6.5 km", time: "15 Menit" },
+      { name: "Pasar Tradisional Samata / Modern", distance: "2.0 km", time: "5 Menit" }
     ]
   },
   {
-    category: "Kuliner & Hiburan",
+    category: "Kuliner & Cafe",
     icon: Coffee,
     items: [
-      { name: "Jalan Sabang (Pusat Kuliner)", distance: "3.0 km", time: "10 Menit" },
-      { name: "Cikini Raya (Cafe & Resto)", distance: "1.0 km", time: "4 Menit" },
-      { name: "Menteng Wok", distance: "2.5 km", time: "8 Menit" }
+      { name: "Sentra Kuliner Mahasiswa Samata", distance: "300 m", time: "2 Menit" },
+      { name: "Coffee Shop & Co-Working Space", distance: "500 m", time: "3 Menit" },
+      { name: "Minimarket 24 Jam (Indomaret/Alfamidi)", distance: "350 m", time: "2 Menit" }
     ]
   },
   {
     category: "Kesehatan",
     icon: Stethoscope,
     items: [
-      { name: "RSCM (RS Cipto Mangunkusumo)", distance: "1.5 km", time: "6 Menit" },
-      { name: "RS St. Carolus", distance: "2.0 km", time: "8 Menit" },
-      { name: "Apotek Kimia Farma 24 Jam", distance: "500 m", time: "2 Menit" }
+      { name: "RSUD Syekh Yusuf Gowa", distance: "3.5 km", time: "8 Menit" },
+      { name: "Puskesmas Somba Opu Samata", distance: "1.2 km", time: "4 Menit" },
+      { name: "Apotek Kimia Farma 24 Jam", distance: "600 m", time: "2 Menit" }
     ]
   },
   {
-    category: "Pusat Perkantoran",
+    category: "Pusat Kegiatan & Perkantoran",
     icon: Briefcase,
     items: [
-      { name: "CBD Sudirman", distance: "5.5 km", time: "18 Menit" },
-      { name: "Thamrin City/Office", distance: "4.5 km", time: "15 Menit" },
-      { name: "Kuningan Rasuna Said", distance: "6.0 km", time: "20 Menit" }
+      { name: "Pusat Kota Sungguminasa (Kantor Bupati)", distance: "4.5 km", time: "10 Menit" },
+      { name: "Kawasan Bisnis A.P. Pettarani Makassar", distance: "6.0 km", time: "15 Menit" },
+      { name: "Masjid Agung Syekh Yusuf Gowa", distance: "4.0 km", time: "9 Menit" }
     ]
   }
 ];

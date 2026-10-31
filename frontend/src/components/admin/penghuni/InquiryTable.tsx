@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { MessageSquare, Calendar, Phone, CheckCircle2, XCircle, Clock, Trash2 } from "lucide-react";
+import { MessageSquare, Calendar, Phone, CheckCircle2, XCircle, Clock, Trash2, UserPlus, Mail } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { apiFetch } from "@/lib/api";
+import { createWhatsAppLink } from "@/lib/whatsapp";
 
 export interface InquiryItem {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  nik?: string | null;
   checkInDate: string | null;
   notes: string | null;
   status: string;
@@ -24,9 +27,10 @@ interface InquiryTableProps {
   inquiries: InquiryItem[];
   loading: boolean;
   onRefresh: () => void;
+  onConvertToTenant?: (inquiry: InquiryItem) => void;
 }
 
-export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryTableProps) {
+export default function InquiryTable({ inquiries, loading, onRefresh, onConvertToTenant }: InquiryTableProps) {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -103,13 +107,15 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
           </thead>
           <tbody className="divide-y divide-[#E5E3DE]">
             {inquiries.map((item) => {
-              const waText = encodeURIComponent(
-                `Halo ${item.name}, saya dari Pengelola Kostara. Menindaklanjuti permintaan reservasi kamar ${
-                  item.roomType?.name || ""
-                } Anda di website kami.`
-              );
-              const cleanPhone = item.phone.replace(/^0/, "62");
-              const waUrl = `https://wa.me/${cleanPhone}?text=${waText}`;
+              const waMessage = 
+                `Halo Kak *${item.name}*, salam dari Pengelola Kostara! 👋\n` +
+                `Menindaklanjuti permintaan reservasi kamar *${item.roomType?.name || "Kostara"}* Anda di website kami.\n\n` +
+                `Untuk memproses pendaftaran resmi sebagai penghuni kos & pembuatan akun portal, mohon melengkapi data berikut ya Kak:\n` +
+                `• Email (Gmail aktif): ${item.email || "[Mohon infokan Gmail Kakak di sini]"}\n` +
+                `• NIK KTP (16 Digit): [Mohon kirimkan 16 digit NIK KTP Kakak di sini]\n\n` +
+                `Data ini diperlukan untuk penerbitan kwitansi/invoice sewa resmi serta akses portal penghuni Kostara. Terima kasih! 🙏`;
+              const waUrl = createWhatsAppLink(item.phone, waMessage);
+
 
               return (
                 <tr key={item.id} className="hover:bg-[#F8F7F4]/60 transition-colors">
@@ -119,6 +125,16 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
                       <Phone className="h-3 w-3" />
                       <span>{item.phone}</span>
                     </p>
+                    {item.email ? (
+                      <p className="mt-0.5 flex items-center gap-1 text-xs text-[#1F3D35] font-medium">
+                        <Mail className="h-3 w-3 text-[#C69C6D]" />
+                        <span>{item.email}</span>
+                      </p>
+                    ) : (
+                      <span className="mt-1 inline-block text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                        Gmail belum diisi (minta via WA)
+                      </span>
+                    )}
                   </td>
 
                   <td className="px-6 py-4">
@@ -198,16 +214,28 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
                           <button
                             disabled={updatingId === item.id}
                             onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
-                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 cursor-pointer"
                           >
                             Tolak
                           </button>
                           <button
                             disabled={updatingId === item.id}
                             onClick={() => handleUpdateStatus(item.id, "CONTACTED")}
-                            className="rounded-xl border border-[#E5E3DE] px-3 py-1.5 text-xs font-semibold text-[#1F3D35] hover:bg-[#F8F7F4]"
+                            className="rounded-xl border border-[#E5E3DE] px-3 py-1.5 text-xs font-semibold text-[#1F3D35] hover:bg-[#F8F7F4] cursor-pointer"
                           >
                             Tandai Dihubungi
+                          </button>
+                          <button
+                            disabled={updatingId === item.id}
+                            onClick={() => {
+                              if (onConvertToTenant) {
+                                onConvertToTenant(item);
+                              }
+                            }}
+                            className="flex items-center gap-1.5 rounded-xl bg-[#1F3D35] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#162E28] shadow-sm cursor-pointer"
+                          >
+                            <UserPlus className="h-3.5 w-3.5 text-[#C69C6D]" />
+                            <span>Proses Jadi Penghuni</span>
                           </button>
                         </>
                       )}
@@ -217,16 +245,23 @@ export default function InquiryTable({ inquiries, loading, onRefresh }: InquiryT
                           <button
                             disabled={updatingId === item.id}
                             onClick={() => handleUpdateStatus(item.id, "CANCELLED")}
-                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+                            className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 cursor-pointer"
                           >
                             Batal
                           </button>
                           <button
                             disabled={updatingId === item.id}
-                            onClick={() => handleUpdateStatus(item.id, "CONVERTED")}
-                            className="rounded-xl bg-[#1F3D35] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#162E28]"
+                            onClick={() => {
+                              if (onConvertToTenant) {
+                                onConvertToTenant(item);
+                              } else {
+                                handleUpdateStatus(item.id, "CONVERTED");
+                              }
+                            }}
+                            className="flex items-center gap-1.5 rounded-xl bg-[#1F3D35] px-3.5 py-1.5 text-xs font-bold text-white hover:bg-[#162E28] shadow-sm cursor-pointer"
                           >
-                            Tandai Deal
+                            <UserPlus className="h-3.5 w-3.5 text-[#C69C6D]" />
+                            <span>Proses Jadi Penghuni</span>
                           </button>
                         </>
                       )}

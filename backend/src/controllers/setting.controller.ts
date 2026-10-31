@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { AuthenticatedRequest } from "../middlewares/auth";
 
-export const getSettings = async (req: Request, res: Response): Promise<void> => {
+export const getSettings = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const settings = await prisma.siteSetting.findMany();
     
@@ -13,6 +14,17 @@ export const getSettings = async (req: Request, res: Response): Promise<void> =>
         config[s.key] = s.value;
       }
     });
+
+    const isAuthorized = Boolean(
+      req.user && (req.user.role === "ADMIN" || req.user.role === "TENANT")
+    );
+
+    // Proteksi Privasi & Keamanan:
+    // Jika diakses oleh Tamu / Pengunjung Publik (belum login),
+    // data rekening bank pembayaran sewa otomatis disembunyikan.
+    if (!isAuthorized && config.paymentMethods) {
+      delete config.paymentMethods;
+    }
 
     res.json({ data: config });
   } catch (error) {

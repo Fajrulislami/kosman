@@ -38,7 +38,10 @@ const Reveal = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
 };
 
 
+import { useProperty } from "@/context/PropertyContext";
+
 export default function Location() {
+    const { profile } = useProperty();
     return (
         // Latar dikembalikan ke Cream (#F8F7F4) agar menyatu dengan root
         <section className="relative overflow-hidden bg-[#F8F7F4] py-24 md:py-32">
@@ -122,7 +125,7 @@ export default function Location() {
                             </div>
                             <div className="flex items-center gap-2 text-[12px] font-semibold text-[#6B716D]">
                                 <MapPin className="h-3.5 w-3.5 text-[#C69C6D]" />
-                                <span>Titik Pusat Pondok Rahmat</span>
+                                <span>Titik Pusat {profile.name || "Pondok Rahmat"}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <span className="relative flex h-2.5 w-2.5">
@@ -147,7 +150,7 @@ export default function Location() {
                                         </div>
                                     </div>
                                     <div className="mt-4 rounded-full border border-[#E5E3DE] bg-white px-4 py-2 text-[12px] font-bold text-[#1F3D35] shadow-sm">
-                                        Pondok Rahmat Residence
+                                        {profile.name || "Pondok Rahmat"} Residence
                                     </div>
                                 </div>
                             </div>
@@ -176,9 +179,9 @@ export default function Location() {
                                             <BookOpen className="h-4 w-4 text-[#1F3D35]" />
                                         </div>
                                         <div>
-                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">Universitas Utama</h4>
+                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">UIN Alauddin (Kampus II)</h4>
                                             <p className="mt-1.5 text-[13px] leading-relaxed text-[#6B716D]">
-                                                Hanya <strong>5 Menit Jalan Kaki</strong>. Sangat menghemat waktu dan biaya transportasi Anda setiap hari.
+                                                Hanya <strong>3 - 5 Menit</strong> dari lokasi. Sangat menghemat waktu dan tenaga aktivitas kuliah harian.
                                             </p>
                                         </div>
                                     </div>
@@ -199,9 +202,9 @@ export default function Location() {
                                             <Coffee className="h-4 w-4 text-[#1F3D35]" />
                                         </div>
                                         <div>
-                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">Minimarket & Cafe</h4>
+                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">Kawasan Kuliner & Minimarket</h4>
                                             <p className="mt-1.5 text-[13px] leading-relaxed text-[#6B716D]">
-                                                Sekitar <strong>2 Menit Berkendara</strong>. Tidak perlu khawatir lapar tengah malam atau kehabisan barang harian.
+                                                Sekitar <strong>2 Menit Berkendara</strong>. Ragam pilihan cafe, warung makan, dan minimarket 24 jam di sekitar Samata.
                                             </p>
                                         </div>
                                     </div>
@@ -222,9 +225,9 @@ export default function Location() {
                                             <Navigation className="h-4 w-4 text-[#1F3D35]" />
                                         </div>
                                         <div>
-                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">Halte Bus & Stasiun</h4>
+                                            <h4 className="text-[16px] font-bold text-[#1F3D35]">Poros Samata - H.M. Yasin Limpo</h4>
                                             <p className="mt-1.5 text-[13px] leading-relaxed text-[#6B716D]">
-                                                Akses transportasi publik terpadu berjarak <strong>10 Menit</strong>. Memudahkan mobilitas akhir pekan Anda.
+                                                Akses jalan utama lebar dan terjangkau armada ojek online 24 jam dengan titik jemput langsung di depan kos.
                                             </p>
                                         </div>
                                     </div>
@@ -240,8 +243,9 @@ export default function Location() {
                 <Reveal delay={300}>
                     <div className="mt-16 flex justify-center">
                         <Link
-                            href="https://maps.google.com"
+                            href={profile.mapsUrl || "https://maps.app.goo.gl/mHwa7ppvN4231RZz5?g_st=aw"}
                             target="_blank"
+                            rel="noopener noreferrer"
                             className="inline-flex items-center justify-center rounded-[10px] bg-[#1F3D35] px-[28px] py-[14px] text-[15px] font-semibold text-white transition-all duration-300 hover:bg-[#162E28] hover:text-[#C69C6D] hover:shadow-[0_8px_20px_rgba(31,61,53,0.3)]"
                         >
                             Buka di Google Maps

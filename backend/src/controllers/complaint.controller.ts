@@ -70,8 +70,12 @@ export const submitComplaint = async (req: AuthenticatedRequest, res: Response):
     }
 
     const activeRoomId = tenant.leases[0].roomId;
-    const ticketCount = await prisma.complaint.count();
-    const ticketNumber = `REQ-${String(ticketCount + 1).padStart(3, "0")}`;
+    
+    // Generate nomor tiket unik anti-duplikasi: REQ-YYYYMM-[4 digit acak]
+    const now = new Date();
+    const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const ticketNumber = `REQ-${datePrefix}-${randomSuffix}`;
 
     const { category, title, description, images, priority } = parsed.data;
 

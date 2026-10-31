@@ -7,6 +7,7 @@ import "./globals.css";
 import Navbar from "@/components/layout/Navbar"; 
 import Footer from "@/components/layout/Footer";
 import { Toaster } from "react-hot-toast";
+import { PropertyProvider } from "@/context/PropertyContext";
 
 // Mengatur font utama sesuai pedoman desain
 const plusJakartaSans = Plus_Jakarta_Sans({ 
@@ -28,17 +29,18 @@ export default function RootLayout({
     <html lang="id">
       {/* Menerapkan background utama (#F8F7F4) dan font Plus Jakarta Sans ke seluruh web */}
       <body className={`${plusJakartaSans.className} bg-[#F8F7F4] text-[#202321] antialiased`}>
-        
-        {/* 2. Panggil Navbar di sini */}
-        <Navbar />
+        <PropertyProvider>
+          {/* 2. Panggil Navbar di sini */}
+          <Navbar />
 
-        <main>{children}</main>
+          <main>{children}</main>
 
-        {/* 3. Panggil Footer di sini */}
-        <Footer />
-        
-        {/* Toast Notifications */}
-        <Toaster position="top-right" />
+          {/* 3. Panggil Footer di sini */}
+          <Footer />
+          
+          {/* Toast Notifications */}
+          <Toaster position="top-right" />
+        </PropertyProvider>
       </body>
     </html>
   );

@@ -14,6 +14,7 @@ export const registerTenantSchema = z.object({
   emergencyPhone: z.string().optional(),
   emergencyRelation: z.string().optional(),
   occupation: z.string().optional(),
+  inquiryId: z.string().optional(),
 });
 
 export const updateTenantSchema = z.object({

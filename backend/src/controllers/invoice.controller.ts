@@ -509,7 +509,7 @@ export const payCash = async (req: Request, res: Response): Promise<void> => {
           amount: invoice.amount,
           method: "CASH",
           status: "VERIFIED",
-          verifiedBy: (req as AuthenticatedRequest).user?.id || "admin",
+          verifiedBy: (req as AuthenticatedRequest).user?.userId || "admin",
           verifiedAt: new Date(),
         },
       });
@@ -527,5 +527,63 @@ export const payCash = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error("Pay cash error:", error);
     res.status(500).json({ error: "Gagal memproses pembayaran tunai" });
+  }
+};
+
+export const getPortalInvoiceById = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const id = req.params.id as string;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: "Sesi tidak ditemukan atau belum login" });
+      return;
+    }
+
+    const tenant = await prisma.tenant.findUnique({
+      where: { userId },
+    });
+
+    if (!tenant) {
+      res.status(404).json({ error: "Data penghuni tidak ditemukan" });
+      return;
+    }
+
+    // Pastikan tagihan benar-benar milik penghuni yang sedang login (Multi-Tenant Isolation)
+    const invoice = await prisma.invoice.findFirst({
+      where: {
+        id,
+        lease: {
+          tenantId: tenant.id,
+        },
+      },
+      include: {
+        lease: {
+          include: {
+            tenant: true,
+            room: {
+              include: {
+                roomType: true,
+              },
+            },
+          },
+        },
+        payments: {
+          where: { status: "VERIFIED" },
+          orderBy: { paidAt: "desc" },
+          take: 1,
+        },
+      },
+    });
+
+    if (!invoice) {
+      res.status(404).json({ error: "Kwitansi tidak ditemukan atau Anda tidak memiliki akses ke tagihan ini" });
+      return;
+    }
+
+    res.json({ data: invoice });
+  } catch (error) {
+    console.error("Get portal invoice detail error:", error);
+    res.status(500).json({ error: "Gagal mengambil detail kwitansi" });
   }
 };

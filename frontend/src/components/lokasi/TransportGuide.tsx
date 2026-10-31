@@ -89,9 +89,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Bundaran HI</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Kota Makassar (Pettarani / Alauddin)</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Arahkan kendaraan ke arah Menteng / Cikini. Lurus terus melintasi Tugu Tani, belok kiri pada lampu merah kedua setelah Stasiun Cikini. Gedung Pondok Rahmat berada di sebelah kiri jalan dengan fasad berwarna hijau gelap.
+                        Arahkan kendaraan ke Jl. Sultan Alauddin, lalu masuk ke Jl. H.M. Yasin Limpo (Poros Samata). Lurus terus melewati Bundaran Samata dan Kampus II UIN Alauddin. Gedung Pondok Rahmat berada di kawasan Romangpolong.
                       </p>
                     </div>
                   </li>
@@ -100,9 +100,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Salemba Raya</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Dari Arah Sungguminasa / Poros Malino</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Masuk ke Jalan Diponegoro, putar balik di depan RS Carolus. Ambil jalur kiri dan belok kiri sebelum pertigaan besar. Pondok Rahmat berjarak 200m dari belokan.
+                        Ambil rute via Jl. Poros Malino menuju Samata. Belok di pertigaan menuju Romangpolong. Akses jalan sudah beraspal halus dan nyaman dilalui mobil maupun motor.
                       </p>
                     </div>
                   </li>
@@ -111,9 +111,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Fasilitas Parkir</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Fasilitas Parkir Luas</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Begitu Anda tiba, masuk melalui gerbang utama. Area parkir tamu tersedia di lantai dasar bagian depan, sementara penghuni memiliki akses parkir khusus di lantai basement.
+                        Area parkir aman dan terlindung di dalam pagar untuk motor dan mobil penghuni maupun calon penyewa yang datang berkunjung untuk survey kamar langsung.
                       </p>
                     </div>
                   </li>
@@ -122,13 +122,12 @@ export default function TransportGuide() {
             ) : (
               <div className="animate-fade-in-up">
                 <h3 className="mb-6 text-2xl font-bold text-[#202321]">
-                  Panduan Transportasi Umum
+                  Panduan Transportasi Umum & Online
                 </h3>
                 <ul key={activeTab} className="space-y-8 relative z-0">
                   <style>{`
                     @keyframes drawLine {
                       0% { height: 0; }
-                      100% { height: 100%; }
                     }
                     .animate-draw-line {
                       animation: drawLine 1.5s ease-out forwards;
@@ -146,9 +145,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan KRL Commuter Line</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan Ojek Online (Gojek / Grab / Maxim)</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Turun di <strong>Stasiun KRL Cikini</strong>. Keluar stasiun, belok kanan dan berjalan kaki sekitar 5 menit (500 meter) menyusuri trotoar. Pondok Rahmat terletak di sebelah kanan jalan.
+                        Cukup ketik tujuan <strong>"Pondok Rahmat Samata"</strong> di aplikasi Anda. Titik penjemputan dan pengantaran sangat akurat tepat di depan pagar gerbang kos.
                       </p>
                     </div>
                   </li>
@@ -157,9 +156,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan TransJakarta (Busway)</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Dari Bandara Sultan Hasanuddin</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Turun di <strong>Halte TransJakarta Salemba UI</strong> (Koridor 5). Anda dapat menggunakan ojek online sekitar 3 menit, atau berjalan kaki sekitar 10 menit menuju lokasi.
+                        Gunakan taksi bandara atau ojek online via Jalan Tol Reformasi ke arah Pettarani, kemudian lanjut ke Poros Samata Gowa (waktu tempuh sekitar 35 - 45 menit).
                       </p>
                     </div>
                   </li>
@@ -168,9 +167,9 @@ export default function TransportGuide() {
                       <CheckCircle2 className="h-6 w-6 shrink-0 text-[#C69C6D] bg-white rounded-full" />
                     </div>
                     <div>
-                      <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan MRT</p>
+                      <p className="font-semibold text-[#1F3D35] text-lg">Menggunakan Angkutan Kota / Teman Bus</p>
                       <p className="mt-1 text-[#6B716D] leading-relaxed">
-                        Turun di <strong>Stasiun MRT Bundaran HI</strong>. Lanjutkan dengan ojek online menuju Cikini/Salemba, waktu tempuh sekitar 10 menit.
+                        Naik bus/pete-pete trayek Makassar - Gowa dan turun di Terminal Mallengkeri atau Bundaran Samata, dilanjutkan 3 menit dengan ojek online ke lokasi.
                       </p>
                     </div>
                   </li>

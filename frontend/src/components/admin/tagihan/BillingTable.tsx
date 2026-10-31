@@ -1,7 +1,9 @@
 "use client";
 
+import toast from "react-hot-toast";
 import { Eye, Bell, CheckCircle, Loader2, Pencil, Trash2, Printer, Wallet } from "lucide-react";
 import { BillingItem } from "@/types/admin";
+import { createWhatsAppLink, formatWhatsAppNumber } from "@/lib/whatsapp";
 
 export type TabType = "menunggu" | "nunggak" | "lunas";
 
@@ -39,12 +41,15 @@ export default function BillingTable({
   });
 
   const handleRemindWhatsApp = (item: BillingItem) => {
-    let cleanPhone = item.tenantPhone.replace(/\D/g, "");
-    if (cleanPhone.startsWith("0")) {
-      cleanPhone = "62" + cleanPhone.slice(1);
+    const rawPhone = item.tenantPhone || "";
+    const cleanPhone = formatWhatsAppNumber(rawPhone);
+    if (!cleanPhone) {
+      toast.error(`Nomor WhatsApp untuk penghuni ${item.tenantName} belum terdaftar.`);
+      return;
     }
-    const message = `Halo ${item.tenantName}, ini pengingat tagihan kos kamar ${item.roomNumber} (${item.invoiceNumber}) sejumlah ${item.amount} dengan jatuh tempo ${item.dueDate}. Mohon segera melakukan pembayaran melalui portal penghuni. Terima kasih!`;
-    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, "_blank");
+    const message = `Halo ${item.tenantName}, ini pengingat tagihan sewa kamar ${item.roomNumber} (${item.invoiceNumber}) sejumlah ${item.amount} dengan jatuh tempo ${item.dueDate}. Mohon segera melakukan pembayaran melalui portal penghuni Kostara. Terima kasih!`;
+    const waUrl = createWhatsAppLink(cleanPhone, message);
+    window.open(waUrl, "_blank");
   };
 
   if (loading) {

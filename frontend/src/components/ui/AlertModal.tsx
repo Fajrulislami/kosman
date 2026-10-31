@@ -6,7 +6,7 @@ interface AlertModalProps {
   isOpen: boolean;
   title: string;
   message: string;
-  variant?: "success" | "error" | "info";
+  variant?: "success" | "error" | "info" | "warning";
   onClose: () => void;
 }
 
@@ -32,6 +32,12 @@ export default function AlertModal({
           icon: <AlertCircle className="h-6 w-6 text-red-600" />,
           bg: "bg-red-100",
           button: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
+        };
+      case "warning":
+        return {
+          icon: <AlertCircle className="h-6 w-6 text-amber-600" />,
+          bg: "bg-amber-100",
+          button: "bg-amber-600 hover:bg-amber-700 focus:ring-amber-500",
         };
       case "info":
       default:

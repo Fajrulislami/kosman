@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, Receipt, Wrench, User, X, LogOut, ArrowLeft } from "lucide-react";
 import { apiFetch } from "@/lib/api";
+import { usePortalContext } from "@/context/PortalContext";
 
 export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { activeBillCount, activeComplaintCount } = usePortalContext();
 
   const navItems = [
     { name: "Dashboard", href: "/portal/dashboard", icon: LayoutDashboard },
@@ -18,11 +20,13 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
 
   const handleLogout = async () => {
     try {
-      await apiFetch("/api/auth/logout", { method: "POST" });
+      await apiFetch("/api/auth/logout?role=tenant", { method: "POST" });
     } catch {
       // Ignore
     } finally {
+      localStorage.removeItem("kostara_tenant_token");
       localStorage.removeItem("kostara_token");
+      document.cookie = "kostara_tenant_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       document.cookie = "kostara_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       router.push("/login");
       router.refresh();
@@ -34,7 +38,7 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
       {/* Mobile Overlay Backdrop */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm md:hidden print:hidden"
           onClick={onClose}
         />
       )}
@@ -43,7 +47,7 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
         fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-[#E5E3DE] flex flex-col h-screen
         transform transition-transform duration-300 ease-out
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0 md:static md:z-auto
+        md:translate-x-0 md:static md:z-auto print:hidden
       `}>
         {/* Header */}
         <div className="p-6 border-b border-[#E5E3DE] flex items-center justify-between">
@@ -56,7 +60,7 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
           {/* Close Button (Mobile Only) */}
           <button 
             onClick={onClose}
-            className="md:hidden p-2 text-[#6B716D] hover:bg-[#F8F7F4] rounded-lg transition-colors"
+            className="md:hidden p-2 text-[#6B716D] hover:bg-[#F8F7F4] rounded-lg transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -66,6 +70,28 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
         <nav className="flex-1 p-4 space-y-1.5">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
+            
+            const renderBadge = () => {
+              if (item.name === "Tagihan" && activeBillCount > 0) {
+                return (
+                  <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white shadow-xs">
+                    {activeBillCount}
+                  </span>
+                );
+              }
+              if (item.name === "Komplain" && activeComplaintCount > 0) {
+                return (
+                  <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white shadow-xs">
+                    {activeComplaintCount}
+                  </span>
+                );
+              }
+              if (isActive) {
+                return <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#C69C6D]" />;
+              }
+              return null;
+            };
+
             return (
               <Link
                 key={item.name}
@@ -78,10 +104,8 @@ export default function PortalSidebar({ isOpen, onClose }: { isOpen?: boolean; o
                 }`}
               >
                 <item.icon className={`w-5 h-5 ${isActive ? "text-[#C69C6D]" : ""}`} />
-                {item.name}
-                {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#C69C6D]" />
-                )}
+                <span>{item.name}</span>
+                {renderBadge()}
               </Link>
             );
           })}
