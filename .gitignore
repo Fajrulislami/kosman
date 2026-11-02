@@ -21,17 +21,36 @@ out/
 dist/
 **/dist/
 
-# SQLite databases (local testing)
+# SQLite databases & backups (local testing & production dumps)
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
+*.sql
+*.dump
+*.tar.gz
+*.bak
+backups/
+**/backups/
 
-# misc
+# User uploaded files (KTP, bukti bayar & file pribadi penghuni)
+uploads/
+**/uploads/
+public/uploads/
+
+# misc & OS
 .DS_Store
+Thumbs.db
 *.pem
 
-# debug
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# debug & logs
+*.log
+logs/
+**/logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -49,3 +68,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI Agent internal tools & rules
+.agents/
+skills-lock.json
+AGENTS.md
+CLAUDE.md
+**/AGENTS.md
+**/CLAUDE.md

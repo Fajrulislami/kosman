@@ -8,6 +8,7 @@ import ProfileSettings from "@/components/admin/pengaturan/ProfileSettings";
 import PaymentSettings from "@/components/admin/pengaturan/PaymentSettings";
 import RuleSettings from "@/components/admin/pengaturan/RuleSettings";
 import AccountSettings from "@/components/admin/pengaturan/AccountSettings";
+import BackupSettings from "@/components/admin/pengaturan/BackupSettings";
 import { apiFetch } from "@/lib/api";
 import AlertModal from "@/components/ui/AlertModal";
 
@@ -55,7 +56,7 @@ function PengaturanContent() {
 
   useEffect(() => {
     const tab = searchParams?.get("tab");
-    if (tab === "akun" || tab === "rekening" || tab === "aturan" || tab === "profil") {
+    if (tab === "akun" || tab === "rekening" || tab === "aturan" || tab === "profil" || tab === "backup") {
       setActiveMenu(tab as SettingsMenu);
     }
   }, [searchParams]);
@@ -115,32 +116,31 @@ function PengaturanContent() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const res = await apiFetch<{ success: boolean; message: string }>("/api/admin/settings", {
+      await apiFetch("/api/admin/settings", {
         method: "PUT",
         body: JSON.stringify(settings),
       });
 
-      setAlertConfig({
-        isOpen: true,
-        title: "Berhasil",
-        message: res.message,
-        variant: "success"
-      });
-      setHasChanges(false);
-
+      // Dispatch event agar Navbar & Footer reaktif terhadap update nama/kontak kos
       if (typeof window !== "undefined") {
         window.dispatchEvent(
-          new CustomEvent("kostara_settings_updated", {
-            detail: settings.profile,
-          })
+          new CustomEvent("kostara_settings_updated", { detail: settings.profile })
         );
       }
+
+      setAlertConfig({
+        isOpen: true,
+        title: "Berhasil!",
+        message: "Perubahan pengaturan berhasil disimpan dan aktif di seluruh website.",
+        variant: "success",
+      });
+      setHasChanges(false);
     } catch (err: any) {
       setAlertConfig({
         isOpen: true,
         title: "Gagal Menyimpan",
-        message: err.message || "Terjadi kesalahan saat menyimpan pengaturan",
-        variant: "error"
+        message: err.message || "Terjadi kesalahan saat menyimpan pengaturan.",
+        variant: "error",
       });
     } finally {
       setSaving(false);
@@ -165,6 +165,8 @@ function PengaturanContent() {
         return <RuleSettings data={settings.rules} onChange={handleRulesChange} />;
       case "akun": 
         return <AccountSettings />;
+      case "backup":
+        return <BackupSettings />;
       default: 
         return <ProfileSettings data={settings.profile} onChange={handleProfileChange} />;
     }
@@ -176,7 +178,7 @@ function PengaturanContent() {
       <div className="mb-8">
         <h1 className="text-3xl font-black tracking-tight text-[#1F3D35]">Pengaturan</h1>
         <p className="mt-1 text-sm font-medium text-[#6B716D]">
-          Kelola profil properti, rekening, aturan kos, dan preferensi akun Anda.
+          Kelola profil properti, rekening, aturan kos, preferensi akun, dan cadangan database Anda.
         </p>
       </div>
 
@@ -195,7 +197,7 @@ function PengaturanContent() {
       </div>
 
       {/* Floating Save Button (Hanya untuk tab Profil, Rekening, dan Aturan saat ada perubahan) */}
-      {hasChanges && activeMenu !== "akun" && (
+      {hasChanges && activeMenu !== "akun" && activeMenu !== "backup" && (
         <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-40 animate-in slide-in-from-bottom-8 duration-500">
           <button 
             disabled={saving}

@@ -13,6 +13,7 @@ import { analyticsRouter } from "./routes/analytics.routes";
 import { inquiryRouter } from "./routes/inquiry.routes";
 import settingRouter from "./routes/setting.routes";
 import { notificationRouter } from "./routes/notification.routes";
+import { backupRouter } from "./routes/backup.routes";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -20,10 +21,29 @@ const PORT = process.env.PORT || 5000;
 // Percayai header proxy (misal dari Next.js rewrite atau Nginx reverse proxy)
 app.set("trust proxy", 1);
 
-// Middleware
+// Middleware CORS (Mendukung satu atau beberapa URL dipisahkan koma)
+const configuredOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim().replace(/\/$/, ""))
+  : [];
+
+const allowedOrigins = [
+  ...new Set([
+    ...configuredOrigins,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+  ]),
+];
+
 app.use(
   cors({
-    origin: [process.env.FRONTEND_URL || "http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: (origin, callback) => {
+      // Izinkan request tanpa origin (seperti mobile apps, Postman, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, true); // Permisif agar tidak memblokir sub-domain vercel preview
+    },
     credentials: true,
   })
 );
@@ -51,6 +71,7 @@ app.use("/api", inquiryRouter);
 app.use("/api", notificationRouter);
 app.use("/api/admin/settings", settingRouter);
 app.use("/api/settings", settingRouter);
+app.use("/api/admin/backup", backupRouter);
 
 // Global Error Handler
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

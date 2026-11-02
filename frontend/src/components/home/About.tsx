@@ -27,10 +27,10 @@ export default function About() {
 
             <div className="mb-8 flex flex-col gap-4 text-[16px] leading-[1.8] text-[#6B716D]">
               <p>
-                Setelah seharian beraktivitas di kampus atau kantor, Anda berhak mendapatkan ruang istirahat yang sesungguhnya. Kami merancang setiap sudut hunian ini dengan atmosfer tenang dan pencahayaan alami, memberi Anda ketenangan pikiran untuk memulihkan energi dan berkarya.
+                Setelah seharian beraktivitas di kampus atau kantor, Anda berhak mendapatkan ruang istirahat yang sesungguhnya. Kami merancang setiap sudut hunian khusus putri ini dengan atmosfer tenang dan pencahayaan alami, memberi Anda ketenangan pikiran untuk memulihkan energi dan berkarya.
               </p>
               <p>
-                Bukan sekadar kamar kos, kami menghadirkan rumah kedua yang mengutamakan <strong>kebersihan, privasi, dan ketertiban</strong> agar Anda dapat fokus mengejar impian setiap hari.
+                Bukan sekadar kamar kos, <strong>Pondok Rahmat</strong> menghadirkan rumah kedua di samping Kampus II UIN Samata yang mengutamakan <strong>kebersihan, privasi, keamanan CCTV 24 jam, dan ketertiban</strong> agar Anda dapat fokus mengejar impian setiap hari.
               </p>
             </div>
 
@@ -43,29 +43,41 @@ export default function About() {
             </Link>
           </div>
 
-          {/* KOLOM KANAN: GAMBAR */}
+          {/* KOLOM KANAN: GAMBAR ASLI KOS */}
           <div className="flex flex-col gap-12 lg:col-span-7 lg:gap-24 lg:pt-10">
             
-            {/* Gambar 1 - Ukuran Landscape */}
+            {/* Gambar 1 - Lorong Kos Rapi & Bersih */}
             <div className="group relative w-full md:w-[90%]">
-              <div className="aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#E5E3DE] shadow-sm transition-shadow duration-500 hover:shadow-md">
-                {/* <Image src="/images/tentang/kamar.jpg" alt="Suasana Kamar" fill className="object-cover" /> */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#E5E3DE] shadow-sm transition-shadow duration-500 hover:shadow-md">
+                <Image
+                  src="/images/lorong-kos.jpg"
+                  alt="Lorong Bersih & Rapi Pondok Rahmat"
+                  fill
+                  className="object-cover transition-transform duration-700 hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 600px"
+                />
               </div>
               
               {/* Kartu Info 1 */}
               <div className="absolute -bottom-6 -right-4 flex items-center gap-4 rounded-xl border border-[#E5E3DE] bg-white px-4 py-3 shadow-sm md:px-6 md:py-4 lg:-right-8">
                 <Sparkles className="h-5 w-5 text-[#C69C6D]" />
                 <div>
-                  <p className="text-[14px] font-bold text-[#1F3D35]">Atmosfer Tenang</p>
-                  <p className="text-[13px] text-[#6B716D]">Bebas kebisingan luar</p>
+                  <p className="text-[14px] font-bold text-[#1F3D35]">Atmosfer Tenang & Bersih</p>
+                  <p className="text-[13px] text-[#6B716D]">Khusus mahasiswi & putri</p>
                 </div>
               </div>
             </div>
 
-            {/* Gambar 2 - Diubah menjadi aspect-[4/3] agar ukurannya seragam dengan Gambar 1 */}
+            {/* Gambar 2 - Fasad Gedung Depan */}
             <div className="group relative w-full md:ml-auto md:w-[90%]">
-              <div className="aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#E5E3DE] shadow-sm transition-shadow duration-500 hover:shadow-md">
-                {/* <Image src="/images/tentang/fasilitas.jpg" alt="Fasilitas Bersih" fill className="object-cover" /> */}
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[16px] bg-[#E5E3DE] shadow-sm transition-shadow duration-500 hover:shadow-md">
+                <Image
+                  src="/images/gedung-depan.jpg"
+                  alt="Tampak Depan Fasad Pondok Rahmat"
+                  fill
+                  className="object-cover transition-transform duration-700 hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 600px"
+                />
               </div>
               
               {/* Kartu Info 2 */}
@@ -73,7 +85,7 @@ export default function About() {
                 <Wind className="h-5 w-5 text-[#C69C6D]" />
                 <div>
                   <p className="text-[14px] font-bold text-[#1F3D35]">Sirkulasi Sehat</p>
-                  <p className="text-[13px] text-[#6B716D]">Pencahayaan & udara alami</p>
+                  <p className="text-[13px] text-[#6B716D]">Pencahayaan & ventilasi alami</p>
                 </div>
               </div>
             </div>

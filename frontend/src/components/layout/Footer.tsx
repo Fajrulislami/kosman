@@ -101,7 +101,7 @@ export default function Footer() {
               </li>
               <li className="group flex items-center gap-3 text-[15px] text-white/70 transition-colors duration-300 hover:text-white">
                 <Phone className="h-5 w-5 shrink-0 text-[#C69C6D] transition-transform duration-300 ease-out group-hover:rotate-12 group-hover:scale-110" />
-                <span>{profile.phone || "+62 853-9740-3114"}</span>
+                <span>{profile.phone || "+62 853-9740-3115"}</span>
               </li>
               <li className="group flex items-center gap-3 text-[15px] text-white/70 transition-colors duration-300 hover:text-white">
                 <Mail className="h-5 w-5 shrink-0 text-[#C69C6D] transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-110" />

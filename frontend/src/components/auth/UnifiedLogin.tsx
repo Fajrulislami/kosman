@@ -42,9 +42,17 @@ export default function UnifiedLogin() {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        // Abaikan jika balasan bukan JSON murni
+      }
 
       if (!res.ok) {
+        if (res.status === 502 || res.status === 504 || !data.error) {
+          throw new Error("Gagal terhubung ke backend OCI (HTTP " + res.status + "). Pastikan BACKEND_INTERNAL_URL di Vercel menggunakan port :5000.");
+        }
         throw new Error(data.error || "Email atau password yang Anda masukkan tidak sesuai");
       }
 
@@ -84,9 +92,17 @@ export default function UnifiedLogin() {
         body: JSON.stringify({ token: credentialResponse.credential }),
       });
 
-      const data = await res.json();
+      let data: any = {};
+      try {
+        data = await res.json();
+      } catch {
+        // Abaikan jika balasan bukan JSON murni
+      }
 
       if (!res.ok) {
+        if (res.status === 502 || res.status === 504 || !data.error) {
+          throw new Error("Gagal terhubung ke backend OCI saat autentikasi Google (HTTP " + res.status + "). Pastikan port :5000 terpasang di Vercel.");
+        }
         throw new Error(data.error || "Gagal login dengan Google");
       }
 

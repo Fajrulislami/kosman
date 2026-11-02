@@ -60,12 +60,15 @@ export default function Navbar() {
         - border border-white/60 : Garis pinggir putih tipis agar bentuk kaca lebih tegas
         - px-8 py-4.5 : Ukuran background tetap dijaga lebih besar dan lega
       */}
-      <nav className="flex w-auto items-center gap-10 rounded-full border border-white/60 bg-white/40 px-8 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.03)] backdrop-blur-lg">
+      <nav className="flex w-auto items-center gap-8 lg:gap-10 rounded-full border border-white/60 bg-white/40 px-6 sm:px-8 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.03)] backdrop-blur-lg">
         
-        {/* Logo Pondok Rahmat */}
-        <Link href="/" className="flex items-center transition-opacity duration-300 hover:opacity-70">
+        {/* Logo Pondok Rahmat + Badge Kost Putri */}
+        <Link href="/" className="flex items-center gap-2.5 transition-opacity duration-300 hover:opacity-85">
           <span className="text-2xl font-extrabold tracking-tighter text-[#1F3D35]">
             {profile.name || "Pondok Rahmat"}<span className="text-[#C69C6D]">.</span>
+          </span>
+          <span className="hidden sm:inline-flex items-center rounded-full bg-[#1F3D35]/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[#1F3D35]">
+            Kost Putri
           </span>
         </Link>
 

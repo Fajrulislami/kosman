@@ -31,16 +31,15 @@ export const rooms: Room[] = [
     totalUnits: 2,
     availableUnits: 1,
     images: [
-      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800",
+      "/images/kamar-standar-3.jpg",
+      "/images/kamar-standar-1.jpg",
+      "/images/kamar-standar-2.jpg"
     ],
     facilities: [
-      "Kasur Springbed",
-      "Lemari Pakaian",
-      "Meja Belajar",
-      "WiFi High Speed",
+      "Kasur",
       "Kamar Mandi Dalam"
     ],
-    description: "Kamar nyaman dengan fasilitas lengkap, cocok untuk mahasiswa dan profesional muda.",
+    description: "Kamar kos nyaman dan bersih dengan fasilitas kasur dan kamar mandi dalam, cocok untuk mahasiswa dan pekerja yang mencari hunian praktis dan terjangkau.",
     rules: [
       "Dilarang membawa tamu lawan jenis menginap tanpa izin",
       "Menjaga ketenangan dan kebersihan bersama",
@@ -110,4 +109,3 @@ export const rooms: Room[] = [
 export const getRoomBySlug = (slug: string): Room | undefined => {
   return rooms.find((room) => room.slug === slug);
 };
-

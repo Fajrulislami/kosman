@@ -1,8 +1,8 @@
 "use client";
 
-import { Building2, CreditCard, ShieldAlert, User, ChevronRight } from "lucide-react";
+import { Building2, CreditCard, ShieldAlert, User, ChevronRight, Database } from "lucide-react";
 
-export type SettingsMenu = "profil" | "rekening" | "aturan" | "akun";
+export type SettingsMenu = "profil" | "rekening" | "aturan" | "akun" | "backup";
 
 interface SettingsSidebarProps {
   activeMenu: SettingsMenu;
@@ -14,6 +14,7 @@ const MENU_ITEMS = [
   { id: "rekening", label: "Rekening & Pembayaran", icon: CreditCard, desc: "Bank & QRIS" },
   { id: "aturan", label: "Aturan Kos", icon: ShieldAlert, desc: "Tata tertib & kebijakan" },
   { id: "akun", label: "Akun Admin", icon: User, desc: "Keamanan & login" },
+  { id: "backup", label: "Cadangan Data", icon: Database, desc: "Unduh & amankan database" },
 ] as const;
 
 export default function SettingsSidebar({ activeMenu, onMenuChange }: SettingsSidebarProps) {

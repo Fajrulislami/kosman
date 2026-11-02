@@ -20,10 +20,10 @@ export default function RoomGallery({ images }: RoomGalleryProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Pastikan kita memiliki setidaknya 3 gambar untuk bento grid
-  const mainImage = images[0] || "/images/placeholder.jpg";
-  const smallImage1 = images[1] || "/images/placeholder.jpg";
-  const smallImage2 = images[2] || "/images/placeholder.jpg";
+  // Pastikan fallback aman jika gambar kurang dari 3
+  const mainImage = images[0] || "/images/kamar-standar-3.jpg";
+  const smallImage1 = images[1] || images[0] || "/images/kamar-standar-1.jpg";
+  const smallImage2 = images[2] || images[0] || "/images/kamar-standar-2.jpg";
 
   return (
     <section className="mb-16 md:mb-24 w-full">

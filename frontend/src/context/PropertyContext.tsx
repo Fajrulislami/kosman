@@ -7,6 +7,7 @@ import { formatWhatsAppNumber } from "@/lib/whatsapp";
 export interface PropertyProfile {
   name: string;
   phone: string;
+  secondaryPhone?: string;
   address: string;
   description: string;
   mapsUrl: string;
@@ -14,9 +15,10 @@ export interface PropertyProfile {
 
 const defaultProfile: PropertyProfile = {
   name: "Pondok Rahmat",
-  phone: "+62 853-9740-3114",
-  address: "Romangpolong, Samata, Kec. Somba Opu, Kabupaten Gowa, Sulawesi Selatan 92113",
-  description: "Hunian nyaman untuk hidup lebih produktif.",
+  phone: "+62 853-9740-3115",
+  secondaryPhone: "+62 831-2350-1171",
+  address: "Romangpolong, Samata (Samping UIN Samata dekat Pintu II), Kec. Somba Opu, Kabupaten Gowa, Sulawesi Selatan 92113",
+  description: "Kost Putri Nyaman, Bersih, dan Strategis Dekat Kampus II UIN Samata.",
   mapsUrl: "https://maps.app.goo.gl/mHwa7ppvN4231RZz5?g_st=aw",
 };
 
@@ -31,8 +33,8 @@ interface PropertyContextType {
 const PropertyContext = createContext<PropertyContextType>({
   profile: defaultProfile,
   isLoading: true,
-  rawPhone: "6285397403114",
-  waUrl: () => "https://wa.me/6285397403114",
+  rawPhone: "6285397403115",
+  waUrl: () => "https://wa.me/6285397403115",
   refreshProfile: () => {},
 });
 
@@ -79,7 +81,7 @@ export const PropertyProvider = ({ children }: { children: React.ReactNode }) =>
     };
   }, []);
 
-  const rawPhone = profile.phone ? formatWhatsAppNumber(profile.phone) : "6285397403114";
+  const rawPhone = profile.phone ? formatWhatsAppNumber(profile.phone) : "6285397403115";
   
   const waUrl = (message?: string) => {
     return message
