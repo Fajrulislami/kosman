@@ -69,7 +69,7 @@ const DraggablePill = ({
 */
 export default function Hero() {
   return (
-    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-28 md:pt-20">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F8F7F4] pt-20 md:pt-16 pb-12">
       
       {/* Pola Titik Latar Belakang */}
       <div className="absolute inset-0 bg-[radial-gradient(#E5E3DE_1px,transparent_1px)] [background-size:24px_24px] opacity-70"></div>
