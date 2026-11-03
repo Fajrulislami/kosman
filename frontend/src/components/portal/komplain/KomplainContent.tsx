@@ -105,7 +105,7 @@ export default function KomplainContent() {
         setFetchError(null);
       }
       const res = await apiFetch<{ data: PortalComplaintItem[] }>("/api/portal/complaints");
-      setComplaints(res.data || []);
+      setComplaints((res.data || []).filter((c) => c.category !== "Administrasi & Sewa"));
       setFetchError(null);
     } catch (err) {
       if (!silent) {

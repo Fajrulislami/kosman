@@ -83,7 +83,7 @@ export default function Hero() {
       <div className="pointer-events-none absolute inset-0 z-10">
         
         {/* Gambar Kiri Atas - Kamar & Kasur Asli */}
-        <div className="pointer-events-auto absolute left-[2%] top-20 hidden w-40 -rotate-6 cursor-pointer overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-110 hover:border-white hover:shadow-2xl md:block md:w-48 lg:left-[5%] xl:left-[8%]">
+        <div className="pointer-events-auto absolute left-[2%] top-20 hidden w-40 -rotate-6 cursor-default overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-105 hover:border-white hover:shadow-2xl md:block md:w-48 lg:left-[5%] xl:left-[8%]">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E3DE]">
             <Image
               src="/images/kamar-kasur.jpg"
@@ -96,7 +96,7 @@ export default function Hero() {
         </div>
 
         {/* Gambar Kanan Atas - Gedung Depan / Fasad Asli */}
-        <div className="pointer-events-auto absolute right-[2%] top-24 hidden w-44 rotate-3 cursor-pointer overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-110 hover:border-white hover:shadow-2xl md:block md:w-56 lg:right-[5%] xl:right-[8%]">
+        <div className="pointer-events-auto absolute right-[2%] top-24 hidden w-44 rotate-3 cursor-default overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-105 hover:border-white hover:shadow-2xl md:block md:w-56 lg:right-[5%] xl:right-[8%]">
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-[#E5E3DE]">
             <Image
               src="/images/gedung-depan.jpg"
@@ -109,7 +109,7 @@ export default function Hero() {
         </div>
 
         {/* Gambar Kiri Bawah - Lorong Kos Bersih & Aman */}
-        <div className="pointer-events-auto absolute bottom-12 left-[3%] hidden w-44 -rotate-3 cursor-pointer overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-110 hover:border-white hover:shadow-2xl md:block md:w-52 lg:left-[8%] xl:left-[12%]">
+        <div className="pointer-events-auto absolute bottom-12 left-[3%] hidden w-44 -rotate-3 cursor-default overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-105 hover:border-white hover:shadow-2xl md:block md:w-52 lg:left-[8%] xl:left-[12%]">
           <div className="relative aspect-[3/2] w-full overflow-hidden bg-[#E5E3DE]">
             <Image
               src="/images/lorong-kos.jpg"
@@ -122,7 +122,7 @@ export default function Hero() {
         </div>
 
         {/* Gambar Kanan Bawah - Kamar Mandi Dalam & Kamar */}
-        <div className="pointer-events-auto absolute bottom-20 right-[3%] hidden w-40 rotate-6 cursor-pointer overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-110 hover:border-white hover:shadow-2xl md:block md:w-48 lg:right-[10%] xl:right-[15%]">
+        <div className="pointer-events-auto absolute bottom-20 right-[3%] hidden w-40 rotate-6 cursor-default overflow-hidden rounded-2xl border-4 border-white/90 bg-white shadow-xl backdrop-blur-sm transition-all duration-500 ease-out hover:z-40 hover:rotate-0 hover:scale-105 hover:border-white hover:shadow-2xl md:block md:w-48 lg:right-[10%] xl:right-[15%]">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E3DE]">
             <Image
               src="/images/kamar-standar-1.jpg"

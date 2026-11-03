@@ -52,3 +52,19 @@ export interface PortalComplaintItem {
   resolvedDate: string | null;
   resolutionNote: string | null;
 }
+
+export interface PortalLeaseExtensionItem {
+  id: string;
+  leaseId: string;
+  tenantId: string;
+  roomId: string;
+  durationMonths: number;
+  proposedEndDate: string;
+  notes: string | null;
+  adminNotes: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  room?: {
+    roomNumber: string;
+  };
+}

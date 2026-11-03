@@ -1,14 +1,15 @@
 "use client";
 
-import { Clock, AlertTriangle, AlertCircle, Home, MessageSquare, CalendarPlus, ChevronRight, Hourglass } from "lucide-react";
+import { Clock, AlertTriangle, AlertCircle, Home, MessageSquare, CalendarPlus, ChevronRight, Hourglass, CheckCircle2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { createWhatsAppLink } from "@/lib/whatsapp";
+import { PortalLeaseExtensionItem } from "@/types/portal";
 
 interface LeaseStatusCardProps {
   activeLease?: any;
   tenantName?: string;
   propertyPhone?: string;
-  pendingExtension?: any;
+  extensionStatus?: PortalLeaseExtensionItem | null;
   onOpenExtendModal: () => void;
 }
 
@@ -16,7 +17,7 @@ export default function LeaseStatusCard({
   activeLease,
   tenantName = "Penghuni",
   propertyPhone = "081122223333",
-  pendingExtension,
+  extensionStatus,
   onOpenExtendModal,
 }: LeaseStatusCardProps) {
   // 1. Kondisi: Belum ada kamar / sewa aktif dalam riwayat
@@ -61,24 +62,25 @@ export default function LeaseStatusCard({
   const now = new Date().getTime();
   const rawDiffDays = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
   const remainingDays = Math.max(0, rawDiffDays);
-  const formattedEndDate = activeLease.endDate ? activeLease.endDate.split("T")[0] : "-";
+  const formattedEndDate = activeLease.endDate
+    ? new Date(activeLease.endDate).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : "-";
+
   const isExpired = rawDiffDays <= 0 || activeLease.status === "EXPIRED" || activeLease.status === "TERMINATED";
+  const isPendingExtension = extensionStatus?.status === "PENDING";
 
   const renderActionSection = (isMinimal = false) => {
-    if (pendingExtension) {
+    if (isPendingExtension) {
       return (
         <div className="flex items-center justify-between gap-2 w-full">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-100/90 px-3 py-2 rounded-xl flex-1 justify-center">
-            <Clock className="w-3.5 h-3.5 animate-pulse text-amber-600" />
-            <span className="truncate">Perpanjangan Ditinjau</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-amber-900 bg-amber-100/90 px-3 py-2.5 rounded-xl flex-1 justify-center border border-amber-200">
+            <Hourglass className="w-4 h-4 animate-pulse text-amber-700" />
+            <span className="truncate">Perpanjangan Sedang Ditinjau Admin</span>
           </div>
-          <Link
-            href="/portal/komplain"
-            className="inline-flex items-center gap-1 text-xs font-bold text-[#1F3D35] hover:text-[#C69C6D] bg-white border border-[#E5E3DE] px-3 py-2 rounded-xl transition-colors shrink-0 shadow-sm"
-          >
-            <span>Tiket</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       );
     }
@@ -106,16 +108,46 @@ export default function LeaseStatusCard({
     );
   };
 
-  const renderPendingExtensionBanner = () => {
-    if (!pendingExtension) return null;
-    return (
-      <div className="mt-3 p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 flex items-center gap-2">
-        <Hourglass className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-        <span className="text-[11px] font-semibold leading-tight">
-          Pengajuan perpanjangan sewa (<strong className="font-bold">{pendingExtension.ticketNumber}</strong>) sedang ditinjau admin.
-        </span>
-      </div>
-    );
+  const renderExtensionBanner = () => {
+    if (!extensionStatus) return null;
+
+    if (extensionStatus.status === "PENDING") {
+      const proposedFormatted = new Date(extensionStatus.proposedEndDate).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      return (
+        <div className="mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900">
+          <div className="flex items-center gap-2 font-bold text-amber-950">
+            <Hourglass className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
+            <span>Pengajuan Perpanjangan (+{extensionStatus.durationMonths} Bulan)</span>
+          </div>
+          <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">
+            Menunggu persetujuan admin hingga <strong>{proposedFormatted}</strong>. Tagihan sewa akan otomatis diterbitkan begitu disetujui.
+          </p>
+        </div>
+      );
+    }
+
+    if (extensionStatus.status === "REJECTED") {
+      return (
+        <div className="mt-3 p-3 rounded-2xl bg-red-50 border border-red-200/80 text-xs text-red-900">
+          <div className="flex items-center gap-2 font-bold text-red-950">
+            <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+            <span>Pengajuan Sebelumnya Ditolak</span>
+          </div>
+          {extensionStatus.adminNotes && (
+            <p className="text-[11px] text-red-800 mt-1 italic">
+              &ldquo;{extensionStatus.adminNotes}&rdquo;
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    return null;
   };
 
   // 2. Kondisi: Kontrak Habis (expired)
@@ -131,10 +163,10 @@ export default function LeaseStatusCard({
           </div>
           <div className="mt-4">
             <h3 className="text-2xl font-extrabold text-red-700 tracking-tight">Masa Sewa Berakhir</h3>
-            <p className="text-xs text-red-600/80 mt-1.5">
+            <p className="text-xs text-red-600/80 mt-1.5 leading-relaxed">
               Kontrak {activeLease.room?.roomNumber ? `Kamar ${activeLease.room.roomNumber}` : "kamar Anda"} telah selesai pada <strong className="font-bold text-red-900">{formattedEndDate}</strong>.
             </p>
-            {renderPendingExtensionBanner()}
+            {renderExtensionBanner()}
           </div>
         </div>
 
@@ -162,7 +194,7 @@ export default function LeaseStatusCard({
             <p className="text-xs text-red-600/80 mt-2">
               Segera berakhir pada <strong className="font-bold text-red-900">{formattedEndDate}</strong>.
             </p>
-            {renderPendingExtensionBanner()}
+            {renderExtensionBanner()}
           </div>
         </div>
 
@@ -190,7 +222,7 @@ export default function LeaseStatusCard({
             <p className="text-xs text-amber-700/80 mt-2">
               Berakhir pada <strong className="font-bold text-amber-950">{formattedEndDate}</strong>.
             </p>
-            {renderPendingExtensionBanner()}
+            {renderExtensionBanner()}
           </div>
         </div>
 
@@ -214,7 +246,7 @@ export default function LeaseStatusCard({
             {remainingDays}
           </span>
           <span className="text-sm font-medium text-[#6B716D] ml-2">Hari lagi</span>
-          {renderPendingExtensionBanner()}
+          {renderExtensionBanner()}
         </div>
       </div>
 

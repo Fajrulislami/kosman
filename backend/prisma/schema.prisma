@@ -43,18 +43,19 @@ model RoomType {
 }
 
 model Room {
-  id          String   @id @default(cuid())
-  roomNumber  String   @unique
-  floor       Int      @default(1)
-  status      String   @default("AVAILABLE") // "AVAILABLE" | "OCCUPIED" | "MAINTENANCE" | "RESERVED"
-  notes       String?
-  roomTypeId  String
-  roomType    RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  roomNumber        String   @unique
+  floor             Int      @default(1)
+  status            String   @default("AVAILABLE") // "AVAILABLE" | "OCCUPIED" | "MAINTENANCE" | "RESERVED"
+  notes             String?
+  roomTypeId        String
+  roomType          RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Restrict)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  leases      Lease[]
-  complaints  Complaint[]
+  leases            Lease[]
+  complaints        Complaint[]
+  extensionRequests LeaseExtensionRequest[]
 
   @@map("rooms")
 }
@@ -76,27 +77,48 @@ model Tenant {
 
   leases            Lease[]
   complaints        Complaint[]
+  extensionRequests LeaseExtensionRequest[]
 
   @@map("tenants")
 }
 
 model Lease {
-  id            String   @id @default(cuid())
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
-  roomId        String
-  room          Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
-  startDate     DateTime
-  endDate       DateTime
-  rentAmount    Int
-  depositAmount Int      @default(0)
-  status        String   @default("ACTIVE") // "ACTIVE" | "TERMINATED" | "EXPIRED"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  roomId            String
+  room              Room     @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  startDate         DateTime
+  endDate           DateTime
+  rentAmount        Int
+  depositAmount     Int      @default(0)
+  status            String   @default("ACTIVE") // "ACTIVE" | "TERMINATED" | "EXPIRED"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  invoices      Invoice[]
+  invoices          Invoice[]
+  extensionRequests LeaseExtensionRequest[]
 
   @@map("leases")
+}
+
+model LeaseExtensionRequest {
+  id              String   @id @default(cuid())
+  leaseId         String
+  lease           Lease    @relation(fields: [leaseId], references: [id], onDelete: Cascade)
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  roomId          String
+  room            Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  durationMonths  Int
+  proposedEndDate DateTime
+  notes           String?
+  status          String   @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  adminNotes      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("lease_extension_requests")
 }
 
 model Invoice {

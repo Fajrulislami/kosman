@@ -17,10 +17,11 @@ import {
   MessageSquare,
   Clock,
   Send,
+  CalendarPlus,
 } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api";
-import { PortalInvoiceItem, PortalComplaintItem } from "@/types/portal";
+import { PortalInvoiceItem, PortalComplaintItem, PortalLeaseExtensionItem } from "@/types/portal";
 import { createWhatsAppLink } from "@/lib/whatsapp";
 import LeaseStatusCard from "./LeaseStatusCard";
 import ExtendLeaseModal from "./ExtendLeaseModal";
@@ -30,6 +31,7 @@ export default function DashboardContent() {
   const [profile, setProfile] = useState<any>(null);
   const [invoices, setInvoices] = useState<PortalInvoiceItem[]>([]);
   const [complaints, setComplaints] = useState<PortalComplaintItem[]>([]);
+  const [extensionStatus, setExtensionStatus] = useState<PortalLeaseExtensionItem | null>(null);
   const [propertyPhone, setPropertyPhone] = useState("081122223333");
   const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
   const [extendSuccessMessage, setExtendSuccessMessage] = useState<string | null>(null);
@@ -42,16 +44,20 @@ export default function DashboardContent() {
         setLoading(true);
         setError(null);
       }
-      const [meRes, invRes, compRes, settingsRes] = await Promise.all([
+      const [meRes, invRes, compRes, extRes, settingsRes] = await Promise.all([
         apiFetch<{ authenticated: boolean; user: any }>("/api/auth/me"),
         apiFetch<{ data: PortalInvoiceItem[] }>("/api/portal/invoices").catch(() => ({ data: [] })),
         apiFetch<{ data: PortalComplaintItem[] }>("/api/portal/complaints").catch(() => ({ data: [] })),
+        apiFetch<{ data: PortalLeaseExtensionItem | null }>("/api/portal/lease/extension-status").catch(() => ({ data: null })),
         apiFetch<{ data: { profile?: { phone?: string } } }>("/api/settings").catch(() => null),
       ]);
 
       setProfile(meRes.user);
       setInvoices(invRes.data || []);
-      setComplaints(compRes.data || []);
+      // Filter out legacy "Administrasi & Sewa" complaints so they don't pollute maintenance tickets
+      setComplaints((compRes.data || []).filter((c) => c.category !== "Administrasi & Sewa"));
+      setExtensionStatus(extRes.data || null);
+
       if (settingsRes?.data?.profile?.phone) {
         setPropertyPhone(settingsRes.data.profile.phone);
       }
@@ -87,14 +93,9 @@ export default function DashboardContent() {
   const activeLease = profile?.tenant?.leases?.find((l: any) => l.status === "ACTIVE") || profile?.tenant?.leases?.[0];
   const room = activeLease?.room;
 
-  // Deteksi pengajuan perpanjangan sewa yang sedang aktif / ditinjau
-  const pendingExtension = complaints.find(
-    (c) => c.category === "Administrasi & Sewa" && c.rawStatus !== "RESOLVED" && c.rawStatus !== "REJECTED"
-  );
-
-  // Filter khusus keluhan/layanan fasilitas kamar (memisahkan tiket administrasi kontrak)
+  // Filter khusus keluhan/layanan fasilitas kamar
   const facilityRequests = complaints.filter(
-    (r) => r.category !== "Administrasi & Sewa" && r.rawStatus !== "RESOLVED" && r.rawStatus !== "REJECTED"
+    (r) => r.rawStatus !== "RESOLVED" && r.rawStatus !== "REJECTED"
   );
 
   // Active bill: prioritaskan tagihan yang paling mendesak (OVERDUE -> REJECTED -> WAITING_CONFIRMATION -> PENDING)
@@ -113,7 +114,13 @@ export default function DashboardContent() {
   const now = new Date().getTime();
   const rawDiffDays = activeLease?.endDate ? Math.ceil((end - now) / (1000 * 60 * 60 * 24)) : 0;
   const remainingDays = Math.max(0, rawDiffDays);
-  const formattedEndDate = activeLease?.endDate ? activeLease.endDate.split("T")[0] : "-";
+  const formattedEndDate = activeLease?.endDate
+    ? new Date(activeLease.endDate).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
+    : "-";
   const isExpired = activeLease && (rawDiffDays <= 0 || activeLease.status === "EXPIRED" || activeLease.status === "TERMINATED");
 
   if (loading) {
@@ -154,7 +161,7 @@ export default function DashboardContent() {
 
   return (
     <div className="space-y-6">
-      {/* Banner Notifikasi Pengajuan Perpanjangan Berhasil */}
+      {/* Banner Notifikasi Pengajuan Perpanjangan Berhasil Dikirim */}
       {extendSuccessMessage && (
         <div className="flex items-start justify-between gap-3 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-start gap-3">
@@ -174,7 +181,24 @@ export default function DashboardContent() {
         </div>
       )}
 
-      {/* Baris Ringkasan Metrik Cepat (Quick Stats - Poin 6) */}
+      {/* Banner Perpanjangan Sedang Ditinjau Admin */}
+      {extensionStatus?.status === "PENDING" && !extendSuccessMessage && (
+        <div className="flex items-start justify-between gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-start gap-3">
+            <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5 animate-pulse" />
+            <div>
+              <p className="font-bold text-sm text-amber-950">
+                Pengajuan Perpanjangan Sewa (+{extensionStatus.durationMonths} Bulan) Sedang Ditinjau
+              </p>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Permohonan perpanjangan hingga <strong>{new Date(extensionStatus.proposedEndDate).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</strong> sedang ditinjau oleh Admin. Setelah disetujui, masa sewa akan otomatis diperpanjang dan invoice tagihan diterbitkan.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Baris Ringkasan Metrik Cepat (Quick Stats) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Unit Kamar"
@@ -186,17 +210,17 @@ export default function DashboardContent() {
         />
         <StatCard
           title="Masa Sewa"
-          value={!activeLease ? "-" : isExpired ? "Berakhir" : `${remainingDays} Hari`}
+          value={!activeLease ? "-" : isExpired ? (extensionStatus?.status === "PENDING" ? "Ditinjau" : "Berakhir") : `${remainingDays} Hari`}
           subtitle={!activeLease ? "Belum ada kontrak" : `Sampai ${formattedEndDate}`}
           icon={Clock}
           href="/portal/profil"
           badge={
             !activeLease
               ? undefined
+              : extensionStatus?.status === "PENDING"
+              ? { text: "Ditinjau", variant: "amber" }
               : isExpired
               ? { text: "Habis", variant: "red" }
-              : pendingExtension
-              ? { text: "Ditinjau", variant: "amber" }
               : remainingDays <= 7
               ? { text: "Kritis", variant: "red" }
               : { text: "Aktif", variant: "green" }
@@ -294,12 +318,12 @@ export default function DashboardContent() {
           </div>
         </div>
 
-        {/* 2. Masa Sewa Remaining Card (Reaktif dengan Deteksi Pengajuan Aktif - Poin 2 & 5) */}
+        {/* 2. Masa Sewa Remaining Card (Reaktif dengan Status Perpanjangan Resmi) */}
         <LeaseStatusCard
           activeLease={activeLease}
           tenantName={profile?.name}
           propertyPhone={propertyPhone}
-          pendingExtension={pendingExtension}
+          extensionStatus={extensionStatus}
           onOpenExtendModal={() => setIsExtendModalOpen(true)}
         />
 
@@ -308,7 +332,7 @@ export default function DashboardContent() {
       {/* Row 2: Tagihan & Layanan */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
-        {/* Status Tagihan Sewa (Poin 1) */}
+        {/* Status Tagihan Sewa */}
         <div className="bg-white rounded-3xl p-8 border border-[#E5E3DE] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
@@ -379,45 +403,42 @@ export default function DashboardContent() {
                 )}
               </div>
             ) : (
-              <div className="mt-4 flex items-center gap-2 text-green-600">
-                <CheckCircle2 className="w-5 h-5" />
-                <span className="font-semibold text-sm">Semua tagihan sewa Anda sudah lunas.</span>
+              <div className="mt-4">
+                <p className="text-lg font-bold text-emerald-800 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  Semua Tagihan Lunas
+                </p>
+                <p className="text-xs text-[#6B716D] mt-1">
+                  Terima kasih! Pembayaran sewa kamar Anda tertib dan tidak ada tunggakan berjalan.
+                </p>
               </div>
             )}
           </div>
 
           <div className="mt-8 pt-6 border-t border-[#E5E3DE]">
-            <Link
+            <Link 
               href="/portal/tagihan"
-              className={`w-full flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold shadow-sm transition-colors ${
-                isRejected || isOverdue
-                  ? "bg-red-600 hover:bg-red-700 text-white"
-                  : "bg-[#1F3D35] hover:bg-[#152923] text-white"
-              }`}
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#1F3D35] hover:bg-[#152923] text-white px-5 py-3 text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
             >
-              <span>
-                {!currentBill
-                  ? "Lihat Riwayat & Cetak Kwitansi"
-                  : isRejected
-                  ? "Upload Ulang Bukti Transfer"
-                  : isWaiting
-                  ? "Lihat Status Pembayaran"
-                  : "Bayar Tagihan Sekarang"}
-              </span>
+              <span>{currentBill ? "Bayar Tagihan Sekarang" : "Riwayat Pembayaran"}</span>
               <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
         </div>
 
-        {/* Layanan Perbaikan / Fasilitas Kamar (Poin 4) */}
+        {/* Layanan Fasilitas & Kendala Kamar */}
         <div className="bg-white rounded-3xl p-8 border border-[#E5E3DE] shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="w-10 h-10 rounded-2xl bg-[#F8F7F4] flex items-center justify-center text-[#1F3D35]">
                 <Wrench className="w-5 h-5" />
               </div>
-              <span className="text-xs font-semibold text-[#6B716D]">
-                {facilityRequests.length} Laporan Kerusakan Aktif
+              <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                facilityRequests.length === 0
+                  ? "bg-green-50 text-green-700 border-green-200"
+                  : "bg-amber-50 text-amber-700 border-amber-200"
+              }`}>
+                {facilityRequests.length === 0 ? "Fasilitas Aman" : `${facilityRequests.length} Diproses`}
               </span>
             </div>
 
@@ -425,18 +446,20 @@ export default function DashboardContent() {
             
             <div className="mt-4 space-y-3">
               {facilityRequests.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-[#F8F7F4] border border-[#E5E3DE] text-xs text-[#6B716D] flex items-center gap-2.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Tidak ada laporan kerusakan aktif. Semua fasilitas kamar Anda terpantau aman dan berfungsi baik.</span>
+                <div>
+                  <p className="text-sm font-semibold text-[#202321]">Kondisi Kamar Terpantau Baik</p>
+                  <p className="text-xs text-[#6B716D] mt-1 leading-relaxed">
+                    Tidak ada laporan kendala AC, listrik, atau sanitasi yang sedang berjalan saat ini.
+                  </p>
                 </div>
               ) : (
                 facilityRequests.slice(0, 2).map((req) => (
-                  <div key={req.id} className="rounded-xl border border-[#E5E3DE] p-3.5 flex items-center justify-between">
-                    <div className="pr-2 min-w-0">
-                      <p className="text-sm font-bold text-[#1F3D35] truncate">{req.issue}</p>
-                      <p className="text-xs text-[#6B716D] mt-0.5">{req.category} • {req.date}</p>
+                  <div key={req.id} className="p-3.5 rounded-2xl bg-[#F8F7F4] border border-[#E5E3DE] flex items-center justify-between gap-3 text-xs">
+                    <div className="min-w-0">
+                      <p className="font-bold text-[#1F3D35] truncate">{req.issue}</p>
+                      <p className="text-[#6B716D] text-[11px] mt-0.5">Tiket #{req.ticketNumber} • {req.date}</p>
                     </div>
-                    <span className="shrink-0 rounded-md bg-amber-50 border border-amber-200 px-2 py-1 text-[11px] font-bold text-amber-700">
+                    <span className="shrink-0 px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">
                       {req.status}
                     </span>
                   </div>

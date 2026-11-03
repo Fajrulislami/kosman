@@ -13,10 +13,11 @@ export default function RoomCatalog() {
 
   useEffect(() => {
     let isMounted = true;
-    const loadRooms = async () => {
+
+    const loadRooms = async (silent = false) => {
       try {
-        setLoading(true);
-        const res = await apiFetch("/api/public/rooms");
+        if (!silent) setLoading(true);
+        const res = await apiFetch("/api/public/rooms", { cache: "no-store" });
         if (res && res.data && isMounted) {
           const formatted: Room[] = res.data.map((r: any) => ({
             id: r.id,
@@ -32,22 +33,36 @@ export default function RoomCatalog() {
             images:
               Array.isArray(r.images) && r.images.length > 0
                 ? r.images
-                : ["https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"],
+                : ["/images/kamar-standar-3.jpg", "/images/kamar-standar-1.jpg"],
             facilities: Array.isArray(r.facilities) ? r.facilities : [],
             description: r.description || "",
           }));
-          setRoomList(formatted);
+          setRoomList(formatted.length > 0 ? formatted : initialRooms);
         }
       } catch (err) {
         console.error("Gagal memuat katalog dinamis, memakai fallback:", err);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted && !silent) setLoading(false);
       }
     };
 
     loadRooms();
+
+    // Smart Background Polling (5s interval senyap)
+    const interval = setInterval(() => {
+      loadRooms(true);
+    }, 5000);
+
+    // Auto-sync saat tab browser aktif kembali
+    const handleFocus = () => {
+      loadRooms(true);
+    };
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 
@@ -72,7 +87,7 @@ export default function RoomCatalog() {
           Temukan Ruang Nyaman<br className="hidden sm:block" /> Sesuai Gaya Hidupmu
         </h1>
         <p className="mx-auto max-w-2xl text-base text-[#6B716D]">
-          Setiap kamar dirancang dengan ventilasi udara segar, pencahayaan alami, dan fasilitas modern untuk istirahat optimal dan produktivitas tinggi.
+          Setiap kamar dirancang dengan ventilasi udara segar, pencahayaan alami, dan fasilitas modern untuk istirahat optimal dan kenyamanan mahasiswi.
         </p>
 
         {/* Filter Controls */}
@@ -107,7 +122,7 @@ export default function RoomCatalog() {
       {/* Grid Katalog Kamar */}
       {loading && roomList.length === 0 ? (
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((n) => (
+          {[1].map((n) => (
             <div
               key={n}
               className="h-96 animate-pulse rounded-3xl border border-[#E5E3DE] bg-white p-6 shadow-sm"
@@ -125,7 +140,7 @@ export default function RoomCatalog() {
             Saat ini belum ada kamar dengan filter yang dipilih.
           </p>
           <p className="mt-2 text-sm text-[#6B716D]">
-            Silakan ganti filter atau hubungi admin untuk reservasi waiting list.
+            Silakan ganti filter atau hubungi pengelola untuk informasi ketersediaan kamar berikutnya.
           </p>
           <button
             onClick={() => setFilter("ALL")}

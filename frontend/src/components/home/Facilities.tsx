@@ -156,7 +156,7 @@ export default function Facilities() {
             <div className="animate-ripple-delayed absolute h-14 w-14 rounded-full border-[1.5px] border-[#C69C6D]"></div>
             
             {/* Lencana Utama (Interaktif) */}
-            <div className="relative flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-[#1F3D35] to-[#162E28] shadow-[0_10px_20px_rgba(31,61,53,0.3)] transition-all duration-500 group-hover:scale-110 group-hover:shadow-[0_15px_30px_rgba(198,156,109,0.3)]">
+            <div className="relative flex h-14 w-14 cursor-default items-center justify-center rounded-full bg-gradient-to-br from-[#1F3D35] to-[#162E28] shadow-[0_10px_20px_rgba(31,61,53,0.3)] transition-all duration-500 group-hover:scale-105 group-hover:shadow-[0_15px_30px_rgba(198,156,109,0.3)]">
               {/* Garis batas dalam lencana */}
               <div className="absolute inset-0 m-[2px] rounded-full border border-[#C69C6D]/40"></div>
               {/* Ikon Bintang Berputar saat Hover */}

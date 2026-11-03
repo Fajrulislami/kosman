@@ -34,7 +34,7 @@ export default function ProfilContent() {
   }, [fetchProfile]);
 
   const tenant = profile?.tenant;
-  const activeLease = tenant?.leases?.[0];
+  const activeLease = tenant?.leases?.find((l: any) => l.status === "ACTIVE") || tenant?.leases?.[0];
   const room = activeLease?.room;
 
   // Format tanggal bahasa Indonesia

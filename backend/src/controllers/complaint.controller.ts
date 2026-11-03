@@ -15,7 +15,10 @@ export const getPortalComplaints = async (req: AuthenticatedRequest, res: Respon
     }
 
     const complaints = await prisma.complaint.findMany({
-      where: { tenantId: tenant.id },
+      where: {
+        tenantId: tenant.id,
+        category: { not: "Administrasi & Sewa" },
+      },
       include: { room: true },
       orderBy: { createdAt: "desc" },
     });
@@ -107,7 +110,8 @@ export const submitComplaint = async (req: AuthenticatedRequest, res: Response):
 export const getAdminComplaints = async (req: Request, res: Response): Promise<void> => {
   try {
     const status = req.query.status ? String(req.query.status) : undefined;
-    const where: Record<string, unknown> = {};
+    const baseWhere: any = { category: { not: "Administrasi & Sewa" } };
+    const where: any = { ...baseWhere };
     if (status) where.status = status;
 
     const complaints = await prisma.complaint.findMany({
@@ -133,10 +137,10 @@ export const getAdminComplaints = async (req: Request, res: Response): Promise<v
       resolutionNote: c.resolutionNote,
     }));
 
-    const total = await prisma.complaint.count();
-    const pending = await prisma.complaint.count({ where: { status: "PENDING" } });
-    const inProgress = await prisma.complaint.count({ where: { status: "IN_PROGRESS" } });
-    const resolved = await prisma.complaint.count({ where: { status: "RESOLVED" } });
+    const total = await prisma.complaint.count({ where: baseWhere });
+    const pending = await prisma.complaint.count({ where: { ...baseWhere, status: "PENDING" } });
+    const inProgress = await prisma.complaint.count({ where: { ...baseWhere, status: "IN_PROGRESS" } });
+    const resolved = await prisma.complaint.count({ where: { ...baseWhere, status: "RESOLVED" } });
 
     res.json({
       data: formatted,

@@ -43,10 +43,11 @@ export default function FeaturedRooms() {
 
   useEffect(() => {
     let isMounted = true;
-    const fetchRooms = async () => {
+
+    const fetchRooms = async (silent = false) => {
       try {
-        setIsLoading(true);
-        const res = await apiFetch("/api/public/rooms");
+        if (!silent) setIsLoading(true);
+        const res = await apiFetch("/api/public/rooms", { cache: "no-store" });
         if (res && res.data && isMounted) {
           const formatted: Room[] = res.data.map((r: any) => ({
             id: r.id,
@@ -62,23 +63,37 @@ export default function FeaturedRooms() {
             images:
               Array.isArray(r.images) && r.images.length > 0
                 ? r.images
-                : ["https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"],
+                : ["/images/kamar-standar-3.jpg", "/images/kamar-standar-1.jpg"],
             facilities: Array.isArray(r.facilities) ? r.facilities : [],
             description: r.description || "",
           }));
-          // Jika backend mengembalikan daftar kamar yang valid, gunakan itu; jika array kosong, simpan state
-          setRoomList(formatted.length > 0 ? formatted : []);
+          setRoomList(formatted.length > 0 ? formatted : initialRooms);
         }
       } catch {
-        // Fallback sudah diset dari initialRooms
+        // Fallback tetap initialRooms
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted && !silent) setIsLoading(false);
       }
     };
 
+    // Pemuatan data pertama kali
     fetchRooms();
+
+    // Smart Background Polling (Interval 5 detik senyap tanpa loading/flicker)
+    const pollInterval = setInterval(() => {
+      fetchRooms(true);
+    }, 5000);
+
+    // Auto-sync instan saat tab browser dibuka kembali
+    const handleFocus = () => {
+      fetchRooms(true);
+    };
+    window.addEventListener("focus", handleFocus);
+
     return () => {
       isMounted = false;
+      clearInterval(pollInterval);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 
@@ -173,7 +188,7 @@ export default function FeaturedRooms() {
                             {room.name}
                           </span>
                         </div>
-                        <span className={`rounded-full px-3 py-1 text-xs font-bold ${
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold transition-all duration-500 ${
                           isAvailable ? "bg-emerald-100 text-emerald-800" : "bg-gray-200 text-gray-700"
                         }`}>
                           {isAvailable ? `Tersedia (${room.availableUnits ?? 1} Unit)` : "Penuh"}
@@ -231,7 +246,7 @@ export default function FeaturedRooms() {
                         </div>
                         <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E5E3DE]">
                           <SafeImage
-                            src={room.images?.[0] || "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800"}
+                            src={room.images?.[0] || "/images/kamar-standar-3.jpg"}
                             alt={room.name}
                             fill
                             unoptimized

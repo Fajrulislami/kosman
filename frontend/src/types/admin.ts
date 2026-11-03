@@ -109,3 +109,37 @@ export interface DashboardOverview {
     inquiries?: any[];
   };
 }
+
+export interface LeaseExtensionItem {
+  id: string;
+  leaseId: string;
+  tenantId: string;
+  roomId: string;
+  durationMonths: number;
+  proposedEndDate: string;
+  notes: string | null;
+  adminNotes: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  createdAt: string;
+  tenant: {
+    id: string;
+    fullName: string;
+    phone: string;
+  };
+  room: {
+    id: string;
+    roomNumber: string;
+    floor: number;
+    roomType?: {
+      name: string;
+      basePrice: number;
+    } | null;
+  };
+  lease: {
+    id: string;
+    startDate: string;
+    endDate: string;
+    rentAmount: number;
+    status: string;
+  };
+}

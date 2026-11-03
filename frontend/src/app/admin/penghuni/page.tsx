@@ -7,20 +7,22 @@ import TenantTable from "@/components/admin/penghuni/TenantTable";
 import AddTenantModal from "@/components/admin/penghuni/AddTenantModal";
 import TenantDetailSlideOver from "@/components/admin/penghuni/TenantDetailSlideOver";
 import InquiryTable, { InquiryItem } from "@/components/admin/penghuni/InquiryTable";
-import { Plus, Users, CalendarCheck, RefreshCw } from "lucide-react";
+import LeaseExtensionTable from "@/components/admin/penghuni/LeaseExtensionTable";
+import { Plus, Users, CalendarCheck, RefreshCw, CalendarPlus } from "lucide-react";
 import { apiFetch } from "@/lib/api";
-import { TenantItem } from "@/types/admin";
+import { TenantItem, LeaseExtensionItem } from "@/types/admin";
 import AlertModal from "@/components/ui/AlertModal";
 
 function PenghuniContent() {
   const searchParams = useSearchParams();
   const [tenants, setTenants] = useState<TenantItem[]>([]);
   const [inquiries, setInquiries] = useState<InquiryItem[]>([]);
+  const [extensions, setExtensions] = useState<LeaseExtensionItem[]>([]);
   const [stats, setStats] = useState<{ total: number; active: number; inactive: number } | undefined>();
   const [totalRooms, setTotalRooms] = useState(10);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<"tenants" | "inquiries">("tenants");
+  const [activeTab, setActiveTab] = useState<"tenants" | "inquiries" | "extensions">("tenants");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedInquiryForTenant, setSelectedInquiryForTenant] = useState<InquiryItem | null>(null);
@@ -44,21 +46,23 @@ function PenghuniContent() {
       if (!silent) {
         setIsRefreshing(true);
       }
-      const [tenantRes, roomRes, inquiryRes] = await Promise.all([
+      const [tenantRes, roomRes, inquiryRes, extensionRes] = await Promise.all([
         apiFetch<{ data: TenantItem[]; stats: any }>("/api/admin/tenants"),
         apiFetch<{ stats: { total: number } }>("/api/admin/rooms").catch(() => ({ stats: { total: 10 } })),
         apiFetch<{ data: InquiryItem[] }>("/api/admin/inquiries").catch(() => ({ data: [] })),
+        apiFetch<{ data: LeaseExtensionItem[] }>("/api/admin/leases/extensions").catch(() => ({ data: [] })),
       ]);
 
       setTenants(tenantRes.data || []);
       setStats(tenantRes.stats);
       setInquiries(inquiryRes.data || []);
+      setExtensions(extensionRes.data || []);
       if (roomRes.stats?.total) {
         setTotalRooms(roomRes.stats.total);
       }
     } catch (err) {
       if (!silent) {
-        console.error("Error fetching tenants & inquiries:", err);
+        console.error("Error fetching tenants, inquiries, & extensions:", err);
       }
     } finally {
       setLoading(false);
@@ -69,7 +73,7 @@ function PenghuniContent() {
   useEffect(() => {
     fetchData();
 
-    // Auto-refresh di latar belakang setiap 15 detik agar reservasi baru otomatis muncul
+    // Auto-refresh di latar belakang setiap 15 detik agar data baru otomatis sinkron
     const interval = setInterval(() => {
       fetchData(true);
     }, 15000);
@@ -86,11 +90,13 @@ function PenghuniContent() {
     };
   }, [fetchData]);
 
-  // Reaktif terhadap parameter ?tab=inquiries di URL (misal saat diklik dari notifikasi lonceng)
+  // Reaktif terhadap parameter ?tab=... di URL (misal saat diklik dari notifikasi lonceng)
   useEffect(() => {
     const tabParam = searchParams?.get("tab");
     if (tabParam === "inquiries") {
       setActiveTab("inquiries");
+    } else if (tabParam === "extensions") {
+      setActiveTab("extensions");
     } else if (tabParam === "tenants") {
       setActiveTab("tenants");
     }
@@ -123,6 +129,7 @@ function PenghuniContent() {
   };
 
   const newInquiriesCount = inquiries.filter((i) => i.status === "NEW").length;
+  const pendingExtensionsCount = extensions.filter((e) => e.status === "PENDING").length;
 
   return (
     <div className="space-y-6">
@@ -131,7 +138,7 @@ function PenghuniContent() {
         <div>
           <h1 className="text-3xl font-black tracking-tight text-[#1F3D35]">Manajemen Penghuni</h1>
           <p className="mt-1 text-sm text-[#6B716D]">
-            Kelola data penghuni kos aktif, alokasi kamar, dan calon penyewa dari website publik.
+            Kelola data penghuni kos aktif, alokasi kamar, reservasi, dan perpanjangan sewa resmi.
           </p>
         </div>
 
@@ -164,10 +171,10 @@ function PenghuniContent() {
       <TenantStats stats={stats} totalRooms={totalRooms} />
 
       {/* Tab Switcher */}
-      <div className="flex items-center gap-2 border-b border-[#E5E3DE] pb-2">
+      <div className="flex items-center gap-2 border-b border-[#E5E3DE] pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab("tenants")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "tenants"
               ? "bg-[#1F3D35] text-white shadow-sm"
               : "text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
@@ -178,8 +185,25 @@ function PenghuniContent() {
         </button>
 
         <button
+          onClick={() => setActiveTab("extensions")}
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === "extensions"
+              ? "bg-[#1F3D35] text-white shadow-sm"
+              : "text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
+          }`}
+        >
+          <CalendarPlus className="h-4 w-4" />
+          <span>Pengajuan Perpanjangan ({extensions.length})</span>
+          {pendingExtensionsCount > 0 && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-extrabold text-white animate-pulse">
+              {pendingExtensionsCount}
+            </span>
+          )}
+        </button>
+
+        <button
           onClick={() => setActiveTab("inquiries")}
-          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "inquiries"
               ? "bg-[#1F3D35] text-white shadow-sm"
               : "text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
@@ -198,6 +222,12 @@ function PenghuniContent() {
       {/* Tab Content */}
       {activeTab === "tenants" ? (
         <TenantTable tenants={tenants} loading={loading} onViewDetail={handleViewDetail} />
+      ) : activeTab === "extensions" ? (
+        <LeaseExtensionTable
+          extensions={extensions}
+          loading={loading}
+          onRefresh={fetchData}
+        />
       ) : (
         <InquiryTable
           inquiries={inquiries}
