@@ -56,6 +56,7 @@ export interface BillingItem {
   rawAmount: number;
   dueDate: string;
   period: string;
+  description?: string | null;
   status: string;
   rawStatus: "PENDING" | "WAITING_CONFIRMATION" | "PAID" | "OVERDUE" | "CANCELLED";
   payment: {

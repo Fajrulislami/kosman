@@ -44,8 +44,15 @@ export default function ActiveBillCard({ activeBill, onPayClick, onPreviewProofC
           <div>
             <h2 className="text-xs font-bold tracking-wider text-[#6B716D] uppercase">Tagihan Aktif</h2>
             <p className="text-lg font-semibold text-[#202321]">
-              {activeBill ? `${activeBill.month} (${activeBill.invoiceNumber})` : "Tidak Ada Tagihan Tertunda"}
-            </p>
+              {activeBill ? activeBill.month : "Tidak Ada Tagihan Tertunda"}
+
+            {activeBill && (
+              <p className="text-xs text-[#6B716D] font-mono mt-0.5">
+                No. Tagihan: {activeBill.invoiceNumber}
+  
+            )}
+
+
           </div>
         </div>
 
@@ -90,7 +97,7 @@ export default function ActiveBillCard({ activeBill, onPayClick, onPreviewProofC
                     <span className="ml-1.5 font-bold text-red-600">(Terlambat {daysOverdue} hari)</span>
                   )}
                 </span>
-              </p>
+  
             </div>
 
             {/* Banner Khusus: Peringatan Keterlambatan Jatuh Tempo (OVERDUE) */}
@@ -106,7 +113,7 @@ export default function ActiveBillCard({ activeBill, onPayClick, onPreviewProofC
                     </h4>
                     <p className="text-xs text-red-800 mt-1 leading-relaxed">
                       Tagihan sewa kamar ini telah melewati jatuh tempo {daysOverdue > 0 ? <strong className="font-bold text-red-950">{daysOverdue} hari</strong> : "hari ini"}. Mohon segera lakukan pembayaran dan unggah bukti transfer ke rekening pengelola kos untuk menghindari sanksi atau denda keterlambatan sewa.
-                    </p>
+        
                   </div>
                 </div>
               </div>
@@ -131,7 +138,7 @@ export default function ActiveBillCard({ activeBill, onPayClick, onPreviewProofC
                     </div>
                     <p className="text-xs text-red-700 mt-2 font-medium">
                       Silakan periksa kembali mutasi/rekening Anda dan unggah ulang bukti transfer yang sah dan jelas.
-                    </p>
+        
                   </div>
                 </div>
               </div>
@@ -189,7 +196,7 @@ export default function ActiveBillCard({ activeBill, onPayClick, onPreviewProofC
             </div>
             <p className="text-[#6B716D] text-sm">
               Kamar Anda tidak memiliki tagihan tertunda saat ini. Terima kasih telah membayar sewa tepat waktu.
-            </p>
+
           </div>
         )}
       </div>

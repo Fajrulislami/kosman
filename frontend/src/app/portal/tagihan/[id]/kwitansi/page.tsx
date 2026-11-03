@@ -13,6 +13,7 @@ interface InvoiceDetail {
   dueDate: string;
   periodMonth: number;
   periodYear: number;
+  description?: string | null;
   status: string;
   createdAt: string;
   lease: {
@@ -212,7 +213,7 @@ export default function PortalKwitansiPage() {
             <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Unit Kamar</h3>
             <p className="text-base font-bold text-[#1F3D35]">Kamar {invoice.lease.room.roomNumber}</p>
             <p className="text-xs text-gray-600 mt-0.5">
-              {invoice.lease.room.roomType?.name || "Standar"} • Periode {invoice.periodMonth}/{invoice.periodYear}
+              {invoice.lease.room.roomType?.name || "Standar"} • {invoice.description || `Periode ${invoice.periodMonth}/${invoice.periodYear}`}
             </p>
           </div>
         </div>
@@ -228,7 +229,9 @@ export default function PortalKwitansiPage() {
           <tbody>
             <tr className="border-b border-gray-50">
               <td className="py-6 text-sm font-semibold text-gray-800">
-                Sewa Kamar Kost ({invoice.lease.room.roomType?.name || "Unit Kamar"}) — Periode Bulan {invoice.periodMonth} Tahun {invoice.periodYear}
+                {invoice.description
+                  ? `${invoice.description} — Kamar ${invoice.lease.room.roomNumber} (${invoice.lease.room.roomType?.name || "Unit Kamar"})`
+                  : `Sewa Kamar Kost (${invoice.lease.room.roomType?.name || "Unit Kamar"}) — Periode Bulan ${invoice.periodMonth} Tahun ${invoice.periodYear}`}
               </td>
               <td className="py-6 text-sm font-bold text-[#1F3D35] text-right whitespace-nowrap">
                 {formatRupiah(invoice.amount)}

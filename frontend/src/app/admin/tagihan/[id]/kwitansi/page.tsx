@@ -13,6 +13,7 @@ interface InvoiceDetail {
   dueDate: string;
   periodMonth: number;
   periodYear: number;
+  description?: string | null;
   status: string;
   createdAt: string;
   lease: {
@@ -168,7 +169,7 @@ export default function KwitansiPage() {
           <div className="text-right">
             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Unit Kamar</h3>
             <p className="text-lg font-bold text-[#1F3D35]">No. {invoice.lease.room.roomNumber}</p>
-            <p className="text-sm text-gray-600">Periode: Bulan {invoice.periodMonth} / {invoice.periodYear}</p>
+            <p className="text-sm text-gray-600">{invoice.description || `Periode: Bulan ${invoice.periodMonth} / ${invoice.periodYear}`}</p>
           </div>
         </div>
 
@@ -183,7 +184,9 @@ export default function KwitansiPage() {
           <tbody>
             <tr className="border-b border-gray-50">
               <td className="py-6 text-sm font-semibold text-gray-800">
-                Sewa Kamar Kost ({invoice.lease.room.roomType?.name || "Unit"}) - Bulan {invoice.periodMonth} Tahun {invoice.periodYear}
+                {invoice.description
+                  ? `${invoice.description} — Kamar ${invoice.lease.room.roomNumber} (${invoice.lease.room.roomType?.name || "Unit"})`
+                  : `Sewa Kamar Kost (${invoice.lease.room.roomType?.name || "Unit"}) - Bulan ${invoice.periodMonth} Tahun ${invoice.periodYear}`}
               </td>
               <td className="py-6 text-sm font-bold text-[#1F3D35] text-right">
                 {formatRupiah(invoice.amount)}

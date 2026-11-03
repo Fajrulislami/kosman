@@ -131,6 +131,7 @@ model Invoice {
   dueDate       DateTime
   periodMonth   Int
   periodYear    Int
+  description   String?
   status        String   @default("PENDING") // "PENDING" | "WAITING_CONFIRMATION" | "PAID" | "OVERDUE" | "CANCELLED"
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

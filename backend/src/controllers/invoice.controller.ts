@@ -3,6 +3,57 @@ import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middlewares/auth";
 import { paySchema, verifySchema, createInvoiceSchema, updateInvoiceSchema } from "../validations/invoice.schema";
 
+/**
+ * Helper: Menghasilkan deskripsi/periode human-readable untuk invoice.
+ * Menangani tagihan sewa bulanan standar maupun tagihan perpanjangan sewa (multi-bulan / tahun berbeda).
+ */
+export function resolveInvoiceDescription(inv: {
+  amount: number;
+  periodMonth: number;
+  periodYear: number;
+  description?: string | null;
+  lease?: {
+    rentAmount?: number;
+    extensionRequests?: Array<{
+      status: string;
+      durationMonths: number;
+      proposedEndDate: Date;
+    }>;
+  };
+}): string {
+  if (inv.description && inv.description.trim().length > 0) {
+    return inv.description;
+  }
+
+  // Cek apakah ada perpanjangan sewa (LeaseExtensionRequest) yang cocok dengan invoice ini
+  if (inv.lease?.extensionRequests && inv.lease.extensionRequests.length > 0) {
+    const matchingReq = inv.lease.extensionRequests.find((r) => {
+      if (r.status !== "APPROVED") return false;
+      if (inv.lease?.rentAmount && inv.amount === inv.lease.rentAmount * r.durationMonths) return true;
+      return r.durationMonths > 1;
+    });
+
+    if (matchingReq) {
+      const endD = new Date(matchingReq.proposedEndDate);
+      const startD = new Date(endD);
+      startD.setMonth(startD.getMonth() - matchingReq.durationMonths);
+      startD.setDate(startD.getDate() + 1);
+
+      const startStr = startD.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+      const endStr = endD.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+      return `Perpanjangan Sewa ${matchingReq.durationMonths} Bulan (${startStr} – ${endStr})`;
+    }
+  }
+
+  // Jika nominal merupakan kelipatan harga sewa bulanan (misal Rp 1.950.000 / Rp 650.000 = 3 bulan)
+  if (inv.lease?.rentAmount && inv.lease.rentAmount > 0 && inv.amount > inv.lease.rentAmount) {
+    const months = Math.round(inv.amount / inv.lease.rentAmount);
+    return `Perpanjangan Sewa ${months} Bulan (Periode ${inv.periodMonth}/${inv.periodYear})`;
+  }
+
+  return `Periode ${inv.periodMonth}/${inv.periodYear}`;
+}
+
 export const getAdminInvoices = async (req: Request, res: Response): Promise<void> => {
   try {
     const { status, month, year } = req.query;
@@ -19,6 +70,10 @@ export const getAdminInvoices = async (req: Request, res: Response): Promise<voi
           include: {
             tenant: true,
             room: { include: { roomType: true } },
+            extensionRequests: {
+              where: { status: "APPROVED" },
+              orderBy: { createdAt: "desc" },
+            },
           },
         },
         payments: {
@@ -31,6 +86,7 @@ export const getAdminInvoices = async (req: Request, res: Response): Promise<voi
 
     const formatted = invoices.map((inv) => {
       const latestPayment = inv.payments[0];
+      const desc = resolveInvoiceDescription(inv);
       return {
         id: inv.id,
         invoiceNumber: inv.invoiceNumber,
@@ -42,6 +98,7 @@ export const getAdminInvoices = async (req: Request, res: Response): Promise<voi
         rawAmount: inv.amount,
         dueDate: inv.dueDate.toISOString().split("T")[0],
         period: `${inv.periodMonth}/${inv.periodYear}`,
+        description: inv.description || desc,
         status:
           inv.status === "PAID"
             ? "Lunas"
@@ -91,6 +148,10 @@ export const getPortalInvoices = async (req: AuthenticatedRequest, res: Response
         leases: {
           include: {
             room: { include: { roomType: true } },
+            extensionRequests: {
+              where: { status: "APPROVED" },
+              orderBy: { createdAt: "desc" },
+            },
             invoices: {
               include: {
                 payments: {
@@ -113,11 +174,20 @@ export const getPortalInvoices = async (req: AuthenticatedRequest, res: Response
     const allInvoices = tenant.leases.flatMap((lease) =>
       lease.invoices.map((inv) => {
         const latestPayment = inv.payments[0];
+        const desc = resolveInvoiceDescription({
+          ...inv,
+          lease: {
+            rentAmount: lease.rentAmount,
+            extensionRequests: lease.extensionRequests,
+          },
+        });
+
         return {
           id: inv.id,
           invoiceNumber: inv.invoiceNumber,
           room: `Kamar ${lease.room.roomNumber} - ${lease.room.roomType.name}`,
-          month: `Periode ${inv.periodMonth}/${inv.periodYear}`,
+          month: inv.description || desc,
+          description: inv.description || desc,
           amount: inv.amount,
           dueDate: inv.dueDate.toISOString().split("T")[0],
           paidDate: latestPayment?.status === "VERIFIED" ? latestPayment.paidAt.toISOString().split("T")[0] : null,
@@ -279,7 +349,7 @@ export const createInvoice = async (req: Request, res: Response): Promise<void> 
       return;
     }
 
-    const { leaseId, amount, dueDate, periodMonth, periodYear } = parsed.data;
+    const { leaseId, amount, dueDate, periodMonth, periodYear, description } = parsed.data;
 
     const lease = await prisma.lease.findUnique({
       where: { id: leaseId },
@@ -301,6 +371,7 @@ export const createInvoice = async (req: Request, res: Response): Promise<void> 
         dueDate: new Date(dueDate),
         periodMonth,
         periodYear,
+        description: description || null,
         status: "PENDING",
       },
     });
@@ -412,6 +483,7 @@ export const updateInvoice = async (req: Request, res: Response): Promise<void> 
     if (parsed.data.dueDate !== undefined) updatedData.dueDate = new Date(parsed.data.dueDate);
     if (parsed.data.periodMonth !== undefined) updatedData.periodMonth = parsed.data.periodMonth;
     if (parsed.data.periodYear !== undefined) updatedData.periodYear = parsed.data.periodYear;
+    if (parsed.data.description !== undefined) updatedData.description = parsed.data.description;
 
     const updatedInvoice = await prisma.invoice.update({
       where: { id },
@@ -460,15 +532,19 @@ export const getAdminInvoiceById = async (req: Request, res: Response): Promise<
         lease: {
           include: {
             tenant: true,
-            room: true,
-          }
+            room: { include: { roomType: true } },
+            extensionRequests: {
+              where: { status: "APPROVED" },
+              orderBy: { createdAt: "desc" },
+            },
+          },
         },
         payments: {
           where: { status: "VERIFIED" },
           orderBy: { paidAt: "desc" },
-          take: 1
-        }
-      }
+          take: 1,
+        },
+      },
     });
 
     if (!invoice) {
@@ -476,7 +552,14 @@ export const getAdminInvoiceById = async (req: Request, res: Response): Promise<
       return;
     }
 
-    res.json({ data: invoice });
+    const desc = resolveInvoiceDescription(invoice);
+
+    res.json({
+      data: {
+        ...invoice,
+        description: invoice.description || desc,
+      },
+    });
   } catch (error) {
     console.error("Get invoice detail error:", error);
     res.status(500).json({ error: "Gagal mengambil detail tagihan" });
@@ -566,6 +649,10 @@ export const getPortalInvoiceById = async (req: AuthenticatedRequest, res: Respo
                 roomType: true,
               },
             },
+            extensionRequests: {
+              where: { status: "APPROVED" },
+              orderBy: { createdAt: "desc" },
+            },
           },
         },
         payments: {
@@ -581,7 +668,14 @@ export const getPortalInvoiceById = async (req: AuthenticatedRequest, res: Respo
       return;
     }
 
-    res.json({ data: invoice });
+    const desc = resolveInvoiceDescription(invoice);
+
+    res.json({
+      data: {
+        ...invoice,
+        description: invoice.description || desc,
+      },
+    });
   } catch (error) {
     console.error("Get portal invoice detail error:", error);
     res.status(500).json({ error: "Gagal mengambil detail kwitansi" });

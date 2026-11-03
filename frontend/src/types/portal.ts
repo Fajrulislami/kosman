@@ -25,6 +25,7 @@ export interface PortalInvoiceItem {
   invoiceNumber: string;
   room: string;
   month: string;
+  description?: string | null;
   amount: number;
   dueDate: string;
   paidDate: string | null;

@@ -215,10 +215,29 @@ export const approveLeaseExtension = async (req: Request, res: Response): Promis
 
     // 1 Invoice total sesuai Opsi 1 (Disetujui User: misal 3 x Rp 650.000 = Rp 1.950.000)
     const totalAmount = lease.rentAmount * durationMonths;
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1;
-    const invoiceNumber = `INV-${currentYear}${String(currentMonth).padStart(2, "0")}-${Date.now().toString().slice(-4)}`;
+
+    // Tanggal akhir sewa sebelum perpanjangan
+    const prevEndDate = new Date(lease.endDate);
+    // Tanggal mulai perpanjangan: sehari setelah tanggal akhir sewa sebelumnya
+    const extensionStartDate = new Date(prevEndDate);
+    extensionStartDate.setDate(extensionStartDate.getDate() + 1);
+    const extensionEndDate = new Date(proposedEndDate);
+
+    const formatIndoDate = (date: Date) => {
+      return date.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+    };
+
+    const startStr = formatIndoDate(extensionStartDate);
+    const endStr = formatIndoDate(extensionEndDate);
+    const descriptionText = `Perpanjangan Sewa ${durationMonths} Bulan (${startStr} – ${endStr})`;
+
+    const startMonth = extensionStartDate.getMonth() + 1;
+    const startYear = extensionStartDate.getFullYear();
+    const invoiceNumber = `INV-${startYear}${String(startMonth).padStart(2, "0")}-${Date.now().toString().slice(-4)}`;
 
     // Jatuh tempo: 7 hari dari sekarang
     const dueDate = new Date();
@@ -243,7 +262,7 @@ export const approveLeaseExtension = async (req: Request, res: Response): Promis
         },
       });
 
-      // 3. Terbitkan 1 Invoice Total Perpanjangan Sewa
+      // 3. Terbitkan 1 Invoice Total Perpanjangan Sewa dengan Deskripsi & Periode yang Sesuai
       const newInvoice = await tx.invoice.create({
         data: {
           invoiceNumber,
@@ -251,8 +270,9 @@ export const approveLeaseExtension = async (req: Request, res: Response): Promis
           amount: totalAmount,
           penaltyAmount: 0,
           dueDate,
-          periodMonth: currentMonth,
-          periodYear: currentYear,
+          periodMonth: startMonth,
+          periodYear: startYear,
+          description: descriptionText,
           status: "PENDING",
         },
       });
