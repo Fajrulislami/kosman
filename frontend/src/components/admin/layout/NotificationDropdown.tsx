@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Bell,
   Calendar,
+  CalendarPlus,
   CreditCard,
   AlertTriangle,
   Clock,
@@ -20,7 +21,7 @@ import { apiFetch } from "@/lib/api";
 
 export interface NotificationItem {
   id: string;
-  type: "INQUIRY" | "PAYMENT" | "COMPLAINT" | "OVERDUE" | "EXPIRING_LEASE";
+  type: "INQUIRY" | "PAYMENT" | "COMPLAINT" | "OVERDUE" | "EXPIRING_LEASE" | "LEASE_EXTENSION";
   title: string;
   message: string;
   createdAt: string;
@@ -35,6 +36,7 @@ export interface NotificationCounts {
   pendingComplaints: number;
   overdueInvoices: number;
   expiringLeases: number;
+  pendingExtensions?: number;
 }
 
 export interface AdminNotificationsResponse {
@@ -115,9 +117,10 @@ export default function NotificationDropdown() {
     pendingComplaints: 0,
     overdueInvoices: 0,
     expiringLeases: 0,
+    pendingExtensions: 0,
   });
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [filterType, setFilterType] = useState<"ALL" | "INQUIRY" | "PAYMENT" | "COMPLAINT" | "REMINDER">("ALL");
+  const [filterType, setFilterType] = useState<"ALL" | "INQUIRY" | "PAYMENT" | "COMPLAINT" | "REMINDER" | "EXTENSION">("ALL");
 
   const prevCountRef = useRef<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -212,6 +215,7 @@ export default function NotificationDropdown() {
     if (filterType === "PAYMENT") return item.type === "PAYMENT";
     if (filterType === "COMPLAINT") return item.type === "COMPLAINT";
     if (filterType === "REMINDER") return item.type === "OVERDUE" || item.type === "EXPIRING_LEASE";
+    if (filterType === "EXTENSION") return item.type === "LEASE_EXTENSION";
     return true;
   });
 
@@ -299,6 +303,17 @@ export default function NotificationDropdown() {
             </button>
             <button
               type="button"
+              onClick={() => setFilterType("EXTENSION")}
+              className={`rounded-lg px-2.5 py-1 text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                filterType === "EXTENSION"
+                  ? "bg-[#1F3D35] text-white"
+                  : "text-[#6B716D] hover:bg-[#F8F7F4] hover:text-[#1F3D35]"
+              }`}
+            >
+              Perpanjang {(counts.pendingExtensions || 0) > 0 ? `(${counts.pendingExtensions})` : ""}
+            </button>
+            <button
+              type="button"
               onClick={() => setFilterType("INQUIRY")}
               className={`rounded-lg px-2.5 py-1 text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 filterType === "INQUIRY"
@@ -361,7 +376,11 @@ export default function NotificationDropdown() {
                 let iconBg = "bg-gray-100 text-gray-700";
                 let badgeLabel = "";
 
-                if (item.type === "INQUIRY") {
+                if (item.type === "LEASE_EXTENSION") {
+                  IconComponent = CalendarPlus;
+                  iconBg = "bg-amber-100 text-amber-900 border border-amber-300/60";
+                  badgeLabel = "Perpanjangan";
+                } else if (item.type === "INQUIRY") {
                   IconComponent = Calendar;
                   iconBg = "bg-amber-100 text-amber-800";
                   badgeLabel = "Reservasi";

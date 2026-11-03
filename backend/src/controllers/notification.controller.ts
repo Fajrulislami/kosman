@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 
 export interface AdminNotificationItem {
   id: string;
-  type: "INQUIRY" | "PAYMENT" | "COMPLAINT" | "OVERDUE" | "EXPIRING_LEASE";
+  type: "INQUIRY" | "PAYMENT" | "COMPLAINT" | "OVERDUE" | "EXPIRING_LEASE" | "LEASE_EXTENSION";
   title: string;
   message: string;
   createdAt: string;
@@ -44,9 +44,12 @@ export const getAdminNotifications = async (_req: Request, res: Response): Promi
       take: 15,
     });
 
-    // 3. Komplain belum ditangani (PENDING)
+    // 3. Komplain belum ditangani (PENDING) - Filter keluar Administrasi & Sewa
     const complaints = await prisma.complaint.findMany({
-      where: { status: "PENDING" },
+      where: {
+        status: "PENDING",
+        category: { not: "Administrasi & Sewa" },
+      },
       include: {
         room: true,
         tenant: true,
@@ -93,6 +96,17 @@ export const getAdminNotifications = async (_req: Request, res: Response): Promi
       },
       orderBy: { endDate: "asc" },
       take: 10,
+    });
+
+    // 6. Pengajuan Perpanjangan Sewa Baru (PENDING)
+    const pendingExtensions = await prisma.leaseExtensionRequest.findMany({
+      where: { status: "PENDING" },
+      include: {
+        tenant: true,
+        room: true,
+      },
+      orderBy: { createdAt: "desc" },
+      take: 15,
     });
 
     // Normalisasi dan bangun daftar seragam
@@ -159,6 +173,33 @@ export const getAdminNotifications = async (_req: Request, res: Response): Promi
           roomNumber: roomNum,
           ticketNumber: c.ticketNumber,
           category: c.category,
+        },
+      });
+    }
+
+    // Pengajuan Perpanjangan Sewa (Resmi)
+    for (const ext of pendingExtensions) {
+      const tenantName = ext.tenant?.fullName || "Penghuni";
+      const roomNum = ext.room?.roomNumber || "-";
+      const proposedEndFormatted = new Date(ext.proposedEndDate).toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+
+      notifications.push({
+        id: `extension-${ext.id}`,
+        type: "LEASE_EXTENSION",
+        title: `Perpanjangan Sewa • Kamar ${roomNum}`,
+        message: `${tenantName} mengajukan perpanjangan sewa +${ext.durationMonths} bulan (hingga ${proposedEndFormatted}). Menunggu persetujuan admin.`,
+        createdAt: ext.createdAt.toISOString(),
+        link: "/admin/penghuni?tab=extensions",
+        priority: "HIGH",
+        meta: {
+          extensionId: ext.id,
+          tenantName,
+          roomNumber: roomNum,
+          durationMonths: ext.durationMonths,
         },
       });
     }
@@ -230,6 +271,7 @@ export const getAdminNotifications = async (_req: Request, res: Response): Promi
         pendingComplaints: complaints.length,
         overdueInvoices: overdueInvoices.length,
         expiringLeases: expiringLeases.length,
+        pendingExtensions: pendingExtensions.length,
       },
       notifications,
     });

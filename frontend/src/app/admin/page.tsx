@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Plus, Loader2, RefreshCw, AlertCircle, AlertTriangle, Wrench, ArrowRight, Receipt } from "lucide-react";
+import { Plus, Loader2, RefreshCw, AlertCircle, AlertTriangle, Wrench, ArrowRight, Receipt, CalendarPlus } from "lucide-react";
 import StatCards from "@/components/admin/overview/StatCards";
 import RevenueChart from "@/components/admin/overview/RevenueChart";
 import RecentActivity from "@/components/admin/overview/RecentActivity";
@@ -175,6 +175,38 @@ export default function AdminDashboardPage() {
             className="inline-flex items-center gap-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 self-end sm:self-auto cursor-pointer"
           >
             <span>Tinjau Komplain Sekarang</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      )}
+
+      {/* Banner Pengajuan Perpanjangan Sewa yang Menunggu Persetujuan */}
+      {data?.metrics && (data.metrics.pendingExtensions || 0) > 0 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-3xl border border-amber-300 bg-gradient-to-r from-amber-100/90 via-amber-50 to-white p-5 shadow-xs animate-in fade-in slide-in-from-top-1">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1F3D35] text-[#C69C6D] shadow-xs">
+              <CalendarPlus className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center rounded-md bg-amber-500 text-white px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
+                  Perpanjangan Sewa
+                </span>
+                <span className="text-xs font-semibold text-[#6B716D]">
+                  Menunggu Persetujuan Admin
+                </span>
+              </div>
+              <p className="text-sm font-bold text-[#1F3D35] mt-0.5">
+                Terdapat <span className="text-amber-800 font-extrabold">{data.metrics.pendingExtensions} pengajuan perpanjangan sewa</span> yang menunggu peninjauan dan persetujuan tagihan Anda.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/admin/penghuni?tab=extensions"
+            className="inline-flex items-center gap-2 rounded-xl bg-[#1F3D35] hover:bg-[#162E28] text-white px-4 py-2 text-xs font-bold transition-all shadow-sm active:scale-95 shrink-0 self-end sm:self-auto cursor-pointer"
+          >
+            <span>Tinjau & Setujui</span>
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>

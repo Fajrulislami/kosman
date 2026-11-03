@@ -43,11 +43,13 @@ export default function AdminSidebar({
     pendingPayments: number;
     pendingComplaints: number;
     overdueInvoices: number;
+    pendingExtensions: number;
   }>({
     inquiries: 0,
     pendingPayments: 0,
     pendingComplaints: 0,
     overdueInvoices: 0,
+    pendingExtensions: 0,
   });
 
   useEffect(() => {
@@ -60,6 +62,7 @@ export default function AdminSidebar({
             pendingPayments: number;
             pendingComplaints: number;
             overdueInvoices: number;
+    pendingExtensions: number;
           };
         }>("/api/admin/notifications");
         if (res && res.counts) {
@@ -141,7 +144,7 @@ export default function AdminSidebar({
           // Hitung badge untuk menu tertentu
           let badgeCount = 0;
           if (item.href === "/admin/penghuni") {
-            badgeCount = counts.inquiries;
+            badgeCount = (counts.inquiries || 0) + (counts.pendingExtensions || 0);
           } else if (item.href === "/admin/tagihan") {
             badgeCount = counts.pendingPayments + counts.overdueInvoices;
           } else if (item.href === "/admin/komplain") {

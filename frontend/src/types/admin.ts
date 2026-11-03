@@ -97,6 +97,7 @@ export interface DashboardOverview {
     occupancyRate: number;
     unpaidInvoices: number;
     activeComplaints: number;
+    pendingExtensions?: number;
   };
   chartData: {
     month: string;

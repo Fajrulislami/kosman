@@ -1,7 +1,6 @@
 "use client";
 
-import { Clock, AlertTriangle, AlertCircle, Home, MessageSquare, CalendarPlus, ChevronRight, Hourglass, CheckCircle2, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Clock, AlertTriangle, AlertCircle, Home, MessageSquare, CalendarPlus, ChevronRight, Hourglass } from "lucide-react";
 import { createWhatsAppLink } from "@/lib/whatsapp";
 import { PortalLeaseExtensionItem } from "@/types/portal";
 
@@ -26,7 +25,7 @@ export default function LeaseStatusCard({
     const waUrl = createWhatsAppLink(propertyPhone, waMessage);
 
     return (
-      <div className="rounded-3xl p-8 border border-[#E5E3DE] bg-[#F8F7F4] flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      <div className="rounded-3xl p-6 sm:p-8 border border-[#E5E3DE] bg-[#F8F7F4] flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-[#6B716D]">Status Kamar</span>
@@ -65,7 +64,7 @@ export default function LeaseStatusCard({
   const formattedEndDate = activeLease.endDate
     ? new Date(activeLease.endDate).toLocaleDateString("id-ID", {
         day: "numeric",
-        month: "long",
+        month: "short",
         year: "numeric",
       })
     : "-";
@@ -75,12 +74,19 @@ export default function LeaseStatusCard({
 
   const renderActionSection = (isMinimal = false) => {
     if (isPendingExtension) {
+      if (isMinimal) {
+        return (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200/80 px-2.5 py-1 text-[11px] font-bold shrink-0">
+            <Hourglass className="w-3 h-3 text-amber-600 animate-pulse" />
+            <span>Ditinjau</span>
+          </span>
+        );
+      }
+
       return (
-        <div className="flex items-center justify-between gap-2 w-full">
-          <div className="flex items-center gap-2 text-xs font-semibold text-amber-900 bg-amber-100/90 px-3 py-2.5 rounded-xl flex-1 justify-center border border-amber-200">
-            <Hourglass className="w-4 h-4 animate-pulse text-amber-700" />
-            <span className="truncate">Perpanjangan Sedang Ditinjau Admin</span>
-          </div>
+        <div className="w-full flex items-center justify-center gap-2 rounded-xl bg-amber-100/90 text-amber-900 border border-amber-200 px-3 py-2.5 text-xs font-bold text-center">
+          <Hourglass className="w-4 h-4 text-amber-600 animate-pulse shrink-0" />
+          <span className="truncate">Pengajuan Sedang Ditinjau Admin</span>
         </div>
       );
     }
@@ -89,7 +95,7 @@ export default function LeaseStatusCard({
       return (
         <button
           onClick={onOpenExtendModal}
-          className="font-semibold text-[#C69C6D] hover:text-[#1F3D35] inline-flex items-center gap-1 transition-colors cursor-pointer"
+          className="font-semibold text-[#C69C6D] hover:text-[#1F3D35] inline-flex items-center gap-1 transition-colors cursor-pointer shrink-0"
         >
           <span>Perpanjang</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -119,10 +125,10 @@ export default function LeaseStatusCard({
       });
 
       return (
-        <div className="mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900">
+        <div className="mt-3 p-3 rounded-2xl bg-amber-50 border border-amber-200/80 text-xs text-amber-900 overflow-hidden">
           <div className="flex items-center gap-2 font-bold text-amber-950">
-            <Hourglass className="w-3.5 h-3.5 text-amber-600 animate-pulse" />
-            <span>Pengajuan Perpanjangan (+{extensionStatus.durationMonths} Bulan)</span>
+            <Hourglass className="w-3.5 h-3.5 text-amber-600 animate-pulse shrink-0" />
+            <span className="truncate">Pengajuan Perpanjangan (+{extensionStatus.durationMonths} Bulan)</span>
           </div>
           <p className="text-[11px] text-amber-800 mt-1 leading-relaxed">
             Menunggu persetujuan admin hingga <strong>{proposedFormatted}</strong>. Tagihan sewa akan otomatis diterbitkan begitu disetujui.
@@ -133,13 +139,13 @@ export default function LeaseStatusCard({
 
     if (extensionStatus.status === "REJECTED") {
       return (
-        <div className="mt-3 p-3 rounded-2xl bg-red-50 border border-red-200/80 text-xs text-red-900">
+        <div className="mt-3 p-3 rounded-2xl bg-red-50 border border-red-200/80 text-xs text-red-900 overflow-hidden">
           <div className="flex items-center gap-2 font-bold text-red-950">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+            <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
             <span>Pengajuan Sebelumnya Ditolak</span>
           </div>
           {extensionStatus.adminNotes && (
-            <p className="text-[11px] text-red-800 mt-1 italic">
+            <p className="text-[11px] text-red-800 mt-1 italic leading-relaxed">
               &ldquo;{extensionStatus.adminNotes}&rdquo;
             </p>
           )}
@@ -153,7 +159,7 @@ export default function LeaseStatusCard({
   // 2. Kondisi: Kontrak Habis (expired)
   if (isExpired) {
     return (
-      <div className="rounded-3xl p-8 border border-red-200 bg-red-50/70 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      <div className="rounded-3xl p-6 sm:p-8 border border-red-200 bg-red-50/70 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-red-700">Status Masa Sewa</span>
@@ -180,7 +186,7 @@ export default function LeaseStatusCard({
   // 3. Kondisi: Kritis (<= 7 Hari)
   if (remainingDays <= 7) {
     return (
-      <div className="rounded-3xl p-8 border border-red-200 bg-red-50/80 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      <div className="rounded-3xl p-6 sm:p-8 border border-red-200 bg-red-50/80 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-red-700">Sisa Masa Sewa</span>
@@ -208,7 +214,7 @@ export default function LeaseStatusCard({
   // 4. Kondisi: Peringatan (8 - 14 Hari)
   if (remainingDays <= 14) {
     return (
-      <div className="rounded-3xl p-8 border border-amber-200 bg-amber-50/80 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+      <div className="rounded-3xl p-6 sm:p-8 border border-amber-200 bg-amber-50/80 flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
         <div>
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Sisa Masa Sewa</span>
@@ -235,7 +241,7 @@ export default function LeaseStatusCard({
 
   // 5. Kondisi: Masih Panjang (> 14 Hari)
   return (
-    <div className="rounded-3xl p-8 border border-[#E5E3DE] bg-[#F8F7F4] flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+    <div className="rounded-3xl p-6 sm:p-8 border border-[#E5E3DE] bg-[#F8F7F4] flex flex-col justify-between shadow-[0_8px_30px_rgb(0,0,0,0.02)] overflow-hidden">
       <div>
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-[#6B716D]">Sisa Masa Sewa</span>
@@ -250,8 +256,8 @@ export default function LeaseStatusCard({
         </div>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-[#E5E3DE]/60 flex items-center justify-between text-xs text-[#6B716D]">
-        <p>Berakhir: <strong className="text-[#202321]">{formattedEndDate}</strong></p>
+      <div className="mt-6 pt-4 border-t border-[#E5E3DE]/60 flex flex-wrap items-center justify-between gap-2 text-xs text-[#6B716D]">
+        <p className="truncate">Berakhir: <strong className="text-[#202321]">{formattedEndDate}</strong></p>
         {renderActionSection(true)}
       </div>
     </div>

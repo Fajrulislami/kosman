@@ -50,12 +50,20 @@ export const getAnalyticsOverview = async (_req: Request, res: Response): Promis
       },
     });
 
-    // 4. Komplain Aktif
+    // 4. Komplain Fasilitas Aktif
     const activeComplaints = await prisma.complaint.count({
-      where: { status: { in: ["PENDING", "IN_PROGRESS"] } },
+      where: {
+        status: { in: ["PENDING", "IN_PROGRESS"] },
+        category: { not: "Administrasi & Sewa" },
+      },
     });
 
-    // 5. Tren Pendapatan 6 Bulan Terakhir untuk Recharts
+    // 5. Pengajuan Perpanjangan Sewa Menunggu Persetujuan
+    const pendingExtensions = await prisma.leaseExtensionRequest.count({
+      where: { status: "PENDING" },
+    });
+
+    // 6. Tren Pendapatan 6 Bulan Terakhir untuk Recharts
     const monthsData = [];
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
@@ -82,7 +90,7 @@ export const getAnalyticsOverview = async (_req: Request, res: Response): Promis
       });
     }
 
-    // 6. Aktivitas Terbaru (Pembayaran, Komplain, & Calon Penghuni Baru)
+    // 7. Aktivitas Terbaru
     const recentPayments = await prisma.payment.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -94,6 +102,7 @@ export const getAnalyticsOverview = async (_req: Request, res: Response): Promis
     });
 
     const recentComplaints = await prisma.complaint.findMany({
+      where: { category: { not: "Administrasi & Sewa" } },
       take: 5,
       orderBy: { createdAt: "desc" },
       include: { tenant: true, room: true },
@@ -103,6 +112,12 @@ export const getAnalyticsOverview = async (_req: Request, res: Response): Promis
       take: 5,
       orderBy: { createdAt: "desc" },
       include: { roomType: true },
+    });
+
+    const recentExtensions = await prisma.leaseExtensionRequest.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: { tenant: true, room: true },
     });
 
     res.json({
@@ -118,12 +133,14 @@ export const getAnalyticsOverview = async (_req: Request, res: Response): Promis
         occupancyRate,
         unpaidInvoices,
         activeComplaints,
+        pendingExtensions,
       },
       chartData: monthsData,
       recentActivities: {
         payments: recentPayments,
         complaints: recentComplaints,
         inquiries: recentInquiries,
+        extensions: recentExtensions,
       },
     });
   } catch (error) {
