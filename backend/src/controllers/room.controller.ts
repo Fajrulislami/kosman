@@ -207,6 +207,21 @@ export const updateRoom = async (req: Request, res: Response): Promise<void> => 
       }
     }
 
+    // Proteksi Integritas Data: Cegah status kamar diubah menjadi AVAILABLE jika masih ada kontrak sewa aktif
+    if (parsed.data.status === "AVAILABLE") {
+      const activeLease = await prisma.lease.findFirst({
+        where: { roomId: id, status: "ACTIVE" },
+        include: { tenant: true },
+      });
+
+      if (activeLease) {
+        res.status(400).json({
+          error: `Kamar tidak dapat diubah menjadi Kosong karena masih memiliki kontrak sewa aktif atas nama ${activeLease.tenant.fullName}. Silakan selesaikan kontrak penghuni di menu Penghuni terlebih dahulu.`,
+        });
+        return;
+      }
+    }
+
     const updated = await prisma.room.update({
       where: { id },
       data: parsed.data,

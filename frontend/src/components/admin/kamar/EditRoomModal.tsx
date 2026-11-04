@@ -31,7 +31,22 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
   const [loading, setLoading] = useState(false);
   const [fetchingTypes, setFetchingTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showConfirm, setShowConfirm] = useState(false);
+
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    variant: "warning" | "danger" | "primary";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "Ya, Lanjutkan",
+    variant: "warning",
+  });
+
+  const hasActiveTenant = Boolean(room?.tenantId || (room?.tenant && room?.tenant !== "-"));
 
   useEffect(() => {
     if (room) {
@@ -40,6 +55,7 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
       setRoomTypeId(room.roomTypeId || "");
       setStatus(room.rawStatus || "AVAILABLE");
       setNotes(room.notes || "");
+      setError(null);
     }
   }, [room]);
 
@@ -96,9 +112,35 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Peringatan jika mengubah status kamar terisi
-    if (room.rawStatus === "OCCUPIED" && status !== "OCCUPIED") {
-      setShowConfirm(true);
+    // Jika kamar memiliki penghuni aktif dan admin mencoba mengubah ke Kosong (AVAILABLE)
+    if (hasActiveTenant && status === "AVAILABLE") {
+      setError(
+        `Kamar ${room.number} tidak dapat diubah menjadi Kosong karena masih memiliki kontrak sewa aktif atas nama ${room.tenant}. Selesaikan kontrak penghuni di menu Penghuni terlebih dahulu.`
+      );
+      return;
+    }
+
+    // Jika kamar sedang dihuni dan diubah ke Perbaikan (MAINTENANCE)
+    if (hasActiveTenant && status === "MAINTENANCE" && room.rawStatus !== "MAINTENANCE") {
+      setConfirmConfig({
+        isOpen: true,
+        title: "Tandai Kamar Dalam Perbaikan?",
+        message: `Kamar ${room.number} saat ini sedang dihuni oleh ${room.tenant}. Mengubah status menjadi 'Perbaikan' akan menandai unit ini memerlukan pemeliharaan teknis tanpa membatalkan masa sewa aktif. Lanjutkan?`,
+        confirmText: "Ya, Tandai Perbaikan",
+        variant: "warning",
+      });
+      return;
+    }
+
+    // Jika kamar sedang dihuni dan diubah ke Dipesan (RESERVED)
+    if (hasActiveTenant && status === "RESERVED" && room.rawStatus !== "RESERVED") {
+      setConfirmConfig({
+        isOpen: true,
+        title: "Ubah Status Menjadi Dipesan?",
+        message: `Kamar ${room.number} saat ini sedang dihuni oleh ${room.tenant}. Apakah Anda yakin ingin mengubah status kamar ini menjadi Dipesan?`,
+        confirmText: "Ya, Ubah Status",
+        variant: "warning",
+      });
       return;
     }
 
@@ -199,14 +241,24 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
                 <select
                   id="editStatus"
                   value={status}
-                  onChange={(e) => setStatus(e.target.value)}
+                  onChange={(e) => {
+                    setStatus(e.target.value);
+                    setError(null);
+                  }}
                   className="mt-2 block w-full rounded-xl border-0 py-2.5 pl-3 pr-10 text-[#1F3D35] ring-1 ring-inset ring-[#E5E3DE] focus:ring-2 focus:ring-[#C69C6D] sm:text-sm"
                 >
-                  <option value="AVAILABLE">Tersedia (Kosong)</option>
+                  <option value="AVAILABLE" disabled={hasActiveTenant}>
+                    Tersedia (Kosong){hasActiveTenant ? " — (Sedang Dihuni)" : ""}
+                  </option>
                   <option value="OCCUPIED">Terisi</option>
                   <option value="MAINTENANCE">Perbaikan</option>
                   <option value="RESERVED">Dipesan</option>
                 </select>
+                {hasActiveTenant && (
+                  <p className="mt-1.5 text-xs text-[#6B716D] leading-relaxed">
+                    <span className="font-semibold text-[#1F3D35]">Penghuni aktif:</span> {room.tenant}. Untuk mengosongkan kamar, selesaikan kontrak sewa di menu <span className="font-semibold text-[#1F3D35]">Penghuni</span>.
+                  </p>
+                )}
               </div>
             </div>
 
@@ -248,17 +300,17 @@ export default function EditRoomModal({ isOpen, onClose, onSuccess, room }: Edit
       </div>
 
       <ConfirmModal
-        isOpen={showConfirm}
-        title="Ubah Status Kamar Terisi?"
-        message="Kamar ini sedang dihuni. Mengubah status menjadi tidak terisi dapat berdampak pada data kontrak penghuni yang sedang aktif. Apakah Anda yakin ingin melanjutkan?"
-        confirmText="Ya, Ubah Status"
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
         cancelText="Batal"
-        variant="warning"
+        variant={confirmConfig.variant}
         onConfirm={() => {
-          setShowConfirm(false);
+          setConfirmConfig((prev) => ({ ...prev, isOpen: false }));
           executeSave();
         }}
-        onCancel={() => setShowConfirm(false)}
+        onCancel={() => setConfirmConfig((prev) => ({ ...prev, isOpen: false }))}
       />
     </div>
   );
